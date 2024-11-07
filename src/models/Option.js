@@ -1,24 +1,20 @@
 'use strict';
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Question extends Model {
+  class Option extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Question.belongsTo(models.Exam, {
-        foreignKey: 'exam_id',
-        as: 'exams',
-      });
-
-      Question.hasMany(models.Option, {
+      Option.belongsTo(models.Question, {
         foreignKey: 'question_id',
+        as: 'questions',
       });
     }
   }
-  Question.init(
+  Option.init(
     {
       id: {
         allowNull: false,
@@ -26,35 +22,34 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      exam_id: {
+      question_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: 'exams',
+          model: 'questions',
           key: 'id',
         },
       },
-      question: {
+      option: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      type: {
-        type: DataTypes.ENUM('single_choice', 'multiple_choice'),
-        defaultValue: 'single_choice',
+      is_correct: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
         allowNull: false,
       },
-      negative_marks: {
+      marks: {
         type: DataTypes.INTEGER,
-        allowNull: true,
         defaultValue: 0,
       },
     },
     {
       sequelize,
-      modelName: 'Question',
-      tableName: 'questions',
+      modelName: 'Option',
+      tableName: 'options',
       paranoid: true,
     },
   );
-  return Question;
+  return Option;
 };
