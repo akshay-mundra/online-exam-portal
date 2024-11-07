@@ -1,28 +1,30 @@
 'use strict';
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Question extends Model {
+  class Answer extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Question.belongsTo(models.Exam, {
-        foreignKey: 'exam_id',
-        as: 'exams',
+      Answer.belongsTo(models.Question, {
+        foreignKey: 'question_id',
+        as: 'questions',
       });
 
-      Question.hasMany(models.Option, {
-        foreignKey: 'question_id',
+      Answer.belongsTo(models.Option, {
+        foreignKey: 'option_id',
+        as: 'options',
       });
 
-      Question.hasMany(models.Answer, {
-        foreignKey: 'question_id',
+      Answer.belongsTo(models.UserExam, {
+        foreignKey: 'user_exam_id',
+        as: 'users_exams',
       });
     }
   }
-  Question.init(
+  Answer.init(
     {
       id: {
         allowNull: false,
@@ -30,35 +32,37 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      exam_id: {
+      option_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: 'exams',
+          model: 'options',
           key: 'id',
         },
       },
-      question: {
-        type: DataTypes.STRING,
+      question_id: {
+        type: DataTypes.UUID,
         allowNull: false,
+        references: {
+          model: 'questions',
+          key: 'id',
+        },
       },
-      type: {
-        type: DataTypes.ENUM('single_choice', 'multiple_choice'),
-        defaultValue: 'single_choice',
+      user_exam_id: {
+        type: DataTypes.UUID,
         allowNull: false,
-      },
-      negative_marks: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        defaultValue: 0,
+        references: {
+          model: 'users_exams',
+          key: 'id',
+        },
       },
     },
     {
       sequelize,
-      modelName: 'Question',
-      tableName: 'questions',
+      modelName: 'Answer',
+      tableName: 'answers',
       paranoid: true,
     },
   );
-  return Question;
+  return Answer;
 };
