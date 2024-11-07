@@ -1,68 +1,56 @@
 'use strict';
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Exam extends Model {
+  class Question extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Exam.belongsTo(models.User, {
-        as: 'admin',
-        foreignKey: 'admin_id',
-      });
-
-      Exam.belongsToMany(models.User, {
-        through: 'users_exams',
+      Question.belongsTo(models.Exam, {
         foreignKey: 'exam_id',
-        other_key: 'user_id',
-      });
-
-      Exam.hasMany(models.Question, {
-        foreignKey: 'exam_id',
+        as: 'exams',
       });
     }
   }
-  Exam.init(
+  Question.init(
     {
       id: {
-        type: DataTypes.UUID,
-        primaryKey: true,
         allowNull: false,
+        primaryKey: true,
+        type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
       },
-      admin_id: {
+      exam_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
-          model: 'users',
+          model: 'exams',
           key: 'id',
         },
       },
-      title: {
+      question: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      is_published: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: 'false',
-      },
-      start_time: {
-        type: DataTypes.DATE,
+      type: {
+        type: DataTypes.ENUM('single_choice', 'multiple_choice'),
+        defaultValue: 'single_choice',
         allowNull: false,
       },
-      end_time: {
-        type: DataTypes.DATE,
-        allowNull: false,
+      negative_marks: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0,
       },
     },
     {
       sequelize,
-      modelName: 'Exam',
-      tableName: 'exams',
+      modelName: 'Question',
+      tableName: 'questions',
       paranoid: true,
     },
   );
-  return Exam;
+  return Question;
 };
