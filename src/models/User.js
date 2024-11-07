@@ -24,6 +24,17 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'user_id',
         other_key: 'role_id',
       });
+
+      User.hasMany(models.Exam, {
+        as: 'exams',
+        foreignKey: 'admin_id',
+      });
+
+      User.belongsToMany(models.Exam, {
+        through: 'users_exams',
+        foreignKey: 'user_id',
+        other_key: 'exam_id',
+      });
     }
   }
   User.init(
