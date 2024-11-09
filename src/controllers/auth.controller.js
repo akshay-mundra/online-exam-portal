@@ -17,7 +17,7 @@ async function login(req, res, next) {
 async function register(req, res, next) {
   try {
     const { body: payload } = req;
-    const result = await authServices.register(payload);
+    const result = await authServices.register(req, payload);
     res.data = result;
     res.statusCode = 201;
     next();
