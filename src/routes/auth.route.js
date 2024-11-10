@@ -20,7 +20,7 @@ router.post(
   commonHelpers.responseHandler,
 );
 
-router.post(
+router.patch(
   '/reset-password',
   authMiddlewares.authenticate,
   authControllers.resetPassword,
