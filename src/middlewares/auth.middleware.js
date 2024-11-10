@@ -28,6 +28,8 @@ function authorize(allowedRoles) {
     try {
       const userRoles = req.user?.roles;
 
+      if (userRoles.includes('super_admin')) return next();
+
       if (userRoles && allowedRoles.some(role => userRoles.includes(role))) {
         return next();
       } else {
