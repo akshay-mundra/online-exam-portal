@@ -22,6 +22,11 @@ router.post(
   commonHelpers.responseHandler,
 );
 
-// router.post('/reset-password', authControllers.forgotPassword);
+router.post(
+  '/reset-password',
+  authMiddlewares.authenticate,
+  authControllers.resetPassword,
+  commonHelpers.responseHandler,
+);
 
 module.exports = router;

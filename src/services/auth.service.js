@@ -107,4 +107,23 @@ async function forgotPassword(payload) {
   return 'Password reset link sent to email';
 }
 
-module.exports = { register, login, forgotPassword };
+async function resetPassword(userId, payload) {
+  const { password, confirmPassword } = payload;
+  if (confirmPassword !== password) {
+    commonHelpers.throwCustomError('Both passwords should match', 422);
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = await User.findOne({
+    where: { id: userId },
+  });
+  if (!user) {
+    commonHelpers.throwCustomError('User does not exist', 404);
+  }
+  user.password = hashedPassword;
+  await user.save();
+
+  return 'Password reset successful';
+}
+
+module.exports = { register, login, forgotPassword, resetPassword };

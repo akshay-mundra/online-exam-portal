@@ -40,4 +40,18 @@ async function forgotPassword(req, res, next) {
   }
 }
 
-module.exports = { register, login, forgotPassword };
+async function resetPassword(req, res, next) {
+  try {
+    const { body: payload } = req;
+    const { id } = req.user;
+    const result = await authServices.resetPassword(id, payload);
+    res.data = result;
+    res.statusCode = 202;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+module.exports = { register, login, forgotPassword, resetPassword };
