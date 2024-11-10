@@ -14,8 +14,6 @@ router.post(
   commonHelpers.responseHandler,
 );
 
-// router.post('/logout', authControllers.logout);
-
 router.post(
   '/forgot-password',
   authControllers.forgotPassword,
@@ -29,4 +27,10 @@ router.post(
   commonHelpers.responseHandler,
 );
 
+router.get(
+  '/logout',
+  authMiddlewares.authenticate,
+  authControllers.logout,
+  commonHelpers.responseHandler,
+);
 module.exports = router;

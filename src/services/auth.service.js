@@ -126,4 +126,8 @@ async function resetPassword(userId, payload) {
   return 'Password reset successful';
 }
 
-module.exports = { register, login, forgotPassword, resetPassword };
+async function logout() {
+  return 'User logged out successfully!!';
+}
+
+module.exports = { register, login, forgotPassword, resetPassword, logout };

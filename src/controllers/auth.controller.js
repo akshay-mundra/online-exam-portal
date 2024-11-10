@@ -54,4 +54,16 @@ async function resetPassword(req, res, next) {
   }
 }
 
-module.exports = { register, login, forgotPassword, resetPassword };
+async function logout(req, res, next) {
+  try {
+    const result = await authServices.logout();
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+module.exports = { register, login, forgotPassword, resetPassword, logout };
