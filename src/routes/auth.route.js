@@ -16,7 +16,11 @@ router.post(
 
 // router.post('/logout', authControllers.logout);
 
-// router.post('/forgot-password', authControllers.forgotPassword);
+router.post(
+  '/forgot-password',
+  authControllers.forgotPassword,
+  commonHelpers.responseHandler,
+);
 
 // router.post('/reset-password', authControllers.forgotPassword);
 
