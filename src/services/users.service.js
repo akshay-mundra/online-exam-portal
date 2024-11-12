@@ -1,5 +1,6 @@
 const { User } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
+const { sequelize } = require('../models');
 
 async function getAll(currentUser, page = 0) {
   const LIMIT = 10;
@@ -46,23 +47,36 @@ async function get(currentUser, id) {
 }
 
 async function update(currentUser, id, payload) {
-  const { first_name, last_name, email } = payload;
+  const { firstName, lastName, email } = payload;
+  const transactionContext = await sequelize.transaction();
+  const roles = currentUser.roles;
 
-  const [updatedRowCount, updatedUser] = await User.update(
-    { first_name, last_name, email },
-    {
-      where: {
-        id,
-        admin_id: currentUser.id,
-      },
-      returning: true,
-      plain: true,
-    },
-  );
-  if (updatedRowCount === 0) {
-    commonHelpers.throwCustomError('User not found', 404);
+  try {
+    const options = {
+      where: roles.includes('super_admin')
+        ? { id }
+        : {
+            id,
+            admin_id: currentUser.id,
+          },
+      returning: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
+      transaction: transactionContext,
+    };
+
+    const [updatedRowCount, updatedUser] = await User.update(
+      { first_name: firstName, last_name: lastName, email },
+      options,
+    );
+    if (updatedRowCount === 0) {
+      commonHelpers.throwCustomError('User not found', 404);
+    }
+    await transactionContext.commit();
+
+    return updatedUser;
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
   }
-  return updatedUser.id;
 }
 
 async function remove(currentUser, id) {
