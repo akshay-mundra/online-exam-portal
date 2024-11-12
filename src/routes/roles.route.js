@@ -4,6 +4,7 @@ const router = express.Router();
 const authMiddlewares = require('../middlewares/auth.middleware');
 const commonHelpers = require('../helpers/common.helper');
 const roleController = require('../controllers/roles.controller');
+const roleValidators = require('../validators/roles.validator');
 
 router.get(
   '/',
@@ -15,6 +16,7 @@ router.get(
 
 router.post(
   '/',
+  roleValidators.roleSchema,
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['super_admin']),
   roleController.create,
@@ -31,6 +33,7 @@ router.get(
 
 router.patch(
   '/:id',
+  roleValidators.roleSchema,
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['super_admin']),
   roleController.update,
