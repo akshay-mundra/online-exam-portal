@@ -72,4 +72,56 @@ async function remove(req, res, next) {
   }
 }
 
-module.exports = { getAll, create, get, update, remove };
+async function addUser(req, res, next) {
+  try {
+    const user = req.user;
+    const { id } = req.params;
+    const { body: payload } = req;
+    const result = await examServices.addUser(user, id, payload);
+    res.data = result;
+    res.statusCode = 201;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+async function getAllUsers(req, res, next) {
+  try {
+    const user = req.user;
+    const { id } = req.params;
+    const result = await examServices.getAllUsers(user, id);
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+async function getUser(req, res, next) {
+  try {
+    const user = req.user;
+    const { id, userId } = req.params;
+    const result = await examServices.getUser(user, userId, id);
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+module.exports = {
+  getAll,
+  create,
+  get,
+  update,
+  remove,
+  getAllUsers,
+  addUser,
+  getUser,
+};
