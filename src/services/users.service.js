@@ -22,28 +22,25 @@ async function getAll(currentUser, page = 0) {
 
 async function get(currentUser, id) {
   const roles = currentUser.roles;
-
   let user;
-  if (roles.includes('super_admin')) {
-    user = await User.findByPk(id);
-  } else if (roles.includes('admin')) {
-    user = await User.findOne({
-      where: {
-        id: id,
-        admin_id: currentUser.id,
-      },
-    });
+  const options = {
+    where:
+      roles.includes('super_admin') || roles.includes('user')
+        ? { id }
+        : { id, admin_id: currentUser.id },
+  };
+  if (roles.includes('super_admin') || roles.includes('admin')) {
+    user = await User.findOne(options);
   } else if (roles.includes('user') && currentUser.id === id) {
-    user = await User.findByPk(id);
+    user = await User.findByPk(options);
   }
-
   if (!user) {
     commonHelpers.throwCustomError('User not found', 404);
   }
 
   return {
-    first_name: user.first_name,
-    last_name: user.last_name,
+    firstName: user.first_name,
+    lastName: user.last_name,
     email: user.email,
   };
 }
