@@ -37,15 +37,15 @@ async function getAll(currentUser, page = 0) {
 }
 
 async function create(currentUser, payload) {
-  const { title, start_time, end_time } = payload;
+  const { title, startTime, endTime } = payload;
   const transactionContext = await sequelize.transaction();
 
   try {
     const exam = await Exam.create(
       {
         title,
-        start_time,
-        end_time,
+        start_time: startTime,
+        end_time: endTime,
         admin_id: currentUser.id,
       },
       { transaction: transactionContext },
@@ -105,12 +105,12 @@ async function get(currentUser, id) {
 
 // update exam details only the admin who created it can update the exam.
 async function update(currentUser, id, payload) {
-  const { title, start_time, end_time } = payload;
+  const { title, startTime, endTime } = payload;
   const transactionContext = await sequelize.transaction();
 
   try {
     const [updateRowCount, updatedExam] = await Exam.update(
-      { title, start_time, end_time },
+      { title, start_time: startTime, endTime },
       {
         where: { id, admin_id: currentUser.id },
         returning: true,
@@ -153,11 +153,11 @@ async function remove(currentUser, id) {
 
 // add user to exam if user exist and is created by that admin.
 async function addUser(currentUser, id, payload) {
-  const { user_id } = payload;
+  const { userId } = payload;
   const transactionContext = await sequelize.transaction();
 
   try {
-    const user = await User.findByPk(user_id);
+    const user = await User.findByPk(userId);
     if (!user) {
       commonHelpers.throwCustomError('User not found', 404);
     }
@@ -168,9 +168,9 @@ async function addUser(currentUser, id, payload) {
       );
     }
     const [userExam, isCreated] = await UserExam.findOrCreate({
-      where: { user_id, exam_id: id },
+      where: { userId, exam_id: id },
       defaults: {
-        user_id,
+        userId,
         exam_id: id,
       },
       transaction: transactionContext,
