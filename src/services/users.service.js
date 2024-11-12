@@ -21,6 +21,7 @@ async function getAll(currentUser, page = 0) {
   };
 }
 
+// admin can get users created by him, user can only see details of self.
 async function get(currentUser, id) {
   const roles = currentUser.roles;
   let user;
@@ -46,6 +47,7 @@ async function get(currentUser, id) {
   };
 }
 
+// update user if user created by admin or the current user is superadmin
 async function update(currentUser, id, payload) {
   const { firstName, lastName, email } = payload;
   const transactionContext = await sequelize.transaction();
@@ -79,18 +81,28 @@ async function update(currentUser, id, payload) {
   }
 }
 
+// remove user (only by admin and superadmin)
 async function remove(currentUser, id) {
-  const countChanged = await User.destroy({
-    where: {
-      id,
-      admin_id: currentUser.id,
-    },
-  });
-  if (countChanged === 0) {
-    commonHelpers.throwCustomError('User not found', 404);
-  }
+  const roles = currentUser.roles;
+  const transactionContext = await sequelize.transaction();
+  try {
+    const options = {
+      where: roles.includes('super_admin')
+        ? { id }
+        : { id, admin_id: currentUser.id },
+      transaction: transactionContext,
+    };
+    const countChanged = await User.destroy(options);
+    if (countChanged === 0) {
+      commonHelpers.throwCustomError('User not found', 404);
+    }
+    await transactionContext.commit();
 
-  return { count: countChanged, message: 'User removed successfully' };
+    return { count: countChanged, message: 'User removed successfully' };
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
+  }
 }
 
 module.exports = { getAll, get, update, remove };
