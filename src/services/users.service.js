@@ -2,30 +2,17 @@ const { User } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 
 async function getAll(currentUser, page = 0) {
-  const roles = currentUser.roles;
   const LIMIT = 10;
   const offset = page * LIMIT;
-  let users, total;
-
+  const roles = currentUser.roles;
   // query data according to the logged in user and its role
-  if (roles.includes('super_admin')) {
-    const { count, rows } = await User.findAndCountAll({
-      offset,
-      limit: LIMIT,
-    });
-    users = rows;
-    total = count;
-  } else if (roles.includes('admin')) {
-    const { count, rows } = await User.findAndCountAll({
-      where: {
-        admin_id: currentUser.id,
-      },
-      offset,
-      limit: LIMIT,
-    });
-    users = rows;
-    total = count;
-  }
+  const options = {
+    where: roles.includes('super_admin') ? {} : { admin_id: currentUser.id },
+    attributes: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
+    offset,
+    limit: LIMIT,
+  };
+  const { count: total, rows: users } = await User.findAndCountAll(options);
 
   return {
     users,
