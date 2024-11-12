@@ -27,4 +27,43 @@ async function register(req, res, next) {
   }
 }
 
-module.exports = { register, login };
+async function forgotPassword(req, res, next) {
+  try {
+    const { body: payload } = req;
+    const result = await authServices.forgotPassword(payload);
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+async function resetPassword(req, res, next) {
+  try {
+    const { body: payload } = req;
+    const { id } = req.user;
+    const result = await authServices.resetPassword(id, payload);
+    res.data = result;
+    res.statusCode = 202;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+async function logout(req, res, next) {
+  try {
+    const result = await authServices.logout();
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+module.exports = { register, login, forgotPassword, resetPassword, logout };

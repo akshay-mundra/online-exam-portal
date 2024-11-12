@@ -14,10 +14,23 @@ router.post(
   commonHelpers.responseHandler,
 );
 
-// router.post('/logout', authControllers.logout);
+router.post(
+  '/forgot-password',
+  authControllers.forgotPassword,
+  commonHelpers.responseHandler,
+);
 
-// router.post('/forgot-password', authControllers.forgotPassword);
+router.patch(
+  '/reset-password',
+  authMiddlewares.authenticate,
+  authControllers.resetPassword,
+  commonHelpers.responseHandler,
+);
 
-// router.post('/reset-password', authControllers.forgotPassword);
-
+router.get(
+  '/logout',
+  authMiddlewares.authenticate,
+  authControllers.logout,
+  commonHelpers.responseHandler,
+);
 module.exports = router;

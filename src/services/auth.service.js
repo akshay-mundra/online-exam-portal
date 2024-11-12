@@ -2,6 +2,7 @@ const { User, Role, UserRole } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const bcrypt = require('bcrypt');
 const jwtHelpers = require('../helpers/jwt.helper');
+const nodemailerHelpers = require('../helpers/nodemailer.helper');
 
 async function login(payload) {
   const { email, password } = payload;
@@ -89,4 +90,44 @@ async function register(req, payload) {
   return user.id;
 }
 
-module.exports = { register, login };
+async function forgotPassword(payload) {
+  const { email } = payload;
+  const user = await User.findOne({ where: { email } });
+  if (!user) {
+    commonHelpers.throwCustomError('User does not exist', 401);
+  }
+  const token = jwtHelpers.signToken({ id: user.id }, { expiresIn: 600 });
+
+  nodemailerHelpers.sendEmail({
+    to: user.email,
+    subject: 'Password Reset Request',
+    message: `${process.env.FRONTEND_URL}/reset-password?token=${token}`,
+  });
+  console.log(token);
+  return 'Password reset link sent to email';
+}
+
+async function resetPassword(userId, payload) {
+  const { password, confirmPassword } = payload;
+  if (confirmPassword !== password) {
+    commonHelpers.throwCustomError('Both passwords should match', 422);
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = await User.findOne({
+    where: { id: userId },
+  });
+  if (!user) {
+    commonHelpers.throwCustomError('User does not exist', 404);
+  }
+  user.password = hashedPassword;
+  await user.save();
+
+  return 'Password reset successful';
+}
+
+async function logout() {
+  return 'User logged out successfully!!';
+}
+
+module.exports = { register, login, forgotPassword, resetPassword, logout };
