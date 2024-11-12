@@ -1,31 +1,19 @@
 const { User } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
+const { sequelize } = require('../models');
 
 async function getAll(currentUser, page = 0) {
-  const roles = currentUser.roles;
   const LIMIT = 10;
   const offset = page * LIMIT;
-  let users, total;
-
+  const roles = currentUser.roles;
   // query data according to the logged in user and its role
-  if (roles.includes('super_admin')) {
-    const { count, rows } = await User.findAndCountAll({
-      offset,
-      limit: LIMIT,
-    });
-    users = rows;
-    total = count;
-  } else if (roles.includes('admin')) {
-    const { count, rows } = await User.findAndCountAll({
-      where: {
-        admin_id: currentUser.id,
-      },
-      offset,
-      limit: LIMIT,
-    });
-    users = rows;
-    total = count;
-  }
+  const options = {
+    where: roles.includes('super_admin') ? {} : { admin_id: currentUser.id },
+    attributes: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
+    offset,
+    limit: LIMIT,
+  };
+  const { count: total, rows: users } = await User.findAndCountAll(options);
 
   return {
     users,
@@ -33,66 +21,88 @@ async function getAll(currentUser, page = 0) {
   };
 }
 
+// admin can get users created by him, user can only see details of self.
 async function get(currentUser, id) {
   const roles = currentUser.roles;
-
   let user;
-  if (roles.includes('super_admin')) {
-    user = await User.findByPk(id);
-  } else if (roles.includes('admin')) {
-    user = await User.findOne({
-      where: {
-        id: id,
-        admin_id: currentUser.id,
-      },
-    });
+  const options = {
+    where:
+      roles.includes('super_admin') || roles.includes('user')
+        ? { id }
+        : { id, admin_id: currentUser.id },
+  };
+  if (roles.includes('super_admin') || roles.includes('admin')) {
+    user = await User.findOne(options);
   } else if (roles.includes('user') && currentUser.id === id) {
-    user = await User.findByPk(id);
+    user = await User.findByPk(options);
   }
-
   if (!user) {
     commonHelpers.throwCustomError('User not found', 404);
   }
 
   return {
-    first_name: user.first_name,
-    last_name: user.last_name,
+    firstName: user.first_name,
+    lastName: user.last_name,
     email: user.email,
   };
 }
 
+// update user if user created by admin or the current user is superadmin
 async function update(currentUser, id, payload) {
-  const { first_name, last_name, email } = payload;
+  const { firstName, lastName, email } = payload;
+  const transactionContext = await sequelize.transaction();
+  const roles = currentUser.roles;
 
-  const [updatedRowCount, updatedUser] = await User.update(
-    { first_name, last_name, email },
-    {
-      where: {
-        id,
-        admin_id: currentUser.id,
-      },
-      returning: true,
-      plain: true,
-    },
-  );
-  if (updatedRowCount === 0) {
-    commonHelpers.throwCustomError('User not found', 404);
+  try {
+    const options = {
+      where: roles.includes('super_admin')
+        ? { id }
+        : {
+            id,
+            admin_id: currentUser.id,
+          },
+      returning: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
+      transaction: transactionContext,
+    };
+
+    const [updatedRowCount, updatedUser] = await User.update(
+      { first_name: firstName, last_name: lastName, email },
+      options,
+    );
+    if (updatedRowCount === 0) {
+      commonHelpers.throwCustomError('User not found', 404);
+    }
+    await transactionContext.commit();
+
+    return updatedUser;
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
   }
-  return updatedUser.id;
 }
 
+// remove user (only by admin and superadmin)
 async function remove(currentUser, id) {
-  const countChanged = await User.destroy({
-    where: {
-      id,
-      admin_id: currentUser.id,
-    },
-  });
-  if (countChanged === 0) {
-    commonHelpers.throwCustomError('User not found', 404);
-  }
+  const roles = currentUser.roles;
+  const transactionContext = await sequelize.transaction();
+  try {
+    const options = {
+      where: roles.includes('super_admin')
+        ? { id }
+        : { id, admin_id: currentUser.id },
+      transaction: transactionContext,
+    };
+    const countChanged = await User.destroy(options);
+    if (countChanged === 0) {
+      commonHelpers.throwCustomError('User not found', 404);
+    }
+    await transactionContext.commit();
 
-  return { count: countChanged, message: 'User removed successfully' };
+    return { count: countChanged, message: 'User removed successfully' };
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
+  }
 }
 
 module.exports = { getAll, get, update, remove };
