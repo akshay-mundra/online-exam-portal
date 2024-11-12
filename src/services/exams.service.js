@@ -1,4 +1,4 @@
-const { Exam, User } = require('../models');
+const { Exam, User, UserExam } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
 
@@ -103,6 +103,7 @@ async function get(currentUser, id) {
   return exam;
 }
 
+// update exam details only the admin who created it can update the exam.
 async function update(currentUser, id, payload) {
   const { title, start_time, end_time } = payload;
   const transactionContext = await sequelize.transaction();
@@ -150,4 +151,96 @@ async function remove(currentUser, id) {
   }
 }
 
-module.exports = { getAll, create, get, update, remove };
+// add user to exam if user exist and is created by that admin.
+async function addUser(currentUser, id, payload) {
+  const { user_id } = payload;
+  const transactionContext = await sequelize.transaction();
+
+  try {
+    const user = await User.findByPk(user_id);
+    if (!user) {
+      commonHelpers.throwCustomError('User not found', 404);
+    }
+    if (user.admin_id !== currentUser.id) {
+      commonHelpers.throwCustomError(
+        'Can not add user that is not created by you',
+        403,
+      );
+    }
+    const [userExam, isCreated] = await UserExam.findOrCreate({
+      where: { user_id, exam_id: id },
+      defaults: {
+        user_id,
+        exam_id: id,
+      },
+      transaction: transactionContext,
+    });
+
+    if (!isCreated) {
+      commonHelpers.throwCustomError('User is already assigned this exam', 400);
+    }
+
+    await transactionContext.commit();
+
+    return userExam;
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
+  }
+}
+
+// get all users for that exam
+async function getAllUsers(currentUser, id) {
+  const users = await Exam.findAll({
+    where: { id, admin_id: currentUser.id },
+    include: [
+      {
+        model: User,
+        attributes: ['id', 'first_name', 'last_name', 'email'],
+        through: {
+          attributes: ['id', 'score', 'status'],
+        },
+      },
+    ],
+    plain: true,
+  });
+  if (users?.length === 0) {
+    commonHelpers.throwCustomError('No users assigned for this exam', 404);
+  }
+  console.log(users);
+  return users;
+}
+
+// get a user and its details for this exam
+async function getUser(currentUser, userId, id) {
+  const examUser = await Exam.findOne({
+    where: { id, admin_id: currentUser.id },
+    include: [
+      {
+        model: User,
+        attributes: ['first_name', 'last_name', 'email'],
+        through: {
+          attributes: ['score', 'status'],
+        },
+      },
+    ],
+  });
+  if (!examUser) {
+    commonHelpers.throwCustomError('User not found', 404);
+  }
+
+  return {
+    users: examUser.Users,
+  };
+}
+
+module.exports = {
+  getAll,
+  create,
+  get,
+  update,
+  remove,
+  addUser,
+  getAllUsers,
+  getUser,
+};

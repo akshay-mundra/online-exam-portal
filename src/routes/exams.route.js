@@ -45,4 +45,28 @@ router.delete(
   commonHelpers.responseHandler,
 );
 
+router.get(
+  '/:id/users',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  examControllers.getAllUsers,
+  commonHelpers.responseHandler,
+);
+
+router.post(
+  '/:id/users',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  examControllers.addUser,
+  commonHelpers.responseHandler,
+);
+
+router.get(
+  '/:id/users/:userId',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  examControllers.getUser,
+  commonHelpers.responseHandler,
+);
+
 module.exports = router;
