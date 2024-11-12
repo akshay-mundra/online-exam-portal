@@ -4,6 +4,7 @@ const router = express.Router();
 const authMiddlewares = require('../middlewares/auth.middleware');
 const commonHelpers = require('../helpers/common.helper');
 const userControllers = require('../controllers/users.controller');
+const userValidators = require('../validators/users.validator');
 
 router.get(
   '/',
@@ -23,6 +24,7 @@ router.get(
 
 router.put(
   '/:id',
+  userValidators.update,
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['admin']),
   userControllers.update,
