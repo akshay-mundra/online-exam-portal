@@ -64,7 +64,7 @@ router.post(
 router.get(
   '/:id/users/:userId',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize(['admin', 'user']),
   examControllers.getUser,
   commonHelpers.responseHandler,
 );
