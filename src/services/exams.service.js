@@ -211,26 +211,42 @@ async function getAllUsers(currentUser, id) {
   return users;
 }
 
-// get a user and its details for this exam
+// get a user and its details for this exam (only admin and the user itself and access)
 async function getUser(currentUser, userId, id) {
-  const examUser = await Exam.findOne({
-    where: { id, admin_id: currentUser.id },
+  const roles = currentUser.roles;
+  let examUser;
+  const options = {
+    where:
+      roles.includes('super_admin') || roles.includes('user')
+        ? { id }
+        : { id, admin_id: currentUser.id },
     include: [
       {
         model: User,
         attributes: ['first_name', 'last_name', 'email'],
+        where: { id: userId },
         through: {
           attributes: ['score', 'status'],
         },
+        required: true,
       },
     ],
-  });
-  if (!examUser) {
+  };
+
+  if (roles.includes('super_admin') || roles.includes('admin')) {
+    examUser = await Exam.findOne(options);
+  } else if (roles.includes('user')) {
+    if (currentUser.id !== userId) {
+      commonHelpers.throwCustomError('Can not access other user', 403);
+    }
+    examUser = await Exam.findOne(options);
+  }
+  if (!examUser || examUser?.Users.length === 0) {
     commonHelpers.throwCustomError('User not found', 404);
   }
 
   return {
-    users: examUser.Users,
+    users: examUser?.Users,
   };
 }
 
