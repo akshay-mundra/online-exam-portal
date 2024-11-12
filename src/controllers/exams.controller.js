@@ -115,6 +115,21 @@ async function getUser(req, res, next) {
   }
 }
 
+async function createQuestion(req, res, next) {
+  try {
+    const user = req.user;
+    const { id } = req.params;
+    const { body: payload } = req;
+    const result = await examServices.createQuestion(user, id, payload);
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
 module.exports = {
   getAll,
   create,
@@ -124,4 +139,5 @@ module.exports = {
   getAllUsers,
   addUser,
   getUser,
+  createQuestion,
 };

@@ -1,4 +1,4 @@
-const { Exam, User, UserExam } = require('../models');
+const { Exam, User, UserExam, Question, Option } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
 
@@ -250,6 +250,49 @@ async function getUser(currentUser, userId, id) {
   };
 }
 
+// create question for exam
+async function createQuestion(currentUser, id, payload) {
+  const { question, type, negativeMarks, options } = payload;
+  const transactionContext = await sequelize.transaction();
+
+  try {
+    if (!options || !options.length) {
+      commonHelpers.throwCustomError('options are required', 400);
+    }
+    const exam = await Exam.findByPk(id);
+    if (!exam) {
+      commonHelpers.throwCustomError('Exam not found');
+    }
+    if (exam.admin_id !== currentUser.id) {
+      commonHelpers.throwCustomError('Insufficient access', 403);
+    }
+
+    const createdQuestion = await Question.create(
+      { exam_id: id, question, type, negative_marks: negativeMarks },
+      { transaction: transactionContext },
+    );
+    const createdOptions = await Promise.all(
+      options.map(option =>
+        Option.create(
+          {
+            question_id: createdQuestion.id,
+            option: option.option,
+            is_correct: option.isCorrect,
+            marks: option.marks,
+          },
+          { transaction: transactionContext },
+        ),
+      ),
+    );
+
+    await transactionContext.commit();
+    return { createdQuestion, createdOptions };
+  } catch (err) {
+    transactionContext.rollback();
+    throw err;
+  }
+}
+
 module.exports = {
   getAll,
   create,
@@ -259,4 +302,5 @@ module.exports = {
   addUser,
   getAllUsers,
   getUser,
+  createQuestion,
 };
