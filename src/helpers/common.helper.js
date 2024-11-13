@@ -1,8 +1,12 @@
 // throw custom error with message and statuscode
-function throwCustomError(message, statusCode = 400) {
+function throwCustomError(message, statusCode = 400, isCustom = false) {
   const err = new Error(message);
   err.statusCode = statusCode;
-  throw err;
+  if (isCustom) {
+    return err;
+  } else {
+    throw err;
+  }
 }
 
 // send response after error
