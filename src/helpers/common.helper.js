@@ -26,8 +26,27 @@ function responseHandler(req, res) {
   res.status(res.statusCode).json(response);
 }
 
+// give roles booleans for ease
+function getRolesAsBool(roles) {
+  const rolesAsBool = {
+    isSuperAdmin: false,
+    isAdmin: false,
+    isUser: false,
+  };
+  if (roles?.includes('super_admin')) {
+    rolesAsBool.isSuperAdmin = true;
+  } else if (roles?.includes('admin')) {
+    rolesAsBool.isAdmin = true;
+  } else if (roles?.includes('user')) {
+    rolesAsBool.isUser = true;
+  }
+
+  return rolesAsBool;
+}
+
 module.exports = {
   throwCustomError,
   errorHandler,
   responseHandler,
+  getRolesAsBool,
 };
