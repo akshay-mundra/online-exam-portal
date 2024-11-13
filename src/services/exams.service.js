@@ -89,7 +89,7 @@ async function get(currentUser, id) {
           through: {
             attributes: ['user_id', 'exam_id'],
             where: { user_id: currentUser.id, exam_id: id },
-            required: true,
+            required: true, // not rdequired
           },
           required: true,
         },
@@ -207,6 +207,7 @@ async function getAllUsers(currentUser, id) {
   if (users?.length === 0) {
     commonHelpers.throwCustomError('No users assigned for this exam', 404);
   }
+  // temp
   console.log(users);
   return users;
 }
@@ -332,9 +333,9 @@ async function getAllQuestions(currentUser, id, query) {
     questions = await Exam.findOne(options);
   }
 
-  if (!questions || questions.Quesitons?.length === 0) {
-    commonHelpers.throwCustomError('No questions found for the exam', 404);
-  }
+  // if (!questions || questions.Quesitons?.length === 0) {
+  //   commonHelpers.throwCustomError('No questions found for the exam', 404);
+  // }
 
   return questions;
 }
@@ -351,28 +352,26 @@ async function getQuestion(currentUser, id, questionId) {
     isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id };
 
   const options = {
-    where: whereCondition,
-    attributes: ['id'],
+    where: { id: questionId },
+    attributes: ['id', 'question', 'type', 'negative_marks'],
     include: [
       {
-        model: Question,
-        where: { id: questionId },
-        attributes: ['id', 'question', 'type', 'negative_marks'],
+        model: Option,
+        attributes: isSuperAdmin || isAdmin ? adminCanSee : userCanSee,
         required: true,
-        include: [
-          {
-            model: Option,
-            attributes: isSuperAdmin || isAdmin ? adminCanSee : userCanSee,
-            required: true,
-          },
-        ],
+      },
+      {
+        model: Exam,
+        as: 'exams',
+        where: whereCondition,
+        attributes: ['id'],
       },
     ],
   };
   let question;
 
   if (isSuperAdmin || isAdmin) {
-    question = await Exam.findOne(options);
+    question = await Question.findOne(options);
   } else if (isUser) {
     const userExam = await UserExam.findOne({
       where: { user_id: currentUser.id, exam_id: id },
@@ -380,7 +379,7 @@ async function getQuestion(currentUser, id, questionId) {
     if (!userExam) {
       commonHelpers.throwCustomError('User is not assigned to this exam', 403);
     }
-    question = await Exam.findOne(options);
+    question = await Question.findOne(options);
   }
 
   if (!question) {
