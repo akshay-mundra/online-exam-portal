@@ -15,9 +15,6 @@ const startServer = async function () {
     await sequelize.authenticate();
     console.log('Db Connected Successfully!');
 
-    const data = await redisClient.get('name');
-    console.log(data);
-
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   } catch (err) {
     console.log('Error runing server', err);
