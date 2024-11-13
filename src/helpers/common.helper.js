@@ -44,9 +44,20 @@ function getRolesAsBool(roles) {
   return rolesAsBool;
 }
 
+// pagination helper for default attributes
+function getPaginationAttributes(page = 0, limit = 10) {
+  const offset = limit * page;
+
+  return {
+    limit,
+    offset,
+  };
+}
+
 module.exports = {
   throwCustomError,
   errorHandler,
   responseHandler,
   getRolesAsBool,
+  getPaginationAttributes,
 };
