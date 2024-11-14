@@ -160,6 +160,26 @@ async function getQuestion(req, res, next) {
   }
 }
 
+async function updateQuestion(req, res, next) {
+  try {
+    const user = req.user;
+    const { id, questionId } = req.params;
+    const { body: payload } = req;
+    const result = await examServices.updateQuestion(
+      user,
+      id,
+      questionId,
+      payload,
+    );
+    res.data = result;
+    res.statusCode = 202;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
 module.exports = {
   getAll,
   create,
@@ -172,4 +192,5 @@ module.exports = {
   createQuestion,
   getAllQuestions,
   getQuestion,
+  updateQuestion,
 };
