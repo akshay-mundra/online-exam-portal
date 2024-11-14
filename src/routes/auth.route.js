@@ -31,7 +31,6 @@ router.post(
 router.patch(
   '/reset-password',
   authValidators.resetPassword,
-  authMiddlewares.authenticate,
   authControllers.resetPassword,
   commonHelpers.responseHandler,
 );

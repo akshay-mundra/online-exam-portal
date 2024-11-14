@@ -43,8 +43,7 @@ async function forgotPassword(req, res, next) {
 async function resetPassword(req, res, next) {
   try {
     const { body: payload } = req;
-    const { id } = req.user;
-    const result = await authServices.resetPassword(id, payload);
+    const result = await authServices.resetPassword(payload);
     res.data = result;
     res.statusCode = 202;
     next();
