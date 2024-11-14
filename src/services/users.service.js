@@ -1,6 +1,8 @@
-const { User } = require('../models');
+const { User, UserRole, Role } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
+const { Op } = require('sequelize');
+const bcrypt = require('bcrypt');
 
 async function getAll(currentUser, page = 0) {
   const LIMIT = 10;
@@ -105,4 +107,73 @@ async function remove(currentUser, id) {
   }
 }
 
-module.exports = { getAll, get, update, remove };
+async function bulkCreate(currentUser, payload) {
+  const { users } = payload;
+  const transactionContext = await sequelize.transaction();
+
+  try {
+    const bulkUsers = [];
+    const userRole = await Role.findOne({ where: { name: 'user' } });
+
+    for (let user of users) {
+      const hashedPassword = await bcrypt.hash(user.password, 10);
+
+      const userObj = {
+        first_name: user.firstName,
+        last_name: user.lastName,
+        email: user.email,
+        password: hashedPassword,
+        admin_id: currentUser.id,
+      };
+
+      const userExists = await User.findOne({
+        where: { [Op.or]: [{ id: user.id }, { email: user.email }] },
+      });
+
+      if (userExists) {
+        if (userExists.admin_id !== currentUser.id) {
+          commonHelpers.throwCustomError(
+            'The user you are updating is not created by you',
+            403,
+          );
+        }
+        const updatedUser = await User.update(
+          userObj,
+          {
+            where: { id: userExists.id },
+            returning: true,
+            plain: true,
+          },
+          { transaction: transactionContext },
+        );
+
+        bulkUsers.push(updatedUser[1].id);
+      } else {
+        const createdUser = await User.create(userObj, {
+          transaction: transactionContext,
+        });
+
+        await UserRole.create(
+          {
+            user_id: createdUser.id,
+            role_id: userRole.id,
+          },
+          {
+            transaction: transactionContext,
+          },
+        );
+
+        bulkUsers.push(createdUser.id);
+      }
+    }
+
+    await transactionContext.commit();
+
+    return bulkUsers;
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
+  }
+}
+
+module.exports = { getAll, get, update, remove, bulkCreate };

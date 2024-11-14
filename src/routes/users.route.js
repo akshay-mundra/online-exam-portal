@@ -5,12 +5,25 @@ const authMiddlewares = require('../middlewares/auth.middleware');
 const commonHelpers = require('../helpers/common.helper');
 const userControllers = require('../controllers/users.controller');
 const userValidators = require('../validators/users.validator');
+const multerMiddlewares = require('../middlewares/multer.middleware');
+const utilMiddlewares = require('../middlewares/utils.middleware');
 
 router.get(
   '/',
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['admin']),
   userControllers.getAll,
+  commonHelpers.responseHandler,
+);
+
+router.post(
+  '/bulk-create',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  multerMiddlewares.upload.single('file'),
+  utilMiddlewares.convertUserFileToObject,
+  userValidators.bulkCreateSchema,
+  userControllers.bulkCreate,
   commonHelpers.responseHandler,
 );
 
@@ -24,9 +37,9 @@ router.get(
 
 router.put(
   '/:id',
-  userValidators.update,
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['admin']),
+  userValidators.updateSchema,
   userControllers.update,
   commonHelpers.responseHandler,
 );

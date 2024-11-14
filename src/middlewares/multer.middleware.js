@@ -8,5 +8,19 @@ const storage = multer.diskStorage({
     cb(null, file.originalname);
   },
 });
-const upload = multer({ storage: storage });
+
+const upload = multer({
+  storage: storage,
+  fileFilter(req, file, callback) {
+    const fileTypes = /\.(xlsx|csv)$/i;
+    if (!file.originalname.match(fileTypes)) {
+      return callback(
+        new Error('Only .xlsx or .csv files are allowed!'),
+        false,
+      );
+    }
+    callback(null, true);
+  },
+});
+
 module.exports = { upload };
