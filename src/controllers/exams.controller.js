@@ -122,6 +122,21 @@ async function createQuestion(req, res, next) {
     const { body: payload } = req;
     const result = await examServices.createQuestion(user, id, payload);
     res.data = result;
+    res.statusCode = 201;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+async function getAllQuestions(req, res, next) {
+  try {
+    const user = req.user;
+    const { id } = req.params;
+    const { query } = req;
+    const result = await examServices.getAllQuestions(user, id, query);
+    res.data = result;
     res.statusCode = 200;
     next();
   } catch (err) {
@@ -140,4 +155,5 @@ module.exports = {
   addUser,
   getUser,
   createQuestion,
+  getAllQuestions,
 };

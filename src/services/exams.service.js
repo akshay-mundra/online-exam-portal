@@ -293,6 +293,53 @@ async function createQuestion(currentUser, id, payload) {
   }
 }
 
+// get all questions for the exam
+async function getAllQuestions(currentUser, id, query) {
+  const { page } = query;
+  const LIMIT = 10;
+  const OFFSET = LIMIT * (page || 0);
+  const roles = currentUser.roles;
+
+  const isAdminOrSuperAdmin =
+    roles.includes('super_admin') || roles.includes('admin');
+  const isUser = roles.includes('user');
+  const whereCondition =
+    isAdminOrSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id };
+
+  const options = {
+    where: whereCondition,
+    attributes: ['id'],
+    include: [
+      {
+        model: Question,
+        attributes: ['id', 'question', 'type', 'negative_marks'],
+        required: true,
+        offset: OFFSET,
+        limit: LIMIT,
+      },
+    ],
+  };
+  let questions;
+
+  if (isAdminOrSuperAdmin) {
+    questions = await Exam.findOne(options);
+  } else if (isUser) {
+    const userExam = await UserExam.findOne({
+      where: { user_id: currentUser.id, exam_id: id },
+    });
+    if (!userExam) {
+      commonHelpers.throwCustomError('User is not assigned to this exam', 403);
+    }
+    questions = await Exam.findOne(options);
+  }
+
+  if (!questions || questions.Quesitons?.length === 0) {
+    commonHelpers.throwCustomError('No questions found for the exam', 404);
+  }
+
+  return questions;
+}
+
 module.exports = {
   getAll,
   create,
@@ -303,4 +350,5 @@ module.exports = {
   getAllUsers,
   getUser,
   createQuestion,
+  getAllQuestions,
 };
