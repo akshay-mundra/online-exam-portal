@@ -1,6 +1,7 @@
 const { Exam, User, UserExam, Question, Option } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
+const { Op } = require('sequelize');
 
 async function getAll(currentUser, page = 0) {
   const roles = currentUser.roles;
@@ -367,6 +368,94 @@ async function getQuestion(currentUser, id, questionId) {
   return question;
 }
 
+async function updateQuestion(currentUser, id, questionId, payload) {
+  const { question, type, negativeMarks, options } = payload;
+  const transactionContext = await sequelize.transaction();
+
+  try {
+    const [updateRowCount, updatedQuestion] = await Question.update(
+      {
+        question,
+        type,
+        negative_marks: negativeMarks,
+      },
+      {
+        where: { id: questionId, exam_id: id },
+        returning: true,
+        include: [
+          {
+            model: Exam,
+            where: { admin_id: currentUser.id },
+            attributes: [],
+            required: true,
+          },
+        ],
+      },
+      {
+        transaction: transactionContext,
+      },
+    );
+
+    if (updateRowCount === 0) {
+      commonHelpers.throwCustomError('Question not found', 404);
+    }
+
+    const optionsToEdit = options.filter(option => option.id && !option.delete);
+    const optionsToDelete = options.filter(
+      option => option.delete && option.id,
+    );
+    const optionsToCreate = options.filter(
+      option => !option.id && !option.delete,
+    );
+
+    const updatedOptions = await Promise.all(
+      optionsToEdit.map(option =>
+        Option.update(
+          {
+            option: option.option,
+            is_correct: option.isCorrect,
+            marks: option.marks,
+          },
+          {
+            where: { id: option.id, question_id: questionId },
+          },
+          { transaction: transactionContext },
+        ),
+      ),
+    );
+
+    const createdOptions = await Option.bulkCreate(
+      optionsToCreate.map(option => {
+        return {
+          question_id: questionId,
+          option: option.option,
+          is_correct: option.isCorrect,
+          marks: option.marks,
+        };
+      }),
+      {
+        transaction: transactionContext,
+      },
+    );
+
+    await Option.destroy({
+      where: { id: { [Op.in]: optionsToDelete.map(option => option.id) } },
+      transaction: transactionContext,
+    });
+
+    await transactionContext.commit();
+
+    return {
+      updatedQuestion,
+      createdOptions,
+      updatedOptions,
+    };
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
+  }
+}
+
 module.exports = {
   getAll,
   create,
@@ -379,4 +468,5 @@ module.exports = {
   createQuestion,
   getAllQuestions,
   getQuestion,
+  updateQuestion,
 };

@@ -98,4 +98,13 @@ router.get(
   commonHelpers.responseHandler,
 );
 
+router.put(
+  '/:id/questions/:questionId',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  examValidators.udpateQuestionSchema,
+  examControllers.updateQuestion,
+  commonHelpers.responseHandler,
+);
+
 module.exports = router;
