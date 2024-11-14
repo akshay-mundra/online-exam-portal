@@ -49,7 +49,9 @@ async function forgotPassword(req, res, next) {
 async function resetPassword(req, res, next) {
   const schema = Joi.object({
     password: Joi.string().min(8).required(),
-    confirmPassword: Joi.ref('passoword'),
+    confirmPassword: Joi.string().min(8).required(),
+    userId: Joi.string().required(),
+    token: Joi.string().required(),
   });
 
   try {
