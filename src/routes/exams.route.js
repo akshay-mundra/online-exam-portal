@@ -4,6 +4,7 @@ const router = express.Router();
 const authMiddlewares = require('../middlewares/auth.middleware');
 const commonHelpers = require('../helpers/common.helper');
 const examControllers = require('../controllers/exams.controller');
+const examValidators = require('../validators/exams.validator');
 
 router.get(
   '/',
@@ -66,6 +67,15 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['admin', 'user']),
   examControllers.getUser,
+  commonHelpers.responseHandler,
+);
+
+router.post(
+  '/:id/questions',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  examValidators.createQuestion,
+  examControllers.createQuestion,
   commonHelpers.responseHandler,
 );
 

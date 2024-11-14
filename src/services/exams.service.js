@@ -1,4 +1,4 @@
-const { Exam, User, UserExam } = require('../models');
+const { Exam, User, UserExam, Question, Option } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
 
@@ -37,15 +37,15 @@ async function getAll(currentUser, page = 0) {
 }
 
 async function create(currentUser, payload) {
-  const { title, start_time, end_time } = payload;
+  const { title, startTime, endTime } = payload;
   const transactionContext = await sequelize.transaction();
 
   try {
     const exam = await Exam.create(
       {
         title,
-        start_time,
-        end_time,
+        start_time: startTime,
+        end_time: endTime,
         admin_id: currentUser.id,
       },
       { transaction: transactionContext },
@@ -105,12 +105,12 @@ async function get(currentUser, id) {
 
 // update exam details only the admin who created it can update the exam.
 async function update(currentUser, id, payload) {
-  const { title, start_time, end_time } = payload;
+  const { title, startTime, endTime } = payload;
   const transactionContext = await sequelize.transaction();
 
   try {
     const [updateRowCount, updatedExam] = await Exam.update(
-      { title, start_time, end_time },
+      { title, start_time: startTime, endTime },
       {
         where: { id, admin_id: currentUser.id },
         returning: true,
@@ -153,11 +153,11 @@ async function remove(currentUser, id) {
 
 // add user to exam if user exist and is created by that admin.
 async function addUser(currentUser, id, payload) {
-  const { user_id } = payload;
+  const { userId } = payload;
   const transactionContext = await sequelize.transaction();
 
   try {
-    const user = await User.findByPk(user_id);
+    const user = await User.findByPk(userId);
     if (!user) {
       commonHelpers.throwCustomError('User not found', 404);
     }
@@ -168,9 +168,9 @@ async function addUser(currentUser, id, payload) {
       );
     }
     const [userExam, isCreated] = await UserExam.findOrCreate({
-      where: { user_id, exam_id: id },
+      where: { userId, exam_id: id },
       defaults: {
-        user_id,
+        userId,
         exam_id: id,
       },
       transaction: transactionContext,
@@ -250,6 +250,49 @@ async function getUser(currentUser, userId, id) {
   };
 }
 
+// create question for exam
+async function createQuestion(currentUser, id, payload) {
+  const { question, type, negativeMarks, options } = payload;
+  const transactionContext = await sequelize.transaction();
+
+  try {
+    if (!options || !options.length) {
+      commonHelpers.throwCustomError('options are required', 400);
+    }
+    const exam = await Exam.findByPk(id);
+    if (!exam) {
+      commonHelpers.throwCustomError('Exam not found');
+    }
+    if (exam.admin_id !== currentUser.id) {
+      commonHelpers.throwCustomError('Insufficient access', 403);
+    }
+
+    const createdQuestion = await Question.create(
+      { exam_id: id, question, type, negative_marks: negativeMarks },
+      { transaction: transactionContext },
+    );
+    const createdOptions = await Promise.all(
+      options.map(option =>
+        Option.create(
+          {
+            question_id: createdQuestion.id,
+            option: option.option,
+            is_correct: option.isCorrect,
+            marks: option.marks,
+          },
+          { transaction: transactionContext },
+        ),
+      ),
+    );
+
+    await transactionContext.commit();
+    return { createdQuestion, createdOptions };
+  } catch (err) {
+    transactionContext.rollback();
+    throw err;
+  }
+}
+
 module.exports = {
   getAll,
   create,
@@ -259,4 +302,5 @@ module.exports = {
   addUser,
   getAllUsers,
   getUser,
+  createQuestion,
 };
