@@ -140,38 +140,44 @@ async function forgotPassword(payload) {
 
 async function resetPassword(payload) {
   const { password, confirmPassword, token, userId } = payload;
+  const transactionContext = await sequelize.transaction();
 
-  if (confirmPassword !== password) {
-    commonHelpers.throwCustomError('Both passwords should match', 422);
+  try {
+    if (confirmPassword !== password) {
+      commonHelpers.throwCustomError('Both passwords should match', 422);
+    }
+
+    const user = await User.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      commonHelpers.throwCustomError('User does not exist', 404);
+    }
+
+    const key = `reset-token:${user.id}`;
+
+    const resetToken = await redisClient.get(key);
+    if (!resetToken) {
+      commonHelpers.throwCustomError('Invalid or expired reset token', 401);
+    }
+
+    const isValid = await bcrypt.compare(token, resetToken);
+    if (!isValid) {
+      commonHelpers.throwCustomError('Invalid token', 401);
+    }
+
+    redisClient.del(key);
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    user.password = hashedPassword;
+    await user.save({ transaction: transactionContext });
+
+    return 'Password reset successful';
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
   }
-
-  const user = await User.findOne({
-    where: { id: userId },
-  });
-  if (!user) {
-    commonHelpers.throwCustomError('User does not exist', 404);
-  }
-
-  const key = `reset-token:${user.id}`;
-
-  const resetToken = await redisClient.get(key);
-  if (!resetToken) {
-    commonHelpers.throwCustomError('Invalid or expired reset token', 401);
-  }
-
-  const isValid = await bcrypt.compare(token, resetToken);
-  if (!isValid) {
-    commonHelpers.throwCustomError('Invalid token', 401);
-  }
-
-  redisClient.del(key);
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  user.password = hashedPassword;
-  await user.save();
-
-  return 'Password reset successful';
 }
 
 async function logout() {
