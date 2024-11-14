@@ -91,7 +91,8 @@ async function getAllUsers(req, res, next) {
   try {
     const user = req.user;
     const { id } = req.params;
-    const result = await examServices.getAllUsers(user, id);
+    const { query } = req;
+    const result = await examServices.getAllUsers(user, id, query);
     res.data = result;
     res.statusCode = 200;
     next();
