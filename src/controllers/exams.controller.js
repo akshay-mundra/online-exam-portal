@@ -145,6 +145,20 @@ async function getAllQuestions(req, res, next) {
   }
 }
 
+async function getQuestion(req, res, next) {
+  try {
+    const user = req.user;
+    const { id, questionId } = req.params;
+    const result = await examServices.getQuestion(user, id, questionId);
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
 module.exports = {
   getAll,
   create,
@@ -156,4 +170,5 @@ module.exports = {
   getUser,
   createQuestion,
   getAllQuestions,
+  getQuestion,
 };

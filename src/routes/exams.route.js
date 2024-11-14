@@ -87,4 +87,12 @@ router.get(
   commonHelpers.responseHandler,
 );
 
+router.get(
+  '/:id/questions/:questionId',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin', 'user']),
+  examControllers.getQuestion,
+  commonHelpers.responseHandler,
+);
+
 module.exports = router;

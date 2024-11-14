@@ -89,7 +89,7 @@ async function get(currentUser, id) {
           through: {
             attributes: ['user_id', 'exam_id'],
             where: { user_id: currentUser.id, exam_id: id },
-            required: true,
+            required: true, // not rdequired
           },
           required: true,
         },
@@ -207,6 +207,7 @@ async function getAllUsers(currentUser, id) {
   if (users?.length === 0) {
     commonHelpers.throwCustomError('No users assigned for this exam', 404);
   }
+  // temp
   console.log(users);
   return users;
 }
@@ -300,11 +301,10 @@ async function getAllQuestions(currentUser, id, query) {
   const OFFSET = LIMIT * (page || 0);
   const roles = currentUser.roles;
 
-  const isAdminOrSuperAdmin =
-    roles.includes('super_admin') || roles.includes('admin');
-  const isUser = roles.includes('user');
+  const { isSuperAdmin, isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
+
   const whereCondition =
-    isAdminOrSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id };
+    isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id };
 
   const options = {
     where: whereCondition,
@@ -321,7 +321,7 @@ async function getAllQuestions(currentUser, id, query) {
   };
   let questions;
 
-  if (isAdminOrSuperAdmin) {
+  if (isSuperAdmin || isAdmin) {
     questions = await Exam.findOne(options);
   } else if (isUser) {
     const userExam = await UserExam.findOne({
@@ -333,11 +333,60 @@ async function getAllQuestions(currentUser, id, query) {
     questions = await Exam.findOne(options);
   }
 
-  if (!questions || questions.Quesitons?.length === 0) {
-    commonHelpers.throwCustomError('No questions found for the exam', 404);
-  }
+  // if (!questions || questions.Quesitons?.length === 0) {
+  //   commonHelpers.throwCustomError('No questions found for the exam', 404);
+  // }
 
   return questions;
+}
+
+async function getQuestion(currentUser, id, questionId) {
+  const roles = currentUser.roles;
+
+  const userCanSee = ['id', 'option', 'marks'];
+  const adminCanSee = [...userCanSee, 'is_correct'];
+
+  const { isSuperAdmin, isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
+
+  const whereCondition =
+    isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id };
+
+  const options = {
+    where: { id: questionId },
+    attributes: ['id', 'question', 'type', 'negative_marks'],
+    include: [
+      {
+        model: Option,
+        attributes: isSuperAdmin || isAdmin ? adminCanSee : userCanSee,
+        required: true,
+      },
+      {
+        model: Exam,
+        as: 'exams',
+        where: whereCondition,
+        attributes: ['id'],
+      },
+    ],
+  };
+  let question;
+
+  if (isSuperAdmin || isAdmin) {
+    question = await Question.findOne(options);
+  } else if (isUser) {
+    const userExam = await UserExam.findOne({
+      where: { user_id: currentUser.id, exam_id: id },
+    });
+    if (!userExam) {
+      commonHelpers.throwCustomError('User is not assigned to this exam', 403);
+    }
+    question = await Question.findOne(options);
+  }
+
+  if (!question) {
+    commonHelpers.throwCustomError('Question not found', 404);
+  }
+
+  return question;
 }
 
 module.exports = {
@@ -351,4 +400,5 @@ module.exports = {
   getUser,
   createQuestion,
   getAllQuestions,
+  getQuestion,
 };
