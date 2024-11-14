@@ -18,6 +18,7 @@ router.post(
   '/',
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['admin']),
+  examValidators.examSchema,
   examControllers.create,
   commonHelpers.responseHandler,
 );
@@ -34,6 +35,7 @@ router.put(
   '/:id',
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['admin']),
+  examValidators.examSchema,
   examControllers.update,
   commonHelpers.responseHandler,
 );
@@ -58,6 +60,7 @@ router.post(
   '/:id/users',
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['admin']),
+  examValidators.addUserSchema,
   examControllers.addUser,
   commonHelpers.responseHandler,
 );
@@ -74,7 +77,7 @@ router.post(
   '/:id/questions',
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['admin']),
-  examValidators.createQuestion,
+  examValidators.createQuestionSchema,
   examControllers.createQuestion,
   commonHelpers.responseHandler,
 );
