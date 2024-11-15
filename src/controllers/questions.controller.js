@@ -28,4 +28,17 @@ async function createOption(req, res, next) {
   }
 }
 
-module.exports = { bulkCreate, createOption };
+async function getOption(req, res, next) {
+  try {
+    const { user, params } = req;
+    const result = await questionServices.getOption(user, params);
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+module.exports = { bulkCreate, createOption, getOption };

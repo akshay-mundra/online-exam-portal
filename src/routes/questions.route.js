@@ -29,4 +29,12 @@ router.post(
   commonHelpers.responseHandler,
 );
 
+router.get(
+  '/:id/options/:optionId',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  questionControllers.getOption,
+  commonHelpers.responseHandler,
+);
+
 module.exports = router;

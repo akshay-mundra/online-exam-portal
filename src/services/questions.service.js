@@ -63,22 +63,11 @@ async function bulkCreate(currentUser, payload) {
 
 async function createOption(currentUser, params, payload) {
   const { id } = params;
-  const question = await Question.findOne({
-    where: { id },
-    include: [
-      {
-        model: Exam,
-        as: 'exams',
-        where: { admin_id: currentUser.id },
-        attributes: ['id'],
-      },
-      {
-        model: Option,
-        where: { question_id: id },
-        required: true,
-      },
-    ],
-  });
+
+  const question = await questionHelpers.getQuestionExamOptions(
+    id,
+    currentUser.id,
+  );
 
   if (!question) {
     commonHelpers.throwCustomError(
@@ -101,4 +90,23 @@ async function createOption(currentUser, params, payload) {
   return await optionServices.create(id, payload);
 }
 
-module.exports = { bulkCreate, createOption };
+async function getOption(currentUser, params) {
+  const { id, optionId } = params;
+
+  const question = await questionHelpers.getQuestionExamOptions(
+    id,
+    currentUser.id,
+    { id: optionId },
+  );
+
+  if (!question) {
+    commonHelpers.throwCustomError(
+      'question not found or you do not have access to it',
+      403,
+    );
+  }
+
+  return question.Options[0];
+}
+
+module.exports = { bulkCreate, createOption, getOption };
