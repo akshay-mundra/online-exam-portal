@@ -37,4 +37,21 @@ router.get(
   commonHelpers.responseHandler,
 );
 
+router.put(
+  '/:id/options/:optionId',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  optionValidators.createSchema,
+  questionControllers.updateOption,
+  commonHelpers.responseHandler,
+);
+
+router.delete(
+  '/:id/options/:optionId',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  questionControllers.removeOption,
+  commonHelpers.responseHandler,
+);
+
 module.exports = router;

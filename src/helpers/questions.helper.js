@@ -23,11 +23,12 @@ async function getQuestionExamOptions(id, userId, optionCondition) {
 
 // single choice question should have only one option as correct
 function checkOptionsSingleChoice(options) {
+  let count = 0;
   for (let option of options) {
-    if (option.is_correct) return false;
+    if (option.is_correct) count++;
   }
 
-  return true;
+  return count;
 }
 
 module.exports = { checkOptionsSingleChoice, getQuestionExamOptions };

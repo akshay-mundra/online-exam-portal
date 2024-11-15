@@ -41,4 +41,36 @@ async function getOption(req, res, next) {
   }
 }
 
-module.exports = { bulkCreate, createOption, getOption };
+async function updateOption(req, res, next) {
+  try {
+    const { user, params, body: payload } = req;
+    const result = await questionServices.updateOption(user, params, payload);
+    res.data = result;
+    res.statusCode = 202;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+async function removeOption(req, res, next) {
+  try {
+    const { user, params } = req;
+    const result = await questionServices.removeOption(user, params);
+    res.data = result;
+    res.statusCode = 202;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+module.exports = {
+  bulkCreate,
+  createOption,
+  getOption,
+  updateOption,
+  removeOption,
+};

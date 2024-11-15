@@ -109,4 +109,59 @@ async function getOption(currentUser, params) {
   return question.Options[0];
 }
 
-module.exports = { bulkCreate, createOption, getOption };
+async function updateOption(currentUser, params, payload) {
+  const { id, optionId } = params;
+
+  const question = await questionHelpers.getQuestionExamOptions(
+    id,
+    currentUser.id,
+    { id: optionId },
+  );
+
+  if (!question) {
+    commonHelpers.throwCustomError(
+      'question or option not found or you do not have access to it',
+      403,
+    );
+  }
+
+  if (
+    payload.isCorrect &&
+    question.type === 'single_choice' &&
+    questionHelpers.checkOptionsSingleChoice(question.Options) > 1
+  ) {
+    commonHelpers.throwCustomError(
+      'Single choice question can only have single option as correct',
+      400,
+    );
+  }
+
+  return await optionServices.update(optionId, payload);
+}
+
+async function removeOption(currentUser, params) {
+  const { id, optionId } = params;
+
+  const question = await questionHelpers.getQuestionExamOptions(
+    id,
+    currentUser.id,
+    { id: optionId },
+  );
+
+  if (!question) {
+    commonHelpers.throwCustomError(
+      'question or option not found or you do not have access to it',
+      403,
+    );
+  }
+
+  return await optionServices.remove(optionId);
+}
+
+module.exports = {
+  bulkCreate,
+  createOption,
+  getOption,
+  updateOption,
+  removeOption,
+};
