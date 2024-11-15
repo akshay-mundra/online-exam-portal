@@ -91,26 +91,35 @@ const convertQuestionFileToObject = async (req, res, next) => {
       req.body.questions = questionsObjArray;
 
       return next();
-    }
-    // else if (fileExtension === 'csv') {
-    //   fs.createReadStream(path)
-    //     .pipe(csvParser())
-    //     .on('data', row => {
-    //       const tempObj = {
-    //         id: row?.id ? row.id : null,
-    //         firstName: row.firstName,
-    //         lastName: row.lastName,
-    //         email: row.email,
-    //         password: row.password,
-    //       };
-    //       questionsObjArray.push(tempObj);
-    //     })
-    //     .on('end', () => {
-    //       req.body.questions = questionsObjArray;
-    //       return next();
-    //     });
-    // }
-    else {
+    } else if (fileExtension === 'csv') {
+      fs.createReadStream(path)
+        .pipe(csvParser({ headers: false, skipLines: 1 }))
+        .on('data', row => {
+          const tempObj = {
+            question: row[0],
+            type: row[1],
+            negativeMarks: row[2],
+          };
+
+          const optionsCount = row[3];
+          let options = [];
+          for (let i = 0; i < optionsCount; i++) {
+            const col = i * 3 + 4;
+            options.push({
+              option: row[col],
+              isCorrect: row[col + 1],
+              marks: row[col + 2],
+            });
+          }
+          tempObj.options = options;
+
+          questionsObjArray.push(tempObj);
+        })
+        .on('end', () => {
+          req.body.questions = questionsObjArray;
+          return next();
+        });
+    } else {
       commonHelpers.throwCustomError(
         'Invalid file format. Only .xlsx, .xls, or .csv files are allowed',
         422,
