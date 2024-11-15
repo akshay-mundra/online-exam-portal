@@ -1,7 +1,8 @@
 const { Exam, User, UserExam, Question, Option } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
-const { Op } = require('sequelize');
+// const { Op } = require('sequelize');
+const questionHelpers = require('../helpers/questions.helper');
 
 async function getAll(currentUser, page = 0) {
   const roles = currentUser.roles;
@@ -85,7 +86,7 @@ async function update(currentUser, id, payload) {
     const [updateRowCount, updatedExam] = await Exam.update(
       { title, start_time: startTime, end_time: endTime },
       {
-        where: { id, admin_id: currentUser.id },
+        where: { id, admin_id: currentUser.id, is_published: false },
         returning: true,
       },
       {
@@ -94,7 +95,10 @@ async function update(currentUser, id, payload) {
     );
 
     if (updateRowCount === 0) {
-      commonHelpers.throwCustomError('Exam not found', 404);
+      commonHelpers.throwCustomError(
+        'Exam not found or already published',
+        404,
+      );
     }
 
     await transactionContext.commit();
@@ -111,7 +115,7 @@ async function remove(currentUser, id) {
 
   try {
     const countChanged = await Exam.destroy(
-      { where: { id, admin_id: currentUser.id } },
+      { where: { id, admin_id: currentUser.id, is_published: false } },
       { transaction: transactionContext },
     );
     if (countChanged === 0) {
@@ -132,16 +136,29 @@ async function addUser(currentUser, id, payload) {
   const transactionContext = await sequelize.transaction();
 
   try {
+    const exam = await Exam.findByPk(id);
+
+    if (!exam) {
+      commonHelpers.throwCustomError('Exam not found', 404);
+    }
+
+    if (exam.is_published) {
+      commonHelpers.throwCustomError('Exam is already published', 400);
+    }
+
     const user = await User.findByPk(userId);
+
     if (!user) {
       commonHelpers.throwCustomError('User not found', 404);
     }
+
     if (user.admin_id !== currentUser.id) {
       commonHelpers.throwCustomError(
         'Can not add user that is not created by you',
         403,
       );
     }
+
     const [userExam, isCreated] = await UserExam.findOrCreate({
       where: { user_id: userId, exam_id: id },
       defaults: {
@@ -238,12 +255,28 @@ async function createQuestion(currentUser, id, payload) {
     if (!options || !options.length) {
       commonHelpers.throwCustomError('options are required', 400);
     }
+
     const exam = await Exam.findByPk(id);
     if (!exam) {
       commonHelpers.throwCustomError('Exam not found');
     }
+
     if (exam.admin_id !== currentUser.id) {
       commonHelpers.throwCustomError('Insufficient access', 403);
+    }
+
+    if (exam.is_published) {
+      commonHelpers.throwCustomError('Exam is already published', 400);
+    }
+
+    if (
+      type === 'single_choice' &&
+      questionHelpers.checkOptionsSingleChoice() > 1
+    ) {
+      commonHelpers.throwCustomError(
+        'Single choice question can not have multiple correct options',
+        400,
+      );
     }
 
     const createdQuestion = await Question.create(
@@ -369,7 +402,7 @@ async function getQuestion(currentUser, id, questionId) {
 }
 
 async function updateQuestion(currentUser, id, questionId, payload) {
-  const { question, type, negativeMarks, options } = payload;
+  const { question, type, negativeMarks } = payload;
   const transactionContext = await sequelize.transaction();
 
   try {
@@ -400,56 +433,42 @@ async function updateQuestion(currentUser, id, questionId, payload) {
       commonHelpers.throwCustomError('Question not found', 404);
     }
 
-    const optionsToEdit = options.filter(option => option.id && !option.delete);
-    const optionsToDelete = options.filter(
-      option => option.delete && option.id,
-    );
-    const optionsToCreate = options.filter(
-      option => !option.id && !option.delete,
-    );
+    await transactionContext.commit();
 
-    const updatedOptions = await Promise.all(
-      optionsToEdit.map(option =>
-        Option.update(
-          {
-            option: option.option,
-            is_correct: option.isCorrect,
-            marks: option.marks,
-          },
-          {
-            where: { id: option.id, question_id: questionId },
-          },
-          { transaction: transactionContext },
-        ),
-      ),
-    );
+    return updatedQuestion;
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
+  }
+}
 
-    const createdOptions = await Option.bulkCreate(
-      optionsToCreate.map(option => {
-        return {
-          question_id: questionId,
-          option: option.option,
-          is_correct: option.isCorrect,
-          marks: option.marks,
-        };
-      }),
+async function removeQuestion(currentUser, id, questionId) {
+  const transactionContext = await sequelize.transaction();
+
+  try {
+    const modifyCount = await Question.destroy(
+      {
+        where: { id: questionId, exam_id: id },
+        include: [
+          {
+            model: Exam,
+            where: { admin_id: currentUser.id },
+            required: true,
+          },
+        ],
+      },
       {
         transaction: transactionContext,
       },
     );
 
-    await Option.destroy({
-      where: { id: { [Op.in]: optionsToDelete.map(option => option.id) } },
-      transaction: transactionContext,
-    });
+    if (modifyCount === 0) {
+      commonHelpers.throwCustomError('Question not found', 404);
+    }
 
     await transactionContext.commit();
 
-    return {
-      updatedQuestion,
-      createdOptions,
-      updatedOptions,
-    };
+    return 'question removed successfully';
   } catch (err) {
     await transactionContext.rollback();
     throw err;
@@ -469,4 +488,5 @@ module.exports = {
   getAllQuestions,
   getQuestion,
   updateQuestion,
+  removeQuestion,
 };

@@ -44,15 +44,6 @@ async function udpateQuestionSchema(req, res, next) {
     question: Joi.string().min(3).required(),
     type: Joi.string().valid('single_choice', 'multi_choice').required(),
     negativeMarks: Joi.number(),
-    options: Joi.array().items(
-      Joi.object({
-        option: Joi.string().required(),
-        isCorrect: Joi.boolean(),
-        marks: Joi.number(),
-        id: Joi.string(),
-        delete: Joi.boolean(),
-      }),
-    ),
   });
 
   try {

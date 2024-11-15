@@ -107,4 +107,12 @@ router.put(
   commonHelpers.responseHandler,
 );
 
+router.delete(
+  '/:id/questions/:questionId',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  examControllers.removeQuestion,
+  commonHelpers.responseHandler,
+);
+
 module.exports = router;
