@@ -1,4 +1,4 @@
-const { User, UserRole, Role } = require('../models');
+const { User, UserRole, Role, Exam } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
 const { Op } = require('sequelize');
@@ -176,4 +176,42 @@ async function bulkCreate(currentUser, payload) {
   }
 }
 
-module.exports = { getAll, get, update, remove, bulkCreate };
+async function getAllExams(currentUser, params) {
+  const { id } = params;
+  const roles = currentUser.roles;
+  const { isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
+
+  const options = {
+    where: isUser ? {} : { admin_id: currentUser.id },
+    include: [
+      {
+        model: User,
+        where: isUser ? { id } : { admin_id: currentUser.id, id },
+        attributes: ['id'],
+        required: true,
+        through: {
+          attributes: [],
+          where: { deleted_at: null },
+        },
+      },
+    ],
+  };
+
+  let exams;
+  if (isAdmin) {
+    exams = await Exam.findAll(options);
+  } else if (isUser) {
+    if (id !== currentUser.id) {
+      commonHelpers.throwCustomError(
+        'Other user is not accessible to you',
+        403,
+      );
+    }
+
+    exams = await Exam.findAll(options);
+  }
+
+  return exams;
+}
+
+module.exports = { getAll, get, update, remove, bulkCreate, getAllExams };
