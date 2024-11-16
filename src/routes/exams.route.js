@@ -48,6 +48,14 @@ router.delete(
   commonHelpers.responseHandler,
 );
 
+router.patch(
+  '/:id/start-exam',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['user']),
+  examControllers.userStartExam,
+  commonHelpers.responseHandler,
+);
+
 router.get(
   '/:id/users',
   authMiddlewares.authenticate,

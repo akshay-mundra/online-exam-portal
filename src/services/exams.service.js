@@ -1,7 +1,7 @@
 const { Exam, User, UserExam, Question, Option } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
-// const { Op } = require('sequelize');
+const moment = require('moment');
 const questionHelpers = require('../helpers/questions.helper');
 
 async function getAll(currentUser, page = 0) {
@@ -124,6 +124,55 @@ async function remove(currentUser, id) {
     await transactionContext.commit();
 
     return { message: 'Exam deleted successfully!' };
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
+  }
+}
+
+async function userStartExam(currentUser, id) {
+  const transactionContext = await sequelize.transaction();
+
+  try {
+    const exam = await Exam.findByPk(id);
+
+    if (!exam) {
+      commonHelpers.throwCustomError('Exam not found', 404);
+    }
+
+    const currentTime = moment();
+
+    const isExamAvailable =
+      currentTime.isAfter(exam.start_time) &&
+      currentTime.isBefore(exam.end_time);
+
+    if (!isExamAvailable) {
+      commonHelpers.throwCustomError(
+        'You can only join the exam within the allowed time window',
+        403,
+      );
+    }
+
+    const [updateCount, userExam] = await UserExam.update(
+      {
+        status: 'on-going',
+      },
+      {
+        where: { exam_id: exam.id, user_id: currentUser.id },
+        returning: true,
+      },
+      {
+        transaction: transactionContext,
+      },
+    );
+
+    if (updateCount === 0) {
+      commonHelpers.throwCustomError('User is not assigned to this exam', 403);
+    }
+
+    await transactionContext.commit();
+
+    return userExam;
   } catch (err) {
     await transactionContext.rollback();
     throw err;
@@ -319,7 +368,7 @@ async function createQuestion(currentUser, id, payload) {
 
     if (
       type === 'single_choice' &&
-      questionHelpers.checkOptionsSingleChoice() > 1
+      questionHelpers.checkOptionsSingleChoice(options) > 1
     ) {
       commonHelpers.throwCustomError(
         'Single choice question can not have multiple correct options',
@@ -529,6 +578,7 @@ module.exports = {
   get,
   update,
   remove,
+  userStartExam,
   addUser,
   getAllUsers,
   getUser,
