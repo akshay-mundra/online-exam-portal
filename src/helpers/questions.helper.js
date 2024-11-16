@@ -25,7 +25,7 @@ async function getQuestionExamOptions(id, userId, optionCondition) {
 function checkOptionsSingleChoice(options) {
   let count = 0;
   for (let option of options) {
-    if (option.is_correct) count++;
+    if (option.is_correct || option.isCorrect) count++;
   }
 
   return count;
