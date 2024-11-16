@@ -195,6 +195,7 @@ async function getAllUsers(currentUser, id, query) {
         attributes: ['id'],
         through: {
           attributes: ['id', 'score', 'status'],
+          where: { deleted_at: null },
         },
         required: true,
       },
@@ -223,6 +224,7 @@ async function getUser(currentUser, userId, id) {
         attributes: ['id'],
         through: {
           attributes: ['id', 'score', 'status'],
+          where: { deleted_at: null },
         },
         required: true,
       },
@@ -244,6 +246,52 @@ async function getUser(currentUser, userId, id) {
   }
 
   return user;
+}
+
+// remove user from exam
+async function removeUser(currentUser, userId, id) {
+  const transactionContext = await sequelize.transaction();
+
+  try {
+    const user = await User.findOne({
+      where: { id: userId, admin_id: currentUser.id },
+    });
+    if (!user) {
+      commonHelpers.throwCustomError('User not found', 404);
+    }
+
+    const exam = await Exam.findOne({
+      where: { id: id, admin_id: currentUser.id },
+    });
+
+    if (!exam) {
+      commonHelpers.throwCustomError('Exam not found', 404);
+    }
+    if (exam.is_published) {
+      commonHelpers.throwCustomError('Exam is already published', 400);
+    }
+
+    const modifyCount = await UserExam.destroy(
+      { where: { user_id: userId, exam_id: id } },
+      { transaction: transactionContext },
+    );
+
+    if (modifyCount === 0) {
+      commonHelpers.throwCustomError(
+        'User is not associated to this exam',
+        403,
+      );
+    }
+
+    console.log(modifyCount);
+
+    await transactionContext.commit();
+
+    return 'User removed from exam successfully';
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
+  }
 }
 
 // create question for exam
@@ -484,6 +532,7 @@ module.exports = {
   addUser,
   getAllUsers,
   getUser,
+  removeUser,
   createQuestion,
   getAllQuestions,
   getQuestion,

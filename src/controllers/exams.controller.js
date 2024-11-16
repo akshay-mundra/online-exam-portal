@@ -116,6 +116,20 @@ async function getUser(req, res, next) {
   }
 }
 
+async function removeUser(req, res, next) {
+  try {
+    const user = req.user;
+    const { id, userId } = req.params;
+    const result = await examServices.removeUser(user, userId, id);
+    res.data = result;
+    res.statusCode = 202;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
 async function createQuestion(req, res, next) {
   try {
     const user = req.user;
@@ -202,6 +216,7 @@ module.exports = {
   getAllUsers,
   addUser,
   getUser,
+  removeUser,
   createQuestion,
   getAllQuestions,
   getQuestion,
