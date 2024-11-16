@@ -73,6 +73,14 @@ router.get(
   commonHelpers.responseHandler,
 );
 
+router.delete(
+  '/:id/users/:userId',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  examControllers.removeUser,
+  commonHelpers.responseHandler,
+);
+
 router.post(
   '/:id/questions',
   authMiddlewares.authenticate,
