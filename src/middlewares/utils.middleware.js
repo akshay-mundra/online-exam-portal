@@ -55,4 +55,79 @@ const convertUserFileToObject = async (req, res, next) => {
   }
 };
 
-module.exports = { convertUserFileToObject };
+const convertQuestionFileToObject = async (req, res, next) => {
+  const questionsObjArray = [];
+  const path = 'src/uploads/' + req.file.originalname;
+  const fileExtension = req.file.originalname.split('.').pop();
+
+  try {
+    if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+      await readXlsxFile(fs.createReadStream(path)).then(rows => {
+        rows.shift();
+
+        rows.forEach(row => {
+          const tempObj = {
+            question: row[0],
+            type: row[1],
+            negativeMarks: row[2],
+          };
+
+          const optionsCount = row[3];
+          let options = [];
+          for (let i = 0; i < optionsCount; i++) {
+            const col = i * 3 + 4;
+            options.push({
+              option: row[col],
+              isCorrect: row[col + 1],
+              marks: row[col + 2],
+            });
+          }
+          tempObj.options = options;
+
+          questionsObjArray.push(tempObj);
+        });
+      });
+
+      req.body.questions = questionsObjArray;
+
+      return next();
+    } else if (fileExtension === 'csv') {
+      fs.createReadStream(path)
+        .pipe(csvParser({ headers: false, skipLines: 1 }))
+        .on('data', row => {
+          const tempObj = {
+            question: row[0],
+            type: row[1],
+            negativeMarks: row[2],
+          };
+
+          const optionsCount = row[3];
+          let options = [];
+          for (let i = 0; i < optionsCount; i++) {
+            const col = i * 3 + 4;
+            options.push({
+              option: row[col],
+              isCorrect: row[col + 1],
+              marks: row[col + 2],
+            });
+          }
+          tempObj.options = options;
+
+          questionsObjArray.push(tempObj);
+        })
+        .on('end', () => {
+          req.body.questions = questionsObjArray;
+          return next();
+        });
+    } else {
+      commonHelpers.throwCustomError(
+        'Invalid file format. Only .xlsx, .xls, or .csv files are allowed',
+        422,
+      );
+    }
+  } catch (err) {
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+};
+
+module.exports = { convertUserFileToObject, convertQuestionFileToObject };
