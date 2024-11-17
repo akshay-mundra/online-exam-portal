@@ -27,7 +27,7 @@ cron.schedule('* * * * *', async () => {
         start_time: {
           [Op.between]: [
             reminderTime.toDate(),
-            reminderTime.add(20, 'minutes').toDate(),
+            reminderTime.clone().add(1, 'minutes').toDate(),
           ],
         },
       },
