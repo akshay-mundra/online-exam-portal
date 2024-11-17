@@ -13,4 +13,18 @@ async function createAnswer(req, res, next) {
     commonHelpers.errorHandler(req, res, err.message, err.statusCode);
   }
 }
-module.exports = { createAnswer };
+
+async function calculateUserScore(req, res, next) {
+  try {
+    const { params, user } = req;
+    const result = await userExamServices.calculateUserScore(user, params);
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+module.exports = { createAnswer, calculateUserScore };
