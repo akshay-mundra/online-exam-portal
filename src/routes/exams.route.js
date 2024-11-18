@@ -57,6 +57,14 @@ router.patch(
 );
 
 router.get(
+  '/:id/result',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin']),
+  examControllers.getResult,
+  commonHelpers.responseHandler,
+);
+
+router.get(
   '/:id/users',
   authMiddlewares.authenticate,
   authMiddlewares.authorize(['admin']),
