@@ -8,9 +8,20 @@ const {
 const authServices = require('../../src/services/auth.service');
 const commonHelpers = require('../../src/helpers/common.helper');
 const { getMockReq, getMockRes } = require('@jest-mock/express');
+const { redisClient } = require('../../src/config/redis');
 
 jest.mock('../../src/services/auth.service');
 jest.mock('../../src/helpers/common.helper');
+jest.mock('redis', () => {
+  const mRedisClient = {
+    connect: jest.fn().mockResolvedValue(),
+    on: jest.fn(),
+    quit: jest.fn().mockResolvedValue(),
+  };
+  return {
+    createClient: jest.fn(() => mRedisClient),
+  };
+});
 
 describe('Auth Controller', () => {
   let req, res, next;
@@ -20,6 +31,10 @@ describe('Auth Controller', () => {
     res = getMockRes().res;
     next = getMockRes().next;
     jest.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await redisClient.quit();
   });
 
   describe('login', () => {

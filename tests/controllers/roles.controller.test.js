@@ -1,5 +1,3 @@
-// tests/controllers/roles.controller.test.js
-
 const {
   create,
   getAll,
