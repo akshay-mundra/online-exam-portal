@@ -58,7 +58,8 @@ async function register(req, payload) {
 
   try {
     const userExists = await User.findOne({ where: { email } });
-    if (userExists) commonHelpers.throwCustomError('User already exists', 400);
+    if (userExists)
+      return commonHelpers.throwCustomError('User already exists', 400);
 
     const roles = await Role.findAll({
       where: {
@@ -68,7 +69,7 @@ async function register(req, payload) {
 
     const roleNames = new Set(roles.map(role => role.name));
     if (userRoles.some(role => !roleNames.has(role))) {
-      commonHelpers.throwCustomError('Invalid roles', 422);
+      return commonHelpers.throwCustomError('Invalid roles', 422);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -111,10 +112,10 @@ async function forgotPassword(payload) {
 
   const user = await User.findOne({ where: { email } });
   if (!user) {
-    commonHelpers.throwCustomError('User does not exist', 401);
+    return commonHelpers.throwCustomError('User does not exist', 401);
   }
 
-  const key = `reset-token:${user.id}`;
+  const key = `reset-token:${user?.id}`;
   const token = await redisClient.get(key);
   if (token) {
     await redisClient.del(key);
@@ -144,26 +145,29 @@ async function resetPassword(payload) {
 
   try {
     if (confirmPassword !== password) {
-      commonHelpers.throwCustomError('Both passwords should match', 422);
+      return commonHelpers.throwCustomError('Both passwords should match', 422);
     }
 
     const user = await User.findOne({
       where: { id: userId },
     });
     if (!user) {
-      commonHelpers.throwCustomError('User does not exist', 404);
+      return commonHelpers.throwCustomError('User does not exist', 404);
     }
 
     const key = `reset-token:${user.id}`;
 
     const resetToken = await redisClient.get(key);
     if (!resetToken) {
-      commonHelpers.throwCustomError('Invalid or expired reset token', 401);
+      return commonHelpers.throwCustomError(
+        'Invalid or expired reset token',
+        401,
+      );
     }
 
     const isValid = await bcrypt.compare(token, resetToken);
     if (!isValid) {
-      commonHelpers.throwCustomError('Invalid token', 401);
+      return commonHelpers.throwCustomError('Invalid token', 401);
     }
 
     redisClient.del(key);
