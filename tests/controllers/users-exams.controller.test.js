@@ -70,7 +70,7 @@ describe('User Exam Controllers', () => {
       req.params = params;
       req.user = { id: faker.string.uuid() };
 
-      const mockResponse = { score: faker.number.int() }; // Corrected line
+      const mockResponse = { score: faker.number.int() };
       userExamServices.calculateUserScore.mockResolvedValue(mockResponse);
 
       await calculateUserScore(req, res, next);

@@ -1,4 +1,3 @@
-// tests/controllers/exams.controller.test.js
 const {
   getAll,
   create,

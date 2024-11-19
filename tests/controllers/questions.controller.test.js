@@ -1,5 +1,3 @@
-// tests/controllers/questions.controller.test.js
-
 const {
   bulkCreate,
   createOption,
