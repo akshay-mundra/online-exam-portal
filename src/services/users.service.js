@@ -40,7 +40,7 @@ async function get(currentUser, id) {
     user = await User.findByPk(options);
   }
   if (!user) {
-    commonHelpers.throwCustomError('User not found', 404);
+    return commonHelpers.throwCustomError('User not found', 404);
   }
 
   return {
@@ -75,7 +75,7 @@ async function update(currentUser, id, payload) {
       options,
     );
     if (updatedRowCount === 0) {
-      commonHelpers.throwCustomError('User not found', 404);
+      return commonHelpers.throwCustomError('User not found', 404);
     }
     await transactionContext.commit();
 
@@ -99,7 +99,7 @@ async function remove(currentUser, id) {
     };
     const countChanged = await User.destroy(options);
     if (countChanged === 0) {
-      commonHelpers.throwCustomError('User not found', 404);
+      return commonHelpers.throwCustomError('User not found', 404);
     }
     await transactionContext.commit();
 
@@ -135,7 +135,7 @@ async function bulkCreate(currentUser, payload) {
 
       if (userExists) {
         if (userExists.admin_id !== currentUser.id) {
-          commonHelpers.throwCustomError(
+          return commonHelpers.throwCustomError(
             'The user you are updating is not created by you',
             403,
           );
@@ -158,8 +158,8 @@ async function bulkCreate(currentUser, payload) {
 
         await UserRole.create(
           {
-            user_id: createdUser.id,
-            role_id: userRole.id,
+            user_id: createdUser?.id,
+            role_id: userRole?.id,
           },
           {
             transaction: transactionContext,
@@ -205,7 +205,7 @@ async function getAllExams(currentUser, params) {
     exams = await Exam.findAll(options);
   } else if (isUser) {
     if (id !== currentUser.id) {
-      commonHelpers.throwCustomError(
+      return commonHelpers.throwCustomError(
         'Other user is not accessible to you',
         403,
       );
