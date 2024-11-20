@@ -43,11 +43,7 @@ async function get(currentUser, id) {
     return commonHelpers.throwCustomError('User not found', 404);
   }
 
-  return {
-    firstName: user.first_name,
-    lastName: user.last_name,
-    email: user.email,
-  };
+  return user;
 }
 
 // update user if user created by admin or the current user is superadmin

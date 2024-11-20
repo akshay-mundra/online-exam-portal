@@ -43,10 +43,6 @@ async function login(payload) {
   return {
     user: {
       id: user.id,
-      email: user.email,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      roles,
     },
     token,
   };

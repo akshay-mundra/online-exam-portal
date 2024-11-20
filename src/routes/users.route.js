@@ -8,12 +8,14 @@ const userValidators = require('../validators/users.validator');
 const multerMiddlewares = require('../middlewares/multer.middleware');
 const utilMiddlewares = require('../middlewares/utils.middleware');
 const { ADMIN, USER } = require('../constants/common.constant').roles;
+const userSerializers = require('../serializers/users.serializer');
 
 router.get(
   '/',
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   userControllers.getAll,
+  userSerializers.users,
   commonHelpers.responseHandler,
 );
 
@@ -33,6 +35,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN, USER]),
   userControllers.get,
+  userSerializers.users,
   commonHelpers.responseHandler,
 );
 
@@ -42,6 +45,7 @@ router.put(
   authMiddlewares.authorize([ADMIN]),
   userValidators.updateSchema,
   userControllers.update,
+  userSerializers.users,
   commonHelpers.responseHandler,
 );
 
