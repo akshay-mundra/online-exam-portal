@@ -3,6 +3,7 @@ const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
 const moment = require('moment');
 const questionHelpers = require('../helpers/questions.helper');
+const { calculateUserScore } = require('../services/users-exams.service');
 
 async function getAll(currentUser, page = 0) {
   const roles = currentUser.roles;
@@ -177,6 +178,52 @@ async function userStartExam(currentUser, id) {
     await transactionContext.rollback();
     throw err;
   }
+}
+
+// get result of all the users in that exam
+async function getResult(currentUser, id) {
+  const exam = await Exam.findByPk(id);
+
+  if (!exam) {
+    commonHelpers.throwCustomError('Exam not found', 404);
+  }
+
+  const currentTime = moment.utc();
+  if (currentTime.isBefore(exam.end_time)) {
+    commonHelpers.throwCustomError('Exam is not ended yet', 400);
+  }
+
+  const users = await User.findAll({
+    where: {},
+    include: [
+      {
+        model: Exam,
+        where: { id: id },
+        through: {
+          where: { status: 'completed' },
+          attributes: ['id', 'score'],
+        },
+        required: true,
+        plain: true,
+      },
+    ],
+  });
+
+  let results = [];
+
+  for (const user of users) {
+    const score = await calculateUserScore(user, user.Exams[0].users_exams);
+    results.push({
+      score: score,
+      user: {
+        email: user.email,
+        firstName: user.first_name,
+        lastName: user.lastName,
+      },
+    });
+  }
+
+  return results;
 }
 
 // add user to exam if user exist and is created by that admin.
@@ -579,6 +626,7 @@ module.exports = {
   update,
   remove,
   userStartExam,
+  getResult,
   addUser,
   getAllUsers,
   getUser,

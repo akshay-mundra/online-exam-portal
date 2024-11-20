@@ -86,6 +86,20 @@ async function userStartExam(req, res, next) {
   }
 }
 
+async function getResult(req, res, next) {
+  try {
+    const user = req.user;
+    const { id } = req.params;
+    const result = await examServices.getResult(user, id);
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
 async function addUser(req, res, next) {
   try {
     const user = req.user;
@@ -228,6 +242,7 @@ module.exports = {
   update,
   remove,
   userStartExam,
+  getResult,
   getAllUsers,
   addUser,
   getUser,
