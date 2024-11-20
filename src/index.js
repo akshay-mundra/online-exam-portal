@@ -2,6 +2,7 @@ const express = require('express');
 const { sequelize } = require('./models');
 const { redisClient } = require('./config/redis.js');
 const { registerRoutes } = require('./routes');
+require('./schedulers');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
