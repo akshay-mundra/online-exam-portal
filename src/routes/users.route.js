@@ -7,11 +7,12 @@ const userControllers = require('../controllers/users.controller');
 const userValidators = require('../validators/users.validator');
 const multerMiddlewares = require('../middlewares/multer.middleware');
 const utilMiddlewares = require('../middlewares/utils.middleware');
+const { ADMIN, USER } = require('../constants/common.constant').roles;
 
 router.get(
   '/',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   userControllers.getAll,
   commonHelpers.responseHandler,
 );
@@ -19,7 +20,7 @@ router.get(
 router.post(
   '/bulk-create',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   multerMiddlewares.upload.single('file'),
   utilMiddlewares.convertUserFileToObject,
   userValidators.bulkCreateSchema,
@@ -30,7 +31,7 @@ router.post(
 router.get(
   '/:id',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin', 'user']),
+  authMiddlewares.authorize([ADMIN, USER]),
   userControllers.get,
   commonHelpers.responseHandler,
 );
@@ -38,7 +39,7 @@ router.get(
 router.put(
   '/:id',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   userValidators.updateSchema,
   userControllers.update,
   commonHelpers.responseHandler,
@@ -47,7 +48,7 @@ router.put(
 router.delete(
   '/:id',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   userControllers.remove,
   commonHelpers.responseHandler,
 );
@@ -55,7 +56,7 @@ router.delete(
 router.get(
   '/:id/exams',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['user']),
+  authMiddlewares.authorize([USER]),
   userControllers.getAllExams,
   commonHelpers.responseHandler,
 );
