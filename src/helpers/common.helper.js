@@ -1,3 +1,6 @@
+const { SUPER_ADMIN, ADMIN, USER } =
+  require('../constants/common.constant').roles;
+
 // throw custom error with message and statuscode
 function throwCustomError(message, statusCode = 400, isCustom = false) {
   const err = new Error(message);
@@ -33,11 +36,11 @@ function getRolesAsBool(roles) {
     isAdmin: false,
     isUser: false,
   };
-  if (roles?.includes('super_admin')) {
+  if (roles?.includes(SUPER_ADMIN)) {
     rolesAsBool.isSuperAdmin = true;
-  } else if (roles?.includes('admin')) {
+  } else if (roles?.includes(ADMIN)) {
     rolesAsBool.isAdmin = true;
-  } else if (roles?.includes('user')) {
+  } else if (roles?.includes(USER)) {
     rolesAsBool.isUser = true;
   }
 
