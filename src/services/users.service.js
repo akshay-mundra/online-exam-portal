@@ -1,19 +1,20 @@
-const { User, UserRole, Role } = require('../models');
+const { User, UserRole, Role, Exam } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 
 async function getAll(currentUser, page = 0) {
-  const LIMIT = 10;
-  const offset = page * LIMIT;
   const roles = currentUser.roles;
+  const { limit, offset } = commonHelpers.getPaginationAttributes(page);
+  const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
+
   // query data according to the logged in user and its role
   const options = {
-    where: roles.includes('super_admin') ? {} : { admin_id: currentUser.id },
+    where: isSuperAdmin ? {} : { admin_id: currentUser.id },
     attributes: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
     offset,
-    limit: LIMIT,
+    limit,
   };
   const { count: total, rows: users } = await User.findAndCountAll(options);
 
@@ -26,16 +27,16 @@ async function getAll(currentUser, page = 0) {
 // admin can get users created by him, user can only see details of self.
 async function get(currentUser, id) {
   const roles = currentUser.roles;
+  const { isSuperAdmin, isUser, isAdmin } = commonHelpers.getRolesAsBool(roles);
+
   let user;
   const options = {
-    where:
-      roles.includes('super_admin') || roles.includes('user')
-        ? { id }
-        : { id, admin_id: currentUser.id },
+    where: isSuperAdmin || isAdmin ? { id } : { id, admin_id: currentUser.id },
   };
-  if (roles.includes('super_admin') || roles.includes('admin')) {
+
+  if (isSuperAdmin || isAdmin) {
     user = await User.findOne(options);
-  } else if (roles.includes('user') && currentUser.id === id) {
+  } else if (isUser && currentUser.id === id) {
     user = await User.findByPk(options);
   }
   if (!user) {
@@ -52,12 +53,14 @@ async function get(currentUser, id) {
 // update user if user created by admin or the current user is superadmin
 async function update(currentUser, id, payload) {
   const { firstName, lastName, email } = payload;
-  const transactionContext = await sequelize.transaction();
   const roles = currentUser.roles;
+  const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
+
+  const transactionContext = await sequelize.transaction();
 
   try {
     const options = {
-      where: roles.includes('super_admin')
+      where: isSuperAdmin
         ? { id }
         : {
             id,
@@ -86,12 +89,12 @@ async function update(currentUser, id, payload) {
 // remove user (only by admin and superadmin)
 async function remove(currentUser, id) {
   const roles = currentUser.roles;
+  const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
+
   const transactionContext = await sequelize.transaction();
   try {
     const options = {
-      where: roles.includes('super_admin')
-        ? { id }
-        : { id, admin_id: currentUser.id },
+      where: isSuperAdmin ? { id } : { id, admin_id: currentUser.id },
       transaction: transactionContext,
     };
     const countChanged = await User.destroy(options);
@@ -176,4 +179,42 @@ async function bulkCreate(currentUser, payload) {
   }
 }
 
-module.exports = { getAll, get, update, remove, bulkCreate };
+async function getAllExams(currentUser, params) {
+  const { id } = params;
+  const roles = currentUser.roles;
+  const { isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
+
+  const options = {
+    where: isUser ? {} : { admin_id: currentUser.id },
+    include: [
+      {
+        model: User,
+        where: isUser ? { id } : { admin_id: currentUser.id, id },
+        attributes: ['id'],
+        required: true,
+        through: {
+          attributes: [],
+          where: { deleted_at: null },
+        },
+      },
+    ],
+  };
+
+  let exams;
+  if (isAdmin) {
+    exams = await Exam.findAll(options);
+  } else if (isUser) {
+    if (id !== currentUser.id) {
+      commonHelpers.throwCustomError(
+        'Other user is not accessible to you',
+        403,
+      );
+    }
+
+    exams = await Exam.findAll(options);
+  }
+
+  return exams;
+}
+
+module.exports = { getAll, get, update, remove, bulkCreate, getAllExams };

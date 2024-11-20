@@ -52,4 +52,12 @@ router.delete(
   commonHelpers.responseHandler,
 );
 
+router.get(
+  '/:id/exams',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['admin', 'user']),
+  userControllers.getAllExams,
+  commonHelpers.responseHandler,
+);
+
 module.exports = router;
