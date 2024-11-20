@@ -72,6 +72,20 @@ async function remove(req, res, next) {
   }
 }
 
+async function userStartExam(req, res, next) {
+  try {
+    const user = req.user;
+    const { id } = req.params;
+    const result = await examServices.userStartExam(user, id);
+    res.data = result;
+    res.statusCode = 202;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
 async function addUser(req, res, next) {
   try {
     const user = req.user;
@@ -213,6 +227,7 @@ module.exports = {
   get,
   update,
   remove,
+  userStartExam,
   getAllUsers,
   addUser,
   getUser,
