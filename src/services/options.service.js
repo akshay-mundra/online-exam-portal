@@ -6,7 +6,7 @@ async function create(questionId, payload) {
   const transactionContext = await sequelize.transaction();
 
   try {
-    const createdQuestion = await Option.create(
+    const createdOption = await Option.create(
       {
         option,
         is_correct: isCorrect,
@@ -20,7 +20,7 @@ async function create(questionId, payload) {
 
     await transactionContext.commit();
 
-    return createdQuestion;
+    return createdOption;
   } catch (err) {
     await transactionContext.rollback();
     throw err;
