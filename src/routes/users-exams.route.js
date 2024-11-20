@@ -21,4 +21,12 @@ router.get(
   commonHelpers.responseHandler,
 );
 
+router.patch(
+  '/:id/submit-exam',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize(['user']),
+  userExamControllers.submitExam,
+  commonHelpers.responseHandler,
+);
+
 module.exports = router;

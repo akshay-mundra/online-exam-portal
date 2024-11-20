@@ -27,4 +27,17 @@ async function calculateUserScore(req, res, next) {
   }
 }
 
-module.exports = { createAnswer, calculateUserScore };
+async function submitExam(req, res, next) {
+  try {
+    const { params, user } = req;
+    const result = await userExamServices.submitExam(user, params);
+    res.data = result;
+    res.statusCode = 202;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+module.exports = { createAnswer, calculateUserScore, submitExam };

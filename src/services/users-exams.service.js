@@ -10,6 +10,7 @@ const commonHelpers = require('../helpers/common.helper');
 const moment = require('moment');
 const { Op } = require('sequelize');
 
+// user submit answer
 async function createAnswer(currentUser, params, payload) {
   const { id } = params;
   const { questionId, optionIds } = payload;
@@ -254,4 +255,54 @@ async function calculateUserScore(currentUser, params) {
   }
 }
 
-module.exports = { createAnswer, calculateUserScore };
+async function submitExam(currentUser, params) {
+  const { id } = params;
+  const transactionContext = await sequelize.transaction();
+
+  try {
+    const userExam = await UserExam.findByPk(id);
+
+    if (!userExam) {
+      commonHelpers.throwCustomError('user exam not found', 404);
+    }
+
+    if (userExam.user_id !== currentUser.id) {
+      commonHelpers.throwCustomError('Can not access other user', 403);
+    }
+
+    const exam = await Exam.findByPk(userExam.exam_id);
+
+    if (!exam) {
+      commonHelpers.throwCustomError('Exam not found', 404);
+    }
+
+    const currentTime = moment();
+
+    if (!currentTime.isAfter(exam.start_time)) {
+      commonHelpers.throwCustomError('Exam is not started yet', 400);
+    }
+
+    await UserExam.update(
+      {
+        status: 'completed',
+      },
+      {
+        where: {
+          id: id,
+        },
+      },
+      {
+        transaction: transactionContext,
+      },
+    );
+
+    await transactionContext.commit();
+
+    return 'Exam submited successfully';
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
+  }
+}
+
+module.exports = { createAnswer, calculateUserScore, submitExam };
