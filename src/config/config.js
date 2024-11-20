@@ -18,11 +18,11 @@ module.exports = {
     },
   },
   test: {
-    host: '',
-    dialect: '',
-    username: '',
-    password: '',
-    database: '',
+    host: process.env.DB_HOST,
+    dialect: process.env.DB_DIALECT,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_TEST_DATABASE,
     logging: process.env.DB_LOGGING === 'true' ? console.log : false,
     define: {
       paranoid: true,

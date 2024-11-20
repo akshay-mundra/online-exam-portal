@@ -9,12 +9,14 @@ async function create(payload) {
   try {
     const role = await Role.findOne({ where: { name } });
     if (role) {
-      commonHelpers.throwCustomError('Role already exist', 400);
+      return commonHelpers.throwCustomError('Role already exist', 400);
     }
     const newRole = await Role.create(
       { name },
       { transaction: transactionContext },
     );
+
+    await transactionContext.commit();
 
     return newRole;
   } catch (err) {
@@ -26,7 +28,7 @@ async function create(payload) {
 async function get(id) {
   const role = await Role.findOne({ where: { id } });
   if (!role) {
-    commonHelpers.throwCustomError('Role not found', 404);
+    return commonHelpers.throwCustomError('Role not found', 404);
   }
   return role;
 }
@@ -41,13 +43,24 @@ async function update(id, payload) {
   const transactionContext = await sequelize.transaction();
 
   try {
-    const role = await Role.findOne({ where: { id } });
-    role.name = name;
-    await role.save({ transaction: transactionContext });
+    const [updatedRowCount, updatedRole] = await Role.update(
+      {
+        name,
+      },
+      {
+        where: { id },
+      },
+      {
+        transaction: transactionContext,
+      },
+    );
+    if (!updatedRowCount) {
+      return commonHelpers.throwCustomError('Role not found', 404);
+    }
 
-    transactionContext.commit();
+    await transactionContext.commit();
 
-    return role;
+    return updatedRole;
   } catch (err) {
     await transactionContext.rollback();
     throw err;
@@ -61,12 +74,14 @@ async function remove(id) {
     const role = await Role.findOne({ where: { id } });
 
     if (!role) {
-      commonHelpers.throwCustomError('Role not found', 404);
+      return commonHelpers.throwCustomError('Role not found', 404);
     }
     await Role.destroy(
       { where: { id: role.id } },
       { transaction: transactionContext },
     );
+
+    await transactionContext.commit();
 
     return 'Role removed successfully';
   } catch (err) {
