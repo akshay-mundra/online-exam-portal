@@ -4,11 +4,12 @@ const router = express.Router();
 const authMiddlewares = require('../middlewares/auth.middleware');
 const commonHelpers = require('../helpers/common.helper');
 const userExamControllers = require('../controllers/users-exams.controller');
+const { ADMIN } = require('../constants/common.constant').roles;
 
 router.put(
   '/:id/answers',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['user']),
+  authMiddlewares.authorize([ADMIN]),
   userExamControllers.createAnswer,
   commonHelpers.responseHandler,
 );
@@ -16,7 +17,7 @@ router.put(
 router.get(
   '/:id/result',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['user']),
+  authMiddlewares.authorize([ADMIN]),
   userExamControllers.calculateUserScore,
   commonHelpers.responseHandler,
 );
@@ -24,7 +25,7 @@ router.get(
 router.patch(
   '/:id/submit-exam',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['user']),
+  authMiddlewares.authorize([ADMIN]),
   userExamControllers.submitExam,
   commonHelpers.responseHandler,
 );
