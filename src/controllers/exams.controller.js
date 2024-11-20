@@ -17,8 +17,7 @@ async function getAll(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    const user = req.user;
-    const { body: payload } = req;
+    const { user, body: payload } = req;
     const result = await examServices.create(user, payload);
     res.data = result;
     res.statusCode = 201;
@@ -45,9 +44,8 @@ async function get(req, res, next) {
 
 async function update(req, res, next) {
   try {
-    const user = req.user;
     const { id } = req.params;
-    const { body: payload } = req;
+    const { body: payload, user } = req;
     const result = await examServices.update(user, id, payload);
     res.data = result;
     res.statusCode = 202;
@@ -102,9 +100,8 @@ async function getResult(req, res, next) {
 
 async function addUser(req, res, next) {
   try {
-    const user = req.user;
     const { id } = req.params;
-    const { body: payload } = req;
+    const { body: payload, user } = req;
     const result = await examServices.addUser(user, id, payload);
     res.data = result;
     res.statusCode = 201;
@@ -117,9 +114,8 @@ async function addUser(req, res, next) {
 
 async function getAllUsers(req, res, next) {
   try {
-    const user = req.user;
     const { id } = req.params;
-    const { query } = req;
+    const { query, user } = req;
     const result = await examServices.getAllUsers(user, id, query);
     res.data = result;
     res.statusCode = 200;
@@ -160,9 +156,8 @@ async function removeUser(req, res, next) {
 
 async function createQuestion(req, res, next) {
   try {
-    const user = req.user;
     const { id } = req.params;
-    const { body: payload } = req;
+    const { body: payload, user } = req;
     const result = await examServices.createQuestion(user, id, payload);
     res.data = result;
     res.statusCode = 201;
@@ -175,9 +170,8 @@ async function createQuestion(req, res, next) {
 
 async function getAllQuestions(req, res, next) {
   try {
-    const user = req.user;
     const { id } = req.params;
-    const { query } = req;
+    const { query, user } = req;
     const result = await examServices.getAllQuestions(user, id, query);
     res.data = result;
     res.statusCode = 200;

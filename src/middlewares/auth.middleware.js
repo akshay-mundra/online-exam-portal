@@ -1,6 +1,8 @@
 const commonHelpers = require('../helpers/common.helper');
 const jwtHelpers = require('../helpers/jwt.helper');
 const { User } = require('../models');
+const { SUPER_ADMIN, ADMIN, USER } =
+  require('../constants/common.constant').roles;
 
 async function authenticate(req, res, next) {
   try {
@@ -28,7 +30,7 @@ function authorize(allowedRoles) {
     try {
       const userRoles = req.user?.roles;
 
-      if (userRoles.includes('super_admin')) return next();
+      if (userRoles.includes(SUPER_ADMIN)) return next();
 
       if (userRoles && allowedRoles.some(role => userRoles.includes(role))) {
         return next();
@@ -50,14 +52,14 @@ async function authorizeRegister(req, res, next) {
     if (!roles || roles.length === 0)
       commonHelpers.throwCustomError('roles are required', 400);
 
-    if (roles.includes('super_admin')) {
+    if (roles.includes(SUPER_ADMIN)) {
       return commonHelpers.throwCustomError(
         'Not allowed to create super_admin',
         401,
       );
-    } else if (roles.includes('user')) {
+    } else if (roles.includes(USER)) {
       await authenticate(req, res, () => {
-        authorize(['admin'])(req, res, next);
+        authorize([ADMIN])(req, res, next);
       });
     } else {
       next();

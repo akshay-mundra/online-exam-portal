@@ -5,11 +5,12 @@ const authMiddlewares = require('../middlewares/auth.middleware');
 const commonHelpers = require('../helpers/common.helper');
 const examControllers = require('../controllers/exams.controller');
 const examValidators = require('../validators/exams.validator');
+const { ADMIN, USER } = require('../constants/common.constant').roles;
 
 router.get(
   '/',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examControllers.getAll,
   commonHelpers.responseHandler,
 );
@@ -17,7 +18,7 @@ router.get(
 router.post(
   '/',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examValidators.examSchema,
   examControllers.create,
   commonHelpers.responseHandler,
@@ -26,7 +27,7 @@ router.post(
 router.get(
   '/:id',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin', 'user']),
+  authMiddlewares.authorize([ADMIN, USER]),
   examControllers.get,
   commonHelpers.responseHandler,
 );
@@ -34,7 +35,7 @@ router.get(
 router.put(
   '/:id',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examValidators.examSchema,
   examControllers.update,
   commonHelpers.responseHandler,
@@ -43,7 +44,7 @@ router.put(
 router.delete(
   '/:id',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examControllers.remove,
   commonHelpers.responseHandler,
 );
@@ -51,7 +52,7 @@ router.delete(
 router.patch(
   '/:id/start-exam',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['user']),
+  authMiddlewares.authorize([USER]),
   examControllers.userStartExam,
   commonHelpers.responseHandler,
 );
@@ -59,7 +60,7 @@ router.patch(
 router.get(
   '/:id/result',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examControllers.getResult,
   commonHelpers.responseHandler,
 );
@@ -67,7 +68,7 @@ router.get(
 router.get(
   '/:id/users',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examControllers.getAllUsers,
   commonHelpers.responseHandler,
 );
@@ -75,7 +76,7 @@ router.get(
 router.post(
   '/:id/users',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examValidators.addUserSchema,
   examControllers.addUser,
   commonHelpers.responseHandler,
@@ -84,7 +85,7 @@ router.post(
 router.get(
   '/:id/users/:userId',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin', 'user']),
+  authMiddlewares.authorize([ADMIN, USER]),
   examControllers.getUser,
   commonHelpers.responseHandler,
 );
@@ -92,7 +93,7 @@ router.get(
 router.delete(
   '/:id/users/:userId',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examControllers.removeUser,
   commonHelpers.responseHandler,
 );
@@ -100,7 +101,7 @@ router.delete(
 router.post(
   '/:id/questions',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examValidators.createQuestionSchema,
   examControllers.createQuestion,
   commonHelpers.responseHandler,
@@ -109,7 +110,7 @@ router.post(
 router.get(
   '/:id/questions',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin', 'user']),
+  authMiddlewares.authorize([ADMIN, USER]),
   examControllers.getAllQuestions,
   commonHelpers.responseHandler,
 );
@@ -117,7 +118,7 @@ router.get(
 router.get(
   '/:id/questions/:questionId',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin', 'user']),
+  authMiddlewares.authorize([ADMIN, USER]),
   examControllers.getQuestion,
   commonHelpers.responseHandler,
 );
@@ -125,7 +126,7 @@ router.get(
 router.put(
   '/:id/questions/:questionId',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examValidators.udpateQuestionSchema,
   examControllers.updateQuestion,
   commonHelpers.responseHandler,
@@ -134,7 +135,7 @@ router.put(
 router.delete(
   '/:id/questions/:questionId',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   examControllers.removeQuestion,
   commonHelpers.responseHandler,
 );

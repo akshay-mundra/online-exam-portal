@@ -8,11 +8,12 @@ const optionValidators = require('../validators/options.validator');
 const multerMiddlewares = require('../middlewares/multer.middleware');
 const utilMiddlewares = require('../middlewares/utils.middleware');
 const questionControllers = require('../controllers/questions.controller');
+const { ADMIN } = require('../constants/common.constant').roles;
 
 router.post(
   '/bulk-create',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   multerMiddlewares.upload.single('file'),
   utilMiddlewares.convertQuestionFileToObject,
   questionValidators.bulkCreateSchema,
@@ -23,7 +24,7 @@ router.post(
 router.post(
   '/:id/options',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   optionValidators.createSchema,
   questionControllers.createOption,
   commonHelpers.responseHandler,
@@ -32,7 +33,7 @@ router.post(
 router.get(
   '/:id/options/:optionId',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   questionControllers.getOption,
   commonHelpers.responseHandler,
 );
@@ -40,7 +41,7 @@ router.get(
 router.put(
   '/:id/options/:optionId',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   optionValidators.createSchema,
   questionControllers.updateOption,
   commonHelpers.responseHandler,
@@ -49,7 +50,7 @@ router.put(
 router.delete(
   '/:id/options/:optionId',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize(['admin']),
+  authMiddlewares.authorize([ADMIN]),
   questionControllers.removeOption,
   commonHelpers.responseHandler,
 );

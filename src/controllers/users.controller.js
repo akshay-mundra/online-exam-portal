@@ -31,9 +31,8 @@ async function get(req, res, next) {
 
 async function update(req, res, next) {
   try {
-    const { body: payload } = req;
+    const { body: payload, user } = req;
     const { id } = req.params;
-    const user = req.user;
     const result = await userServices.update(user, id, payload);
     res.data = result;
     res.statusCode = 202;
@@ -60,8 +59,7 @@ async function remove(req, res, next) {
 
 async function bulkCreate(req, res, next) {
   try {
-    const user = req.user;
-    const { body: payload } = req;
+    const { body: payload, user } = req;
     const result = await userServices.bulkCreate(user, payload);
     res.data = result;
     res.statusCode = 201;

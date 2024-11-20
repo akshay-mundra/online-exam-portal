@@ -7,6 +7,7 @@ const { sequelize } = require('../models');
 const { Op } = require('sequelize');
 const { redisClient } = require('../config/redis');
 const crypto = require('crypto');
+const { SUPER_ADMIN, ADMIN } = require('../constants/common.constant');
 
 async function login(payload) {
   const { email, password } = payload;
@@ -74,7 +75,7 @@ async function register(req, payload) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const admin_id = ['admin', 'super_admin'].some(role =>
+    const admin_id = [ADMIN, SUPER_ADMIN].some(role =>
       req?.user?.roles?.includes(role),
     )
       ? req.user.id
