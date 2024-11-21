@@ -56,15 +56,6 @@ router.delete(
   commonHelpers.responseHandler,
 );
 
-router.patch(
-  '/:id/start-exam',
-  authMiddlewares.authenticate,
-  authMiddlewares.authorize([USER]),
-  examControllers.userStartExam,
-  userExamSerializers.usersExams,
-  commonHelpers.responseHandler,
-);
-
 router.get(
   '/:id/result',
   authMiddlewares.authenticate,

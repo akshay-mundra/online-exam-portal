@@ -83,4 +83,25 @@ async function getAllExams(req, res, next) {
   }
 }
 
-module.exports = { getAll, get, update, remove, bulkCreate, getAllExams };
+async function startExam(req, res, next) {
+  try {
+    const { user, params } = req;
+    const result = await userServices.startExam(user, params);
+    res.data = result;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
+module.exports = {
+  getAll,
+  get,
+  update,
+  remove,
+  bulkCreate,
+  getAllExams,
+  startExam,
+};

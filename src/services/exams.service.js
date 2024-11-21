@@ -152,59 +152,6 @@ async function remove(currentUser, id) {
   }
 }
 
-async function userStartExam(currentUser, id) {
-  const transactionContext = await sequelize.transaction();
-
-  try {
-    const exam = await Exam.findByPk(id);
-
-    if (!exam) {
-      commonHelpers.throwCustomError('Exam not found', 404);
-    }
-
-    const currentTime = moment();
-
-    const isExamAvailable =
-      currentTime.isAfter(exam.start_time) &&
-      currentTime.isBefore(exam.end_time);
-
-    if (!isExamAvailable) {
-      commonHelpers.throwCustomError(
-        'You can only join the exam within the allowed time window',
-        403,
-      );
-    }
-
-    const [updateCount, userExam] = await UserExam.update(
-      {
-        status: 'on-going',
-      },
-      {
-        where: {
-          exam_id: exam.id,
-          user_id: currentUser.id,
-          status: { [Op.not]: 'completed' },
-        },
-        returning: true,
-      },
-      {
-        transaction: transactionContext,
-      },
-    );
-
-    if (updateCount === 0) {
-      commonHelpers.throwCustomError('User is not assigned to this exam', 403);
-    }
-
-    await transactionContext.commit();
-
-    return userExam;
-  } catch (err) {
-    await transactionContext.rollback();
-    throw err;
-  }
-}
-
 // get result of all the users in that exam
 async function getResult(currentUser, id) {
   const exam = await Exam.findByPk(id);
@@ -650,7 +597,6 @@ module.exports = {
   get,
   update,
   remove,
-  userStartExam,
   getResult,
   addUser,
   getAllUsers,

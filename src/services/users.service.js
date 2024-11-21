@@ -1,8 +1,9 @@
-const { User, UserRole, Role, Exam } = require('../models');
+const { User, UserRole, Role, Exam, UserExam } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
 const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
+const moment = require('moment');
 
 async function getAll(currentUser, page = 0) {
   const roles = currentUser.roles;
@@ -213,4 +214,74 @@ async function getAllExams(currentUser, params) {
   return exams;
 }
 
-module.exports = { getAll, get, update, remove, bulkCreate, getAllExams };
+async function startExam(currentUser, params) {
+  const { id, examId } = params;
+
+  const transactionContext = await sequelize.transaction();
+
+  try {
+    if (currentUser.id !== id) {
+      return commonHelpers.throwCustomError(
+        'you can not access another user',
+        403,
+      );
+    }
+
+    const exam = await Exam.findOne({ id: examId });
+
+    if (!exam) {
+      return commonHelpers.throwCustomError('Exam not found', 404);
+    }
+
+    const currentTime = moment.utc();
+
+    const isExamAvailable =
+      currentTime.isAfter(exam.start_time) &&
+      currentTime.isBefore(exam.end_time);
+
+    if (!isExamAvailable) {
+      commonHelpers.throwCustomError(
+        'You can only join the exam within the allowed time window',
+        403,
+      );
+    }
+
+    const [updatedRowCount, updatedUserExam] = await UserExam.update(
+      {
+        status: 'on-going',
+      },
+      {
+        where: {
+          user_id: id,
+          exam_id: examId,
+          status: { [Op.not]: 'completed' },
+        },
+        returning: true,
+      },
+      {
+        transaction: transactionContext,
+      },
+    );
+
+    if (updatedRowCount === 0) {
+      commonHelpers.throwCustomError('User is not assigned to this exam', 403);
+    }
+
+    await transactionContext.commit();
+
+    return updatedUserExam[0];
+  } catch (err) {
+    await transactionContext.rollback();
+    throw err;
+  }
+}
+
+module.exports = {
+  getAll,
+  get,
+  update,
+  remove,
+  bulkCreate,
+  getAllExams,
+  startExam,
+};

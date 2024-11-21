@@ -9,6 +9,7 @@ const multerMiddlewares = require('../middlewares/multer.middleware');
 const utilMiddlewares = require('../middlewares/utils.middleware');
 const { ADMIN, USER } = require('../constants/common.constant').roles;
 const userSerializers = require('../serializers/users.serializer');
+const userExamSerializers = require('../serializers/users-exams.serializer');
 
 router.get(
   '/',
@@ -62,6 +63,15 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([USER]),
   userControllers.getAllExams,
+  commonHelpers.responseHandler,
+);
+
+router.post(
+  '/:id/exams/:examId/start-exam',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize([USER]),
+  userControllers.startExam,
+  userExamSerializers.usersExams,
   commonHelpers.responseHandler,
 );
 
