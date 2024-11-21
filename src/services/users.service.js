@@ -75,12 +75,13 @@ async function update(currentUser, id, payload) {
       { first_name: firstName, last_name: lastName, email },
       options,
     );
+
     if (updatedRowCount === 0) {
       return commonHelpers.throwCustomError('User not found', 404);
     }
-    await transactionContext.commit();
 
-    return updatedUser;
+    await transactionContext.commit();
+    return updatedUser[0];
   } catch (err) {
     await transactionContext.rollback();
     throw err;

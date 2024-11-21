@@ -35,23 +35,29 @@ function exams(req, res, next) {
 function userWithExams(req, res, next) {
   let { data } = res;
 
-  const response = {};
-  if (data) {
-    response.firstName = data.first_name;
-    response.lastName = data.last_name;
-    response.email = data.email;
-
-    if (data.Exams) {
-      response.exams = data.Exams.map(exam => ({
-        examId: exam?.id,
-        userExamId: exam?.users_exams?.id,
-        score: exam?.users_exams?.score,
-        status: exam?.users_exams?.status,
-      }));
-    }
+  if (!Array.isArray(data)) {
+    data = [data];
   }
 
-  res.data = response;
+  const response = data.map(user => ({
+    id: user?.id,
+    firstName: user?.first_name,
+    lastName: user?.last_name,
+    email: user?.email,
+    exams: {
+      id: user?.Exams[0]?.id,
+      userExamId: user?.Exams[0]?.users_exams?.id,
+      score: user?.Exams[0]?.users_exams?.score,
+      status: user?.Exams[0]?.users_exams?.status,
+    },
+  }));
+
+  if (response.length > 1) {
+    res.data = response;
+  } else {
+    res.data = response[0];
+  }
+
   next();
 }
 
