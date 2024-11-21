@@ -1,0 +1,927 @@
+openapi: 3.0.3
+info:
+  title: online-examination-portal
+  version: 1.0.0
+  contact: {}
+servers:
+  - url: http://localhost:3000/api
+paths:
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: register new user
+      description: register new user
+      operationId: registerNewUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: harshitpurohit02@gmail.com
+                firstName:
+                  type: string
+                  example: harshit
+                lastName:
+                  type: string
+                  example: purohit
+                password:
+                  type: string
+                  example: harshit@123
+                roles:
+                  type: array
+                  items:
+                    type: string
+                    example: user
+                  example:
+                    - user
+            examples:
+              register new user:
+                value:
+                  email: harshitpurohit02@gmail.com
+                  firstName: harshit
+                  lastName: purohit
+                  password: harshit@123
+                  roles:
+                    - user
+      responses:
+        '200':
+          description: ''
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: login
+      description: login
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: b@gmail.com
+                password:
+                  type: string
+                  example: Akshay@123
+            examples:
+              login:
+                value:
+                  email: b@gmail.com
+                  password: Akshay@123
+      responses:
+        '200':
+          description: ''
+      security:
+        - {}
+  /auth/forgot-password:
+    post:
+      tags:
+        - auth
+      summary: forgot-password
+      description: forgot-password
+      operationId: forgotPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: a@gmail.com
+            examples:
+              forgot-password:
+                value:
+                  email: a@gmail.com
+      responses:
+        '200':
+          description: ''
+      security:
+        - {}
+  /auth/reset-password:
+    post:
+      tags:
+        - auth
+      summary: reset password
+      description: reset password
+      operationId: resetPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                confirmPassword:
+                  type: string
+                  example: Akshay@1234
+                password:
+                  type: string
+                  example: Akshay@1234
+                token:
+                  type: string
+                  example: >-
+                    36fc09ddb49094cbe25efdf1433bbe0ea894476e310e12ba026f2118826d9541
+                userId:
+                  type: string
+                  example: 860c5c29-1e1b-476b-a749-f619b235b3f5
+            examples:
+              reset password:
+                value:
+                  confirmPassword: Akshay@1234
+                  password: Akshay@1234
+                  token: >-
+                    36fc09ddb49094cbe25efdf1433bbe0ea894476e310e12ba026f2118826d9541
+                  userId: 860c5c29-1e1b-476b-a749-f619b235b3f5
+      responses:
+        '200':
+          description: ''
+      security:
+        - {}
+  /auth/logout:
+    delete:
+      tags:
+        - auth
+      summary: logout
+      description: logout
+      operationId: logout
+      responses:
+        '200':
+          description: ''
+  /roles:
+    get:
+      tags:
+        - roles
+      summary: get all roles
+      description: get all roles
+      operationId: getAllRoles
+      responses:
+        '200':
+          description: ''
+    post:
+      tags:
+        - roles
+      summary: create role
+      description: create role
+      operationId: createRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: to be deleted
+            examples:
+              create role:
+                value:
+                  name: to be deleted
+      responses:
+        '200':
+          description: ''
+  /roles/{id}:
+    get:
+      tags:
+        - roles
+      summary: get a role
+      description: get a role
+      operationId: getARole
+      responses:
+        '200':
+          description: ''
+    delete:
+      tags:
+        - roles
+      summary: remove role
+      description: remove role
+      operationId: removeRole
+      responses:
+        '200':
+          description: ''
+    patch:
+      tags:
+        - roles
+      summary: update role
+      description: update role
+      operationId: updateRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: to be updated
+            examples:
+              update role:
+                value:
+                  name: to be updated
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: a7602530-564f-4e3d-84af-882b97170b66
+  /users/{id}/exams:
+    get:
+      tags:
+        - users
+        - exams
+      summary: get all exams
+      description: get all exams
+      operationId: getAllExams
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: f843e949-bdd3-47dc-869b-53a70e487d5a
+  /users/{id}/exams/{examid}/start-exam:
+    post:
+      tags:
+        - users
+        - exams
+      summary: start exam
+      description: start exam
+      operationId: startExam
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: f843e949-bdd3-47dc-869b-53a70e487d5a
+      - name: examid
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 5c21ecb4-1918-4d28-965a-563335fec740
+  /users:
+    get:
+      tags:
+        - users
+      summary: get all users
+      description: get all users
+      operationId: getAllUsers
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: string
+            example: '0'
+      responses:
+        '200':
+          description: ''
+  /users/{id}:
+    get:
+      tags:
+        - users
+      summary: get a user
+      description: get a user
+      operationId: getAUser
+      responses:
+        '200':
+          description: ''
+    put:
+      tags:
+        - users
+      summary: update user
+      description: update user
+      operationId: updateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: b@gmail.com
+                firstName:
+                  type: string
+                  example: aks
+                lastName:
+                  type: string
+                  example: mun
+            examples:
+              update user:
+                value:
+                  email: b@gmail.com
+                  firstName: aks
+                  lastName: mun
+      responses:
+        '200':
+          description: ''
+    delete:
+      tags:
+        - users
+      summary: delete user
+      description: delete user
+      operationId: deleteUser
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: f843e949-bdd3-47dc-869b-53a70e487d5a
+  /users/bulk-create:
+    post:
+      tags:
+        - users
+      summary: bulk create users
+      description: bulk create users
+      operationId: bulkCreateUsers
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: ''
+  /exams/{id}/users:
+    get:
+      tags:
+        - exams1
+        - users1
+      summary: get all users
+      description: get all users
+      operationId: getAllUsers1
+      responses:
+        '200':
+          description: ''
+    post:
+      tags:
+        - exams1
+        - users1
+      summary: add user
+      description: add user
+      operationId: addUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  example: 860c5c29-1e1b-476b-a749-f619b235b3f5
+            examples:
+              add user:
+                value:
+                  userId: 860c5c29-1e1b-476b-a749-f619b235b3f5
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: d97f5f43-8db0-4ba0-b09c-3f21a52c4350
+  /exams/{id}/users/{userId}:
+    get:
+      tags:
+        - exams1
+        - users1
+      summary: get a user
+      description: get a user
+      operationId: getAUser1
+      responses:
+        '200':
+          description: ''
+    delete:
+      tags:
+        - exams1
+        - users1
+      summary: remove user
+      description: remove user
+      operationId: removeUser
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 5c21ecb4-1918-4d28-965a-563335fec740
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          example: f843e949-bdd3-47dc-869b-53a70e487d5a
+  /exams/{id}/questions:
+    get:
+      tags:
+        - exams1
+        - questions
+      summary: get all questions
+      description: get all questions
+      operationId: getAllQuestions
+      responses:
+        '200':
+          description: ''
+    post:
+      tags:
+        - exams1
+        - questions
+      summary: create question
+      description: create question
+      operationId: createQuestion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                negativeMarks:
+                  type: number
+                  example: -4
+                options:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      isCorrect:
+                        type: boolean
+                        example: true
+                      marks:
+                        type: number
+                        example: 10
+                      option:
+                        type: string
+                        example: option 1
+                  example:
+                    - isCorrect: true
+                      marks: 10
+                      option: option 1
+                    - isCorrect: false
+                      option: option 2
+                    - isCorrect: false
+                      marks: 0
+                      option: option 3
+                question:
+                  type: string
+                  example: question 1
+                type:
+                  type: string
+                  example: single_choice
+            examples:
+              create question:
+                value:
+                  negativeMarks: -4
+                  options:
+                    - isCorrect: true
+                      marks: 10
+                      option: option 1
+                    - isCorrect: false
+                      option: option 2
+                    - isCorrect: false
+                      marks: 0
+                      option: option 3
+                  question: question 1
+                  type: single_choice
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: d97f5f43-8db0-4ba0-b09c-3f21a52c4350
+  /exams/{id}/questions/{questionId}:
+    get:
+      tags:
+        - exams1
+        - questions
+      summary: get a question
+      description: get a question
+      operationId: getAQuestion
+      responses:
+        '200':
+          description: ''
+    put:
+      tags:
+        - exams1
+        - questions
+      summary: update question
+      description: update question
+      operationId: updateQuestion
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                negativeMarks:
+                  type: number
+                  example: -200
+                question:
+                  type: string
+                  example: question 4
+                type:
+                  type: string
+                  example: single_choice
+            examples:
+              update question:
+                value:
+                  negativeMarks: -200
+                  question: question 4
+                  type: single_choice
+      responses:
+        '200':
+          description: ''
+    delete:
+      tags:
+        - exams1
+        - questions
+      summary: delete question
+      description: delete question
+      operationId: deleteQuestion
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 5c21ecb4-1918-4d28-965a-563335fec740
+      - name: questionId
+        in: path
+        required: true
+        schema:
+          type: string
+          example: b2c0cd56-c74e-48cb-b31b-5ab8adc13aca
+  /exams:
+    get:
+      tags:
+        - exams1
+      summary: get all exams
+      description: get all exams
+      operationId: getAllExams1
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: string
+            example: '0'
+        - name: limit
+          in: query
+          schema:
+            type: string
+            example: '10'
+        - name: isPublished
+          in: query
+          schema:
+            type: string
+            example: 'true'
+      responses:
+        '200':
+          description: ''
+    post:
+      tags:
+        - exams1
+      summary: create exam
+      description: create exam
+      operationId: createExam
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                endTime:
+                  type: string
+                  example: '{{endTime}}'
+                startTime:
+                  type: string
+                  example: '{{startTime}}'
+                title:
+                  type: string
+                  example: scheduler text exam
+            examples:
+              create exam:
+                value:
+                  endTime: '{{endTime}}'
+                  startTime: '{{startTime}}'
+                  title: scheduler text exam
+      responses:
+        '200':
+          description: ''
+  /exams/{id}:
+    get:
+      tags:
+        - exams1
+      summary: get a exam
+      description: get a exam
+      operationId: getAExam
+      responses:
+        '200':
+          description: ''
+    put:
+      tags:
+        - exams1
+      summary: udpate exam
+      description: udpate exam
+      operationId: udpateExam
+      requestBody:
+        content:
+          application/json:
+            examples:
+              udpate exam:
+                value: |-
+                  {
+                      "title": "udpated exam",
+                      "startTime": {{$timestamp}},
+                      "endTime": {{$timestamp}}
+                  }
+      responses:
+        '200':
+          description: ''
+    delete:
+      tags:
+        - exams1
+      summary: delete exam
+      description: delete exam
+      operationId: deleteExam
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: a3cf746e-bc58-44d2-afdc-33e113e9a3e0
+  /exams/{id}/result:
+    get:
+      tags:
+        - exams1
+      summary: results
+      description: results
+      operationId: results
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: d97f5f43-8db0-4ba0-b09c-3f21a52c4350
+  /questions/{id}/options:
+    post:
+      tags:
+        - questions1
+        - options
+      summary: create option
+      description: create option
+      operationId: createOption
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isCorrect:
+                  type: boolean
+                  example: false
+                marks:
+                  type: number
+                  example: 2
+                option:
+                  type: string
+                  example: test option
+            examples:
+              create option:
+                value:
+                  isCorrect: false
+                  marks: 2
+                  option: test option
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: e56db36a-0fb7-41b6-8ad4-ae00ee79f9a4
+  /questions/{id}/options/{optionId}:
+    get:
+      tags:
+        - questions1
+        - options
+      summary: get option
+      description: get option
+      operationId: getOption
+      responses:
+        '200':
+          description: ''
+    put:
+      tags:
+        - questions1
+        - options
+      summary: update question
+      description: update question
+      operationId: updateQuestion1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isCorrect:
+                  type: boolean
+                  example: false
+                marks:
+                  type: number
+                  example: 10
+                option:
+                  type: string
+                  example: test option
+            examples:
+              update question:
+                value:
+                  isCorrect: false
+                  marks: 10
+                  option: test option
+      responses:
+        '200':
+          description: ''
+    delete:
+      tags:
+        - questions1
+        - options
+      summary: delete option
+      description: delete option
+      operationId: deleteOption
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: e56db36a-0fb7-41b6-8ad4-ae00ee79f9a4
+      - name: optionId
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 125ce711-e2ea-460e-bd1c-02232417e499
+  /questions/bulk-create:
+    post:
+      tags:
+        - questions1
+      summary: bulk create
+      description: bulk create
+      operationId: bulkCreate
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                examId:
+                  type: string
+                  example: 5c21ecb4-1918-4d28-965a-563335fec740
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: ''
+  /users-exams/{id}/answers:
+    put:
+      tags:
+        - users- exams
+      summary: create answer
+      description: create answer
+      operationId: createAnswer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                optionIds:
+                  type: array
+                  items:
+                    type: string
+                    example: da27d147-8af8-4d31-9262-ffdaadf0e321
+                  example:
+                    - da27d147-8af8-4d31-9262-ffdaadf0e321
+                    - 0aaf74e9-4032-4bb9-afc4-7638f17c22ae
+                questionId:
+                  type: string
+                  example: cdf65dee-3119-43fe-bbe8-889939836f3b
+            examples:
+              create answer:
+                value:
+                  optionIds:
+                    - da27d147-8af8-4d31-9262-ffdaadf0e321
+                    - 0aaf74e9-4032-4bb9-afc4-7638f17c22ae
+                  questionId: cdf65dee-3119-43fe-bbe8-889939836f3b
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 2e1894bf-4d75-4968-ba6a-df5a7463c589
+  /users-exams/{id}/result:
+    get:
+      tags:
+        - users- exams
+      summary: get result
+      description: get result
+      operationId: getResult
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 2e1894bf-4d75-4968-ba6a-df5a7463c589
+  /users-exams/{id}/submit-exam:
+    post:
+      tags:
+        - users- exams
+      summary: submit exam
+      description: submit exam
+      operationId: submitExam
+      responses:
+        '200':
+          description: ''
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          example: 2e1894bf-4d75-4968-ba6a-df5a7463c589
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - bearerAuth: []
+tags:
+  - name: auth
+  - name: roles
+  - name: users
+  - name: exams
+  - name: exams1
+  - name: users1
+  - name: questions
+  - name: questions1
+  - name: options
+  - name: users- exams
