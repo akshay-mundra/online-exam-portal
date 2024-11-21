@@ -113,16 +113,39 @@ async function remove(currentUser, id) {
   const transactionContext = await sequelize.transaction();
 
   try {
+    const currentTime = moment.utc();
+
     const countChanged = await Exam.destroy(
-      { where: { id, admin_id: currentUser.id, is_published: false } },
+      {
+        where: {
+          id,
+          admin_id: currentUser.id,
+          [Op.or]: [
+            {
+              start_time: {
+                [Op.gt]: currentTime.toDate(),
+              },
+            },
+            {
+              end_time: {
+                [Op.lt]: currentTime.toDate(),
+              },
+            },
+          ],
+        },
+      },
       { transaction: transactionContext },
     );
     if (countChanged === 0) {
-      commonHelpers.throwCustomError('exam not found', 404);
+      commonHelpers.throwCustomError(
+        'exam not found or exam is currently on going',
+        404,
+      );
     }
+
     await transactionContext.commit();
 
-    return { message: 'Exam deleted successfully!' };
+    return { message: 'Exam deleted successfully!', countChanged };
   } catch (err) {
     await transactionContext.rollback();
     throw err;
