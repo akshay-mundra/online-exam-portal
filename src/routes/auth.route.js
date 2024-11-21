@@ -35,7 +35,7 @@ router.patch(
   commonHelpers.responseHandler,
 );
 
-router.get(
+router.delete(
   '/logout',
   authMiddlewares.authenticate,
   authControllers.logout,
