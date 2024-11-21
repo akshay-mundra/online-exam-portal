@@ -2,12 +2,20 @@ const Joi = require('joi');
 const validateHelpers = require('../helpers/validators.helper');
 const commonHelpers = require('../helpers/common.helper');
 
+const passwordSchema = Joi.string()
+  .regex(/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/)
+  .required()
+  .messages({
+    'string.pattern.base':
+      'Password must contain 1 special character and 1 number',
+  });
+
 async function register(req, res, next) {
   const schema = Joi.object({
     firstName: Joi.string().min(3).required(),
     lastName: Joi.string().min(3).required(),
     email: Joi.string().email().required(),
-    password: Joi.string().min(8).required(),
+    password: passwordSchema,
     roles: Joi.array().items(Joi.string()),
   });
 
@@ -48,8 +56,8 @@ async function forgotPassword(req, res, next) {
 
 async function resetPassword(req, res, next) {
   const schema = Joi.object({
-    password: Joi.string().min(8).required(),
-    confirmPassword: Joi.string().min(8).required(),
+    password: passwordSchema,
+    confirmPassword: passwordSchema,
     userId: Joi.string().required(),
     token: Joi.string().required(),
   });
