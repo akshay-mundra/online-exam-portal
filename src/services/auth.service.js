@@ -56,7 +56,7 @@ async function register(req, payload) {
   try {
     const userExists = await User.findOne({ where: { email } });
     if (userExists)
-      return commonHelpers.throwCustomError('User already exists', 400);
+      return commonHelpers.throwCustomError('User already exists', 409);
 
     const roles = await Role.findAll({
       where: {
