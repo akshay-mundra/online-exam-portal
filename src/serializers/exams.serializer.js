@@ -3,7 +3,11 @@ function exams(req, res, next) {
 
   const response = [];
   if (!exams) {
-    exams = [res.data];
+    if (Array.isArray(res.data)) {
+      exams = res.data;
+    } else {
+      exams = [res.data];
+    }
   }
 
   for (const exam of exams) {
@@ -17,10 +21,12 @@ function exams(req, res, next) {
     });
   }
 
-  if (!res.data.exams) {
-    res.data = response[0];
-  } else {
+  if (res.data.exams) {
     res.data.exams = response;
+  } else if (response.length > 1) {
+    res.data = response;
+  } else {
+    res.data = response[0];
   }
 
   next();

@@ -10,6 +10,7 @@ const utilMiddlewares = require('../middlewares/utils.middleware');
 const { ADMIN, USER } = require('../constants/common.constant').roles;
 const userSerializers = require('../serializers/users.serializer');
 const userExamSerializers = require('../serializers/users-exams.serializer');
+const examSerializers = require('../serializers/exams.serializer');
 
 router.get(
   '/',
@@ -63,6 +64,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([USER]),
   userControllers.getAllExams,
+  examSerializers.exams,
   commonHelpers.responseHandler,
 );
 
