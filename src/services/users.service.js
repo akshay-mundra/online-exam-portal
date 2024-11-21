@@ -5,9 +5,13 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const moment = require('moment');
 
-async function getAll(currentUser, page = 0) {
+async function getAll(currentUser, query) {
+  const { limit: queryLimit, page } = query;
+  const { limit, offset } = commonHelpers.getPaginationAttributes(
+    page,
+    queryLimit,
+  );
   const roles = currentUser.roles;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(page);
   const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
 
   // query data according to the logged in user and its role

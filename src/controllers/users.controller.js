@@ -3,9 +3,8 @@ const userServices = require('../services/users.service');
 
 async function getAll(req, res, next) {
   try {
-    const user = req.user;
-    const page = req?.query?.page;
-    const result = await userServices.getAll(user, page);
+    const { user, query } = req;
+    const result = await userServices.getAll(user, query);
     res.data = result;
     res.statusCode = 200;
     next();

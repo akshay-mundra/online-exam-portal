@@ -263,8 +263,11 @@ async function addUser(currentUser, id, payload) {
 
 // get all users for that exam
 async function getAllUsers(currentUser, id, query) {
-  const { page } = query;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(page);
+  const { page, limit: queryLimit } = query;
+  const { limit, offset } = commonHelpers.getPaginationAttributes(
+    page,
+    queryLimit,
+  );
 
   const users = await User.findAll({
     attributes: ['id', 'first_name', 'last_name', 'email'],
@@ -437,9 +440,12 @@ async function createQuestion(currentUser, id, payload) {
 
 // get all questions for the exam
 async function getAllQuestions(currentUser, id, query) {
-  const { page } = query;
+  const { page, limit: queryLimit } = query;
   const roles = currentUser.roles;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(page);
+  const { limit, offset } = commonHelpers.getPaginationAttributes(
+    page,
+    queryLimit,
+  );
   const { isSuperAdmin, isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
   let questions;
 
