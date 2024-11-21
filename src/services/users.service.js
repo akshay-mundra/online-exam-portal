@@ -36,13 +36,13 @@ async function get(currentUser, id) {
 
   let user;
   const options = {
-    where: isSuperAdmin || isAdmin ? { id } : { id, admin_id: currentUser.id },
+    where: isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id },
   };
 
   if (isSuperAdmin || isAdmin) {
     user = await User.findOne(options);
   } else if (isUser && currentUser.id === id) {
-    user = await User.findByPk(options);
+    user = await User.findOne(options);
   }
   if (!user) {
     return commonHelpers.throwCustomError('User not found', 404);
