@@ -6,6 +6,7 @@ const questionHelpers = require('../helpers/questions.helper');
 const { calculateUserScore } = require('../services/users-exams.service');
 const { Op } = require('sequelize');
 
+// get all exams
 async function getAll(currentUser, query) {
   const { limit: queryLimit, page = 0, isPublished } = query;
   const { limit, offset } = commonHelpers.getPaginationAttributes(
@@ -37,6 +38,7 @@ async function getAll(currentUser, query) {
   };
 }
 
+// create new exam
 async function create(currentUser, payload) {
   const { title, startTime, endTime } = payload;
   const transactionContext = await sequelize.transaction();
@@ -59,6 +61,7 @@ async function create(currentUser, payload) {
   }
 }
 
+// get single exam by id
 async function get(currentUser, id) {
   const roles = currentUser.roles;
   const { isSuperAdmin, isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
@@ -121,6 +124,7 @@ async function update(currentUser, id, payload) {
   }
 }
 
+// remove exam by id
 async function remove(currentUser, id) {
   const transactionContext = await sequelize.transaction();
 
@@ -484,6 +488,7 @@ async function getAllQuestions(currentUser, id, query) {
   return questions;
 }
 
+// get single question details with options by exam id and questionId
 async function getQuestion(currentUser, id, questionId) {
   const roles = currentUser.roles;
 
@@ -535,6 +540,7 @@ async function getQuestion(currentUser, id, questionId) {
   return question;
 }
 
+// update question details by exam id and questionId
 async function updateQuestion(currentUser, id, questionId, payload) {
   const { question, type, negativeMarks } = payload;
   const transactionContext = await sequelize.transaction();
@@ -576,6 +582,7 @@ async function updateQuestion(currentUser, id, questionId, payload) {
   }
 }
 
+// remove question
 async function removeQuestion(currentUser, id, questionId) {
   const transactionContext = await sequelize.transaction();
 

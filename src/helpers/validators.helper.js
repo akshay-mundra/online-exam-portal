@@ -1,5 +1,6 @@
 const commonHelpers = require('./common.helper.js');
 
+// validate request data using the JOI schema
 function validateRequest(req, res, next, schema, reqParameter) {
   let requestData = {};
 

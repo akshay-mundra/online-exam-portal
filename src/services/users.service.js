@@ -5,6 +5,7 @@ const { Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const moment = require('moment');
 
+// get all users created by that admin
 async function getAll(currentUser, query) {
   const { limit: queryLimit, page } = query;
   const { limit, offset } = commonHelpers.getPaginationAttributes(
@@ -14,7 +15,6 @@ async function getAll(currentUser, query) {
   const roles = currentUser.roles;
   const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
 
-  // query data according to the logged in user and its role
   const options = {
     where: isSuperAdmin ? {} : { admin_id: currentUser.id },
     attributes: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
@@ -111,6 +111,7 @@ async function remove(currentUser, id) {
   }
 }
 
+// bulk create users from csv or excel file
 async function bulkCreate(currentUser, payload) {
   const { users } = payload;
   const transactionContext = await sequelize.transaction();
@@ -180,6 +181,7 @@ async function bulkCreate(currentUser, payload) {
   }
 }
 
+// get all exams for that user
 async function getAllExams(currentUser, params) {
   const { id } = params;
   const roles = currentUser.roles;
@@ -218,6 +220,7 @@ async function getAllExams(currentUser, params) {
   return exams;
 }
 
+// user start exam - update status for the user.
 async function startExam(currentUser, params) {
   const { id, examId } = params;
 

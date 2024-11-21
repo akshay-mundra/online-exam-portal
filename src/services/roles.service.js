@@ -2,6 +2,7 @@ const { Role } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const { sequelize } = require('../models');
 
+// create role
 async function create(payload) {
   const { name } = payload;
   const transactionContext = await sequelize.transaction();
@@ -25,6 +26,7 @@ async function create(payload) {
   }
 }
 
+// get role by id
 async function get(id) {
   const role = await Role.findOne({ where: { id } });
   if (!role) {
@@ -33,11 +35,13 @@ async function get(id) {
   return role;
 }
 
+// get all roles
 async function getAll() {
   const roles = await Role.findAll();
   return roles;
 }
 
+// update role by id
 async function update(id, payload) {
   const { name } = payload;
   const transactionContext = await sequelize.transaction();
@@ -67,6 +71,7 @@ async function update(id, payload) {
   }
 }
 
+// remove role by id
 async function remove(id) {
   const transactionContext = await sequelize.transaction();
 
