@@ -6,13 +6,25 @@ const questionHelpers = require('../helpers/questions.helper');
 const { calculateUserScore } = require('../services/users-exams.service');
 const { Op } = require('sequelize');
 
-async function getAll(currentUser, page = 0) {
+async function getAll(currentUser, query) {
+  const { limit: queryLimit, page = 0, isPublished } = query;
+  const { limit, offset } = commonHelpers.getPaginationAttributes(
+    page,
+    queryLimit,
+  );
+
   const roles = currentUser.roles;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(page);
   const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
 
+  const filters = {};
+  if (isPublished !== undefined) {
+    filters.is_published = isPublished;
+  }
+
   const options = {
-    where: isSuperAdmin ? {} : { admin_id: currentUser.id },
+    where: isSuperAdmin
+      ? { ...filters }
+      : { admin_id: currentUser.id, ...filters },
     offset,
     limit,
   };
