@@ -4,7 +4,6 @@ const {
   get,
   update,
   remove,
-  userStartExam,
   getResult,
   addUser,
   getAllUsers,
@@ -46,7 +45,7 @@ describe('Exams Controller', () => {
 
       await getAll(req, res, next);
 
-      expect(examServices.getAll).toHaveBeenCalledWith(req.user, 1);
+      expect(examServices.getAll).toHaveBeenCalledWith(req.user, { page: 1 });
       expect(res.data).toEqual(mockExams);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -198,39 +197,6 @@ describe('Exams Controller', () => {
       examServices.remove.mockRejectedValue(error);
 
       await remove(req, res, next);
-
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
-    });
-  });
-
-  describe('userStartExam', () => {
-    it('should start an exam successfully', async () => {
-      const examId = faker.string.uuid();
-      req.params.id = examId;
-
-      const mockResponse = { message: 'Exam started successfully' };
-      examServices.userStartExam.mockResolvedValue(mockResponse);
-
-      await userStartExam(req, res, next);
-
-      expect(examServices.userStartExam).toHaveBeenCalledWith(req.user, examId);
-      expect(res.data).toEqual(mockResponse);
-      expect(res.statusCode).toBe(202);
-      expect(next).toHaveBeenCalled();
-    });
-
-    it('should handle errors if userStartExam fails', async () => {
-      const errorMessage = 'Error starting exam';
-      const error = new Error(errorMessage);
-      error.statusCode = 400;
-      examServices.userStartExam.mockRejectedValue(error);
-
-      await userStartExam(req, res, next);
 
       expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
         req,

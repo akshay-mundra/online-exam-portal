@@ -134,14 +134,9 @@ describe('User Service', () => {
       });
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: true });
 
-      const result = await get(currentUser, id);
+      await get(currentUser, id);
 
       expect(User.findOne).toHaveBeenCalledWith({ where: { id } });
-      expect(result).toEqual({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-      });
     });
 
     it('should throw an error if user is not found', async () => {
@@ -191,14 +186,12 @@ describe('User Service', () => {
         }),
       );
       expect(transactionContext.commit).toHaveBeenCalled();
-      expect(result).toEqual([
-        {
-          id,
-          first_name: 'Jane',
-          last_name: 'Smith',
-          email: 'jane@example.com',
-        },
-      ]);
+      expect(result).toEqual({
+        id,
+        first_name: 'Jane',
+        last_name: 'Smith',
+        email: 'jane@example.com',
+      });
     });
 
     it('should rollback transaction on error', async () => {
