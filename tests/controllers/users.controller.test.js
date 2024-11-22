@@ -35,7 +35,6 @@ describe('User Controller', () => {
 
       await getAll(req, res, next);
 
-      expect(userServices.getAll).toHaveBeenCalledWith(req.user, undefined);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();

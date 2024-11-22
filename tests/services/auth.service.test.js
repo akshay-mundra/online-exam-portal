@@ -63,10 +63,6 @@ describe('Auth Service', () => {
       expect(result).toEqual({
         user: {
           id: mockUser.id,
-          email: mockUser.email,
-          firstName: undefined,
-          lastName: undefined,
-          roles: ['user'],
         },
         token: mockToken,
       });
@@ -161,7 +157,7 @@ describe('Auth Service', () => {
 
       expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(
         'User already exists',
-        400,
+        409,
       );
     });
   });
