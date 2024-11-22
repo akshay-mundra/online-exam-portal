@@ -44,6 +44,7 @@ async function login(payload) {
   return {
     user: {
       id: user.id,
+      roles,
     },
     token,
   };
@@ -99,7 +100,7 @@ async function register(req, payload) {
 
     await transactionContext.commit();
 
-    return user.id;
+    return 'User created successfully';
   } catch (err) {
     await transactionContext.rollback();
     throw err;
@@ -132,10 +133,10 @@ async function forgotPassword(payload) {
     message: `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&id=${user.id}`,
   });
 
+  console.log('reset token', token);
+  console.log('userId', user.id);
   return {
     message: 'Password reset link sent to email',
-    resetToken,
-    userId: user.id,
   };
 }
 

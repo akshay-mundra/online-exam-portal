@@ -9,7 +9,9 @@
     "format": "npx prettier --write \"./**/*.{js,jsx}\"",
     "lint": "npx eslint ./",
     "test": "jest --silent",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "db:migrate": "npx sequelize-cli db:migrate",
+    "db:seed": "npx sequelize-cli db:seed:all"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
