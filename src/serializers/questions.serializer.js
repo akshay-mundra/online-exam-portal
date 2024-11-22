@@ -11,7 +11,7 @@ function questions(req, res, next) {
     question: item?.question,
     type: item?.type,
     negativeMarks: item?.negative_marks,
-    options: item?.options?.map(option => ({
+    options: item?.Options?.map(option => ({
       id: option?.id,
       questionId: option?.question_id,
       option: option?.option,
@@ -20,7 +20,7 @@ function questions(req, res, next) {
     })),
   }));
 
-  if (!Array.isArray(res.data)) {
+  if (response.length === 1) {
     res.data = response[0];
   } else {
     res.data = response;

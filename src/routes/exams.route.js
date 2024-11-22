@@ -69,6 +69,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   examControllers.getAllUsers,
+  examSerializers.userWithExams,
   commonHelpers.responseHandler,
 );
 

@@ -13,7 +13,7 @@ function options(req, res, next) {
     marks: option?.marks,
   }));
 
-  if (!Array.isArray(res.data)) {
+  if (response.length === 1) {
     res.data = response[0];
   } else {
     res.data = response;

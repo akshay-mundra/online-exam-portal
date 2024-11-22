@@ -62,7 +62,7 @@ router.delete(
 router.get(
   '/:id/exams',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize([USER]),
+  authMiddlewares.authorize([ADMIN, USER]),
   userControllers.getAllExams,
   examSerializers.exams,
   commonHelpers.responseHandler,

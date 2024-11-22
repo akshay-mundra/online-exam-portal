@@ -3,11 +3,15 @@ const { sequelize } = require('./models');
 const { redisClient } = require('./config/redis.js');
 const { registerRoutes } = require('./routes');
 require('./schedulers');
+const swaggerUi = require('swagger-ui-express');
+const { swaggerDocument } = require('./swagger/swagger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 registerRoutes(app);
 

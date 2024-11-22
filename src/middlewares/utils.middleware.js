@@ -5,8 +5,8 @@ const commonHelpers = require('../helpers/common.helper');
 
 const convertUserFileToObject = async (req, res, next) => {
   const userObjArray = [];
-  const path = 'src/uploads/' + req.file.originalname;
-  const fileExtension = req.file.originalname.split('.').pop();
+  const path = 'src/uploads/' + req?.file?.originalname;
+  const fileExtension = req?.file?.originalname?.split('.').pop();
 
   try {
     if (fileExtension === 'xlsx' || fileExtension === 'xls') {
@@ -57,8 +57,8 @@ const convertUserFileToObject = async (req, res, next) => {
 
 const convertQuestionFileToObject = async (req, res, next) => {
   const questionsObjArray = [];
-  const path = 'src/uploads/' + req.file.originalname;
-  const fileExtension = req.file.originalname.split('.').pop();
+  const path = 'src/uploads/' + req?.file?.originalname;
+  const fileExtension = req?.file?.originalname?.split('.').pop();
 
   try {
     if (fileExtension === 'xlsx' || fileExtension === 'xls') {
