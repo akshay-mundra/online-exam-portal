@@ -10,7 +10,8 @@ const commonHelpers = require('../helpers/common.helper');
 const moment = require('moment');
 const { Op } = require('sequelize');
 
-// user submit answer
+// user submit answer - the submission contains the options selected by the user
+// update create or delte the responses according to the user selection.
 async function createAnswer(currentUser, params, payload) {
   const { id } = params;
   const { questionId, optionIds } = payload;
@@ -139,7 +140,13 @@ async function createAnswer(currentUser, params, payload) {
   }
 }
 
-// calculate user score for the exam
+/*
+  calculate user score for the exam
+  if in single choice multiple optins are selected then its wrong
+  if in multiple choice if a correct option is selected then partial marks will be given but
+  any wrong option selection should make the whole quesiton incorrect.
+  minus marking should be given.
+*/
 async function calculateUserScore(currentUser, params) {
   const { id } = params;
   const roles = currentUser.roles;
@@ -252,6 +259,7 @@ async function calculateUserScore(currentUser, params) {
   }
 }
 
+// submit exam - change the exam status for the user
 async function submitExam(currentUser, params) {
   const { id } = params;
   const transactionContext = await sequelize.transaction();

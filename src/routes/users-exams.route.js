@@ -22,7 +22,7 @@ router.get(
   commonHelpers.responseHandler,
 );
 
-router.patch(
+router.post(
   '/:id/submit-exam',
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),

@@ -9,6 +9,7 @@ const { redisClient } = require('../config/redis');
 const crypto = require('crypto');
 const { SUPER_ADMIN, ADMIN } = require('../constants/common.constant');
 
+// login user by email and password
 async function login(payload) {
   const { email, password } = payload;
 
@@ -48,6 +49,7 @@ async function login(payload) {
   };
 }
 
+// register new user
 async function register(req, payload) {
   const { firstName, lastName, email, password, roles: userRoles } = payload;
 
@@ -56,7 +58,7 @@ async function register(req, payload) {
   try {
     const userExists = await User.findOne({ where: { email } });
     if (userExists)
-      return commonHelpers.throwCustomError('User already exists', 400);
+      return commonHelpers.throwCustomError('User already exists', 409);
 
     const roles = await Role.findAll({
       where: {
@@ -104,6 +106,7 @@ async function register(req, payload) {
   }
 }
 
+// send token to user for password reset
 async function forgotPassword(payload) {
   const { email } = payload;
 
@@ -136,6 +139,7 @@ async function forgotPassword(payload) {
   };
 }
 
+// reset passwword by verifying token and updating to new password
 async function resetPassword(payload) {
   const { password, confirmPassword, token, userId } = payload;
   const transactionContext = await sequelize.transaction();
@@ -181,6 +185,7 @@ async function resetPassword(payload) {
   }
 }
 
+// logout user
 async function logout() {
   return 'User logged out successfully!!';
 }

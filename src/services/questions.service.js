@@ -4,6 +4,7 @@ const { sequelize } = require('../models');
 const optionServices = require('../services/options.service');
 const questionHelpers = require('../helpers/questions.helper');
 
+// bulk create questions from the csv or excel file
 async function bulkCreate(currentUser, payload) {
   const { questions, examId } = payload;
 
@@ -61,6 +62,7 @@ async function bulkCreate(currentUser, payload) {
   }
 }
 
+// create single option for that question (users option service)
 async function createOption(currentUser, params, payload) {
   const { id } = params;
 
@@ -90,6 +92,7 @@ async function createOption(currentUser, params, payload) {
   return await optionServices.create(id, payload);
 }
 
+// get a option for that question
 async function getOption(currentUser, params) {
   const { id, optionId } = params;
 
@@ -109,6 +112,7 @@ async function getOption(currentUser, params) {
   return question.Options[0];
 }
 
+// update the option
 async function updateOption(currentUser, params, payload) {
   const { id, optionId } = params;
 
@@ -139,6 +143,7 @@ async function updateOption(currentUser, params, payload) {
   return await optionServices.update(optionId, payload);
 }
 
+// remove the option from that question
 async function removeOption(currentUser, params) {
   const { id, optionId } = params;
 

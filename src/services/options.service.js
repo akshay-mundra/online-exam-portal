@@ -1,6 +1,7 @@
 const { Option, sequelize } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 
+// create a option for the question
 async function create(questionId, payload) {
   const { option, isCorrect, marks } = payload;
   const transactionContext = await sequelize.transaction();
@@ -27,6 +28,7 @@ async function create(questionId, payload) {
   }
 }
 
+// update the option
 async function update(id, payload) {
   const { option, isCorrect, marks } = payload;
   const transactionContext = await sequelize.transaction();
@@ -60,6 +62,7 @@ async function update(id, payload) {
   }
 }
 
+// remove the option
 async function remove(id) {
   const transactionContext = await sequelize.transaction();
 

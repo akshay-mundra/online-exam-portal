@@ -28,14 +28,14 @@ router.post(
   commonHelpers.responseHandler,
 );
 
-router.patch(
+router.post(
   '/reset-password',
   authValidators.resetPassword,
   authControllers.resetPassword,
   commonHelpers.responseHandler,
 );
 
-router.get(
+router.delete(
   '/logout',
   authMiddlewares.authenticate,
   authControllers.logout,

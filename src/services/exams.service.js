@@ -6,13 +6,26 @@ const questionHelpers = require('../helpers/questions.helper');
 const { calculateUserScore } = require('../services/users-exams.service');
 const { Op } = require('sequelize');
 
-async function getAll(currentUser, page = 0) {
+// get all exams
+async function getAll(currentUser, query) {
+  const { limit: queryLimit, page = 0, isPublished } = query;
+  const { limit, offset } = commonHelpers.getPaginationAttributes(
+    page,
+    queryLimit,
+  );
+
   const roles = currentUser.roles;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(page);
   const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
 
+  const filters = {};
+  if (isPublished !== undefined) {
+    filters.is_published = isPublished;
+  }
+
   const options = {
-    where: isSuperAdmin ? {} : { admin_id: currentUser.id },
+    where: isSuperAdmin
+      ? { ...filters }
+      : { admin_id: currentUser.id, ...filters },
     offset,
     limit,
   };
@@ -25,6 +38,7 @@ async function getAll(currentUser, page = 0) {
   };
 }
 
+// create new exam
 async function create(currentUser, payload) {
   const { title, startTime, endTime } = payload;
   const transactionContext = await sequelize.transaction();
@@ -47,6 +61,7 @@ async function create(currentUser, payload) {
   }
 }
 
+// get single exam by id
 async function get(currentUser, id) {
   const roles = currentUser.roles;
   const { isSuperAdmin, isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
@@ -109,73 +124,44 @@ async function update(currentUser, id, payload) {
   }
 }
 
+// remove exam by id
 async function remove(currentUser, id) {
   const transactionContext = await sequelize.transaction();
 
   try {
+    const currentTime = moment.utc();
+
     const countChanged = await Exam.destroy(
-      { where: { id, admin_id: currentUser.id, is_published: false } },
+      {
+        where: {
+          id,
+          admin_id: currentUser.id,
+          [Op.or]: [
+            {
+              start_time: {
+                [Op.gt]: currentTime.toDate(),
+              },
+            },
+            {
+              end_time: {
+                [Op.lt]: currentTime.toDate(),
+              },
+            },
+          ],
+        },
+      },
       { transaction: transactionContext },
     );
     if (countChanged === 0) {
-      commonHelpers.throwCustomError('exam not found', 404);
-    }
-    await transactionContext.commit();
-
-    return { message: 'Exam deleted successfully!' };
-  } catch (err) {
-    await transactionContext.rollback();
-    throw err;
-  }
-}
-
-async function userStartExam(currentUser, id) {
-  const transactionContext = await sequelize.transaction();
-
-  try {
-    const exam = await Exam.findByPk(id);
-
-    if (!exam) {
-      commonHelpers.throwCustomError('Exam not found', 404);
-    }
-
-    const currentTime = moment();
-
-    const isExamAvailable =
-      currentTime.isAfter(exam.start_time) &&
-      currentTime.isBefore(exam.end_time);
-
-    if (!isExamAvailable) {
       commonHelpers.throwCustomError(
-        'You can only join the exam within the allowed time window',
-        403,
+        'exam not found or exam is currently on going',
+        404,
       );
     }
 
-    const [updateCount, userExam] = await UserExam.update(
-      {
-        status: 'on-going',
-      },
-      {
-        where: {
-          exam_id: exam.id,
-          user_id: currentUser.id,
-          status: { [Op.not]: 'completed' },
-        },
-        returning: true,
-      },
-      {
-        transaction: transactionContext,
-      },
-    );
-
-    if (updateCount === 0) {
-      commonHelpers.throwCustomError('User is not assigned to this exam', 403);
-    }
-
     await transactionContext.commit();
 
-    return userExam;
+    return { message: 'Exam deleted successfully!', countChanged };
   } catch (err) {
     await transactionContext.rollback();
     throw err;
@@ -281,8 +267,11 @@ async function addUser(currentUser, id, payload) {
 
 // get all users for that exam
 async function getAllUsers(currentUser, id, query) {
-  const { page } = query;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(page);
+  const { page, limit: queryLimit } = query;
+  const { limit, offset } = commonHelpers.getPaginationAttributes(
+    page,
+    queryLimit,
+  );
 
   const users = await User.findAll({
     attributes: ['id', 'first_name', 'last_name', 'email'],
@@ -455,9 +444,12 @@ async function createQuestion(currentUser, id, payload) {
 
 // get all questions for the exam
 async function getAllQuestions(currentUser, id, query) {
-  const { page } = query;
+  const { page, limit: queryLimit } = query;
   const roles = currentUser.roles;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(page);
+  const { limit, offset } = commonHelpers.getPaginationAttributes(
+    page,
+    queryLimit,
+  );
   const { isSuperAdmin, isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
   let questions;
 
@@ -496,6 +488,7 @@ async function getAllQuestions(currentUser, id, query) {
   return questions;
 }
 
+// get single question details with options by exam id and questionId
 async function getQuestion(currentUser, id, questionId) {
   const roles = currentUser.roles;
 
@@ -547,6 +540,7 @@ async function getQuestion(currentUser, id, questionId) {
   return question;
 }
 
+// update question details by exam id and questionId
 async function updateQuestion(currentUser, id, questionId, payload) {
   const { question, type, negativeMarks } = payload;
   const transactionContext = await sequelize.transaction();
@@ -588,6 +582,7 @@ async function updateQuestion(currentUser, id, questionId, payload) {
   }
 }
 
+// remove question
 async function removeQuestion(currentUser, id, questionId) {
   const transactionContext = await sequelize.transaction();
 
@@ -627,7 +622,6 @@ module.exports = {
   get,
   update,
   remove,
-  userStartExam,
   getResult,
   addUser,
   getAllUsers,
