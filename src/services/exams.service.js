@@ -4,6 +4,7 @@ const { sequelize } = require('../models');
 const moment = require('moment');
 const questionHelpers = require('../helpers/questions.helper');
 const { calculateUserScore } = require('../services/users-exams.service');
+const { Op } = require('sequelize');
 
 async function getAll(currentUser, page = 0) {
   const roles = currentUser.roles;
@@ -39,10 +40,7 @@ async function create(currentUser, payload) {
       { transaction: transactionContext },
     );
     await transactionContext.commit();
-    return {
-      title: exam.title,
-      id: exam.id,
-    };
+    return exam;
   } catch (err) {
     await transactionContext.rollback();
     throw err;
@@ -159,7 +157,11 @@ async function userStartExam(currentUser, id) {
         status: 'on-going',
       },
       {
-        where: { exam_id: exam.id, user_id: currentUser.id },
+        where: {
+          exam_id: exam.id,
+          user_id: currentUser.id,
+          status: { [Op.not]: 'completed' },
+        },
         returning: true,
       },
       {
@@ -444,7 +446,7 @@ async function createQuestion(currentUser, id, payload) {
 
     await transactionContext.commit();
 
-    return { createdQuestion, createdOptions };
+    return { ...createdQuestion.dataValues, options: createdOptions };
   } catch (err) {
     transactionContext.rollback();
     throw err;

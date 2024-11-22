@@ -108,11 +108,8 @@ async function createAnswer(currentUser, params, payload) {
       return acc;
     }, []);
 
-    let createdAnswers;
-    let modifyCount;
-
     if (ansToDelete && ansToDelete.length) {
-      modifyCount = await Answer.destroy(
+      await Answer.destroy(
         {
           where: {
             id: {
@@ -127,7 +124,7 @@ async function createAnswer(currentUser, params, payload) {
     }
 
     if (ansToCreate && ansToCreate.length) {
-      createdAnswers = await Answer.bulkCreate(ansToCreate, {
+      await Answer.bulkCreate(ansToCreate, {
         transaction: transactionContext,
         returning: true,
       });
@@ -135,7 +132,7 @@ async function createAnswer(currentUser, params, payload) {
 
     await transactionContext.commit();
 
-    return { createdAnswers, modifyCount };
+    return 'Answer submitted successfully';
   } catch (err) {
     await transactionContext.rollback();
     throw err;

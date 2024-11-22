@@ -9,6 +9,7 @@ const multerMiddlewares = require('../middlewares/multer.middleware');
 const utilMiddlewares = require('../middlewares/utils.middleware');
 const questionControllers = require('../controllers/questions.controller');
 const { ADMIN } = require('../constants/common.constant').roles;
+const optionSerializers = require('../serializers/options.serializer');
 
 router.post(
   '/bulk-create',
@@ -27,6 +28,7 @@ router.post(
   authMiddlewares.authorize([ADMIN]),
   optionValidators.createSchema,
   questionControllers.createOption,
+  optionSerializers.options,
   commonHelpers.responseHandler,
 );
 
@@ -35,6 +37,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   questionControllers.getOption,
+  optionSerializers.options,
   commonHelpers.responseHandler,
 );
 
@@ -44,6 +47,7 @@ router.put(
   authMiddlewares.authorize([ADMIN]),
   optionValidators.createSchema,
   questionControllers.updateOption,
+  optionSerializers.options,
   commonHelpers.responseHandler,
 );
 

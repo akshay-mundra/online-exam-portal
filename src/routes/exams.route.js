@@ -6,12 +6,16 @@ const commonHelpers = require('../helpers/common.helper');
 const examControllers = require('../controllers/exams.controller');
 const examValidators = require('../validators/exams.validator');
 const { ADMIN, USER } = require('../constants/common.constant').roles;
+const examSerializers = require('../serializers/exams.serializer');
+const userExamSerializers = require('../serializers/users-exams.serializer');
+const questionSerializers = require('../serializers/questions.serializer');
 
 router.get(
   '/',
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   examControllers.getAll,
+  examSerializers.exams,
   commonHelpers.responseHandler,
 );
 
@@ -21,6 +25,7 @@ router.post(
   authMiddlewares.authorize([ADMIN]),
   examValidators.examSchema,
   examControllers.create,
+  examSerializers.exams,
   commonHelpers.responseHandler,
 );
 
@@ -29,6 +34,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN, USER]),
   examControllers.get,
+  examSerializers.exams,
   commonHelpers.responseHandler,
 );
 
@@ -38,6 +44,7 @@ router.put(
   authMiddlewares.authorize([ADMIN]),
   examValidators.examSchema,
   examControllers.update,
+  examSerializers.exams,
   commonHelpers.responseHandler,
 );
 
@@ -54,6 +61,7 @@ router.patch(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([USER]),
   examControllers.userStartExam,
+  userExamSerializers.usersExams,
   commonHelpers.responseHandler,
 );
 
@@ -79,6 +87,7 @@ router.post(
   authMiddlewares.authorize([ADMIN]),
   examValidators.addUserSchema,
   examControllers.addUser,
+  userExamSerializers.usersExams,
   commonHelpers.responseHandler,
 );
 
@@ -87,6 +96,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN, USER]),
   examControllers.getUser,
+  examSerializers.userWithExams,
   commonHelpers.responseHandler,
 );
 
@@ -104,6 +114,7 @@ router.post(
   authMiddlewares.authorize([ADMIN]),
   examValidators.createQuestionSchema,
   examControllers.createQuestion,
+  questionSerializers.questions,
   commonHelpers.responseHandler,
 );
 
@@ -112,6 +123,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN, USER]),
   examControllers.getAllQuestions,
+  questionSerializers.questions,
   commonHelpers.responseHandler,
 );
 
@@ -120,6 +132,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN, USER]),
   examControllers.getQuestion,
+  questionSerializers.questions,
   commonHelpers.responseHandler,
 );
 
@@ -129,6 +142,7 @@ router.put(
   authMiddlewares.authorize([ADMIN]),
   examValidators.udpateQuestionSchema,
   examControllers.updateQuestion,
+  questionSerializers.questions,
   commonHelpers.responseHandler,
 );
 
