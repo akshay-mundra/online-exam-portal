@@ -66,7 +66,7 @@ describe('Exam Service', () => {
           status: 'on-going',
           exam_id: 1,
         };
-        const mockExam = { id: 1, start_time: moment().subtract(1, 'hour') }; // Mock start_time property
+        const mockExam = { id: 1, start_time: moment().subtract(1, 'hour') };
         const mockQuestion = {
           id: 1,
           exam_id: 1,
@@ -131,7 +131,7 @@ describe('Exam Service', () => {
 
       await expect(
         calculateUserScore({ id: 1, roles: [] }, { id: 1 }),
-      ).resolves.toBe(2); // Assuming the score is correctly calculated
+      ).resolves.toBe(2);
 
       expect(transactionContext.commit).toHaveBeenCalled();
     });
@@ -177,7 +177,7 @@ describe('Exam Service', () => {
 
       await expect(
         calculateUserScore({ id: 1, roles: [] }, { id: 1 }),
-      ).resolves.toBe(-2); // Incorrect answer selection results in negative marks
+      ).resolves.toBe(-2);
 
       expect(transactionContext.commit).toHaveBeenCalled();
     });
