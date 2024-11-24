@@ -133,7 +133,7 @@ async function forgotPassword(payload) {
     message: `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&id=${user.id}`,
   });
 
-  console.log('reset token', token);
+  console.log('reset token', resetToken);
   console.log('userId', user.id);
   return {
     message: 'Password reset link sent to email',
@@ -178,6 +178,8 @@ async function resetPassword(payload) {
 
     user.password = hashedPassword;
     await user.save({ transaction: transactionContext });
+
+    await transactionContext.commit();
 
     return 'Password reset successful';
   } catch (err) {
