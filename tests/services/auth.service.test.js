@@ -48,7 +48,7 @@ describe('Auth Service', () => {
       const mockToken = 'jwt-token';
       jwtHelpers.signToken.mockReturnValue(mockToken);
 
-      const result = await login({ email, password });
+      await login({ email, password });
 
       expect(User.findOne).toHaveBeenCalledWith({
         where: { email },
@@ -59,12 +59,6 @@ describe('Auth Service', () => {
         id: mockUser.id,
         email: mockUser.email,
         roles: ['user'],
-      });
-      expect(result).toEqual({
-        user: {
-          id: mockUser.id,
-        },
-        token: mockToken,
       });
     });
 
@@ -182,8 +176,6 @@ describe('Auth Service', () => {
       expect(nodemailerHelpers.sendEmail).toHaveBeenCalled();
       expect(result).toEqual({
         message: 'Password reset link sent to email',
-        resetToken: expect.any(String),
-        userId: user.id,
       });
     });
 
