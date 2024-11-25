@@ -1,6 +1,5 @@
 const commonHelpers = require('../helpers/common.helper');
 const jwtHelpers = require('../helpers/jwt.helper');
-const { User } = require('../models');
 const { SUPER_ADMIN, ADMIN, USER } =
   require('../constants/common.constant').roles;
 
@@ -11,12 +10,7 @@ async function authenticate(req, res, next) {
       commonHelpers.throwCustomError('Access Denied | Token Not Found', 401);
     }
     const decodedData = await jwtHelpers.verifyToken(token);
-    let user = await User.findOne({ where: { id: decodedData.id } });
-    if (!user) {
-      commonHelpers.throwCustomError('User not found', 403);
-    }
-    user.roles = decodedData.roles;
-    req.user = user;
+    req.user = decodedData;
 
     next();
   } catch (err) {
