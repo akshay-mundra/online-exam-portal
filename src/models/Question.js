@@ -10,15 +10,15 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Question.belongsTo(models.Exam, {
         foreignKey: 'exam_id',
-        as: 'exams',
+        as: 'exams'
       });
 
       Question.hasMany(models.Option, {
-        foreignKey: 'question_id',
+        foreignKey: 'question_id'
       });
 
       Question.hasMany(models.Answer, {
-        foreignKey: 'question_id',
+        foreignKey: 'question_id'
       });
     }
   }
@@ -28,37 +28,37 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         primaryKey: true,
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: DataTypes.UUIDV4
       },
       exam_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'exams',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       question: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       type: {
         type: DataTypes.ENUM('single_choice', 'multiple_choice'),
         defaultValue: 'single_choice',
-        allowNull: false,
+        allowNull: false
       },
       negative_marks: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        defaultValue: 0,
-      },
+        defaultValue: 0
+      }
     },
     {
       sequelize,
       modelName: 'Question',
       tableName: 'questions',
-      paranoid: true,
-    },
+      paranoid: true
+    }
   );
   return Question;
 };

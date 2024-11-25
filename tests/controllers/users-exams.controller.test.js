@@ -1,8 +1,4 @@
-const {
-  createAnswer,
-  calculateUserScore,
-  submitExam,
-} = require('../../src/controllers/users-exams.controller');
+const { createAnswer, calculateUserScore, submitExam } = require('../../src/controllers/users-exams.controller');
 const commonHelpers = require('../../src/helpers/common.helper');
 const userExamServices = require('../../src/services/users-exams.service');
 const { getMockReq, getMockRes } = require('@jest-mock/express');
@@ -25,7 +21,7 @@ describe('User Exam Controllers', () => {
     it('should create an answer successfully', async () => {
       const payload = {
         answer: faker.lorem.word(),
-        questionId: faker.string.uuid(),
+        questionId: faker.string.uuid()
       };
       const params = { examId: faker.string.uuid() };
       req.body = payload;
@@ -37,11 +33,7 @@ describe('User Exam Controllers', () => {
 
       await createAnswer(req, res, next);
 
-      expect(userExamServices.createAnswer).toHaveBeenCalledWith(
-        req.user,
-        params,
-        payload,
-      );
+      expect(userExamServices.createAnswer).toHaveBeenCalledWith(req.user, params, payload);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(201);
       expect(next).toHaveBeenCalled();
@@ -55,12 +47,7 @@ describe('User Exam Controllers', () => {
 
       await createAnswer(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 
@@ -75,10 +62,7 @@ describe('User Exam Controllers', () => {
 
       await calculateUserScore(req, res, next);
 
-      expect(userExamServices.calculateUserScore).toHaveBeenCalledWith(
-        req.user,
-        params,
-      );
+      expect(userExamServices.calculateUserScore).toHaveBeenCalledWith(req.user, params);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -92,12 +76,7 @@ describe('User Exam Controllers', () => {
 
       await calculateUserScore(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        500,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 500);
     });
   });
 
@@ -112,10 +91,7 @@ describe('User Exam Controllers', () => {
 
       await submitExam(req, res, next);
 
-      expect(userExamServices.submitExam).toHaveBeenCalledWith(
-        req.user,
-        params,
-      );
+      expect(userExamServices.submitExam).toHaveBeenCalledWith(req.user, params);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
@@ -129,12 +105,7 @@ describe('User Exam Controllers', () => {
 
       await submitExam(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 });

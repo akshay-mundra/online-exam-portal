@@ -12,7 +12,7 @@ const sendExamResultEmail = async (userEmail, examDetails, score) => {
     subject: 'Your Exam Result is Here!',
     message: `Dear user,
     Your score for the exam "${examDetails.title}" is: \n
-    Total Marks: ${score}`,
+    Total Marks: ${score}`
   };
 
   await nodemailerHelpers.sendEmail(mailOptions);
@@ -29,9 +29,9 @@ cron.schedule('*/5 * * * *', async () => {
     const endingExams = await Exam.findAll({
       where: {
         end_time: {
-          [Op.between]: [rangeTime.toDate(), currentTime.toDate()],
-        },
-      },
+          [Op.between]: [rangeTime.toDate(), currentTime.toDate()]
+        }
+      }
     });
 
     for (const exam of endingExams) {
@@ -43,12 +43,12 @@ cron.schedule('*/5 * * * *', async () => {
             where: { id: exam.id },
             through: {
               where: { status: 'completed' },
-              attributes: ['id'],
+              attributes: ['id']
             },
             required: true,
-            plain: true,
-          },
-        ],
+            plain: true
+          }
+        ]
       });
 
       for (const user of users) {

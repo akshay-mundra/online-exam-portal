@@ -9,7 +9,7 @@ const sendExamReminderEmail = async (userEmail, examDetails) => {
     to: userEmail,
     subject: 'Reminder: Your Exam is Starting Soon!',
     message: `Dear user,
-      This is a reminder that your exam titled "${examDetails.title}" is starting in 10 minutes.`,
+      This is a reminder that your exam titled "${examDetails.title}" is starting in 10 minutes.`
   };
 
   await nodemailerHelpers.sendEmail(mailOptions);
@@ -25,12 +25,9 @@ cron.schedule('* * * * *', async () => {
     const upcomingExams = await Exam.findAll({
       where: {
         start_time: {
-          [Op.between]: [
-            reminderTime.toDate(),
-            reminderTime.clone().add(1, 'minutes').toDate(),
-          ],
-        },
-      },
+          [Op.between]: [reminderTime.toDate(), reminderTime.clone().add(1, 'minutes').toDate()]
+        }
+      }
     });
 
     for (const exam of upcomingExams) {
@@ -43,10 +40,10 @@ cron.schedule('* * * * *', async () => {
             where: { id: exam.id },
             required: true,
             through: {
-              where: { deleted_at: null },
-            },
-          },
-        ],
+              where: { deleted_at: null }
+            }
+          }
+        ]
       });
 
       for (const user of users) {

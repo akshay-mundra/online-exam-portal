@@ -9,10 +9,7 @@ const { Op } = require('sequelize');
 // get all exams
 async function getAll(currentUser, query) {
   const { limit: queryLimit, page = 0, isPublished } = query;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(
-    page,
-    queryLimit,
-  );
+  const { limit, offset } = commonHelpers.getPaginationAttributes(page, queryLimit);
 
   const roles = currentUser.roles;
   const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
@@ -23,18 +20,16 @@ async function getAll(currentUser, query) {
   }
 
   const options = {
-    where: isSuperAdmin
-      ? { ...filters }
-      : { admin_id: currentUser.id, ...filters },
+    where: isSuperAdmin ? { ...filters } : { admin_id: currentUser.id, ...filters },
     offset,
-    limit,
+    limit
   };
 
   const { count: total, rows: exams } = await Exam.findAndCountAll(options);
 
   return {
     exams,
-    total,
+    total
   };
 }
 
@@ -49,15 +44,17 @@ async function create(currentUser, payload) {
         title,
         start_time: startTime,
         end_time: endTime,
-        admin_id: currentUser.id,
+        admin_id: currentUser.id
       },
-      { transaction: transactionContext },
+      { transaction: transactionContext }
     );
+
     await transactionContext.commit();
+
     return exam;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -68,14 +65,14 @@ async function get(currentUser, id) {
   let exam;
 
   const options = {
-    where: isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id },
+    where: isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id }
   };
 
   if (isSuperAdmin || isAdmin) {
     exam = await Exam.findOne(options);
   } else if (isUser) {
     const userExam = await UserExam.findOne({
-      where: { exam_id: id, user_id: currentUser.id },
+      where: { exam_id: id, user_id: currentUser.id }
     });
 
     if (!userExam) {
@@ -101,26 +98,23 @@ async function update(currentUser, id, payload) {
       { title, start_time: startTime, end_time: endTime },
       {
         where: { id, admin_id: currentUser.id, is_published: false },
-        returning: true,
+        returning: true
       },
       {
-        transaction: transactionContext,
-      },
+        transaction: transactionContext
+      }
     );
 
     if (updateRowCount === 0) {
-      commonHelpers.throwCustomError(
-        'Exam not found or already published',
-        404,
-      );
+      commonHelpers.throwCustomError('Exam not found or already published', 404);
     }
 
     await transactionContext.commit();
 
     return updatedExam;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -139,32 +133,29 @@ async function remove(currentUser, id) {
           [Op.or]: [
             {
               start_time: {
-                [Op.gt]: currentTime.toDate(),
-              },
+                [Op.gt]: currentTime.toDate()
+              }
             },
             {
               end_time: {
-                [Op.lt]: currentTime.toDate(),
-              },
-            },
-          ],
-        },
+                [Op.lt]: currentTime.toDate()
+              }
+            }
+          ]
+        }
       },
-      { transaction: transactionContext },
+      { transaction: transactionContext }
     );
     if (countChanged === 0) {
-      commonHelpers.throwCustomError(
-        'exam not found or exam is currently on going',
-        404,
-      );
+      commonHelpers.throwCustomError('exam not found or exam is currently on going', 404);
     }
 
     await transactionContext.commit();
 
     return { message: 'Exam deleted successfully!', countChanged };
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -189,15 +180,15 @@ async function getResult(currentUser, id) {
         where: { id: id },
         through: {
           where: { status: 'completed' },
-          attributes: ['id', 'score'],
+          attributes: ['id', 'score']
         },
         required: true,
-        plain: true,
-      },
-    ],
+        plain: true
+      }
+    ]
   });
 
-  let results = [];
+  const results = [];
 
   for (const user of users) {
     const score = await calculateUserScore(user, user.Exams[0].users_exams);
@@ -206,8 +197,8 @@ async function getResult(currentUser, id) {
       user: {
         email: user.email,
         firstName: user.first_name,
-        lastName: user.lastName,
-      },
+        lastName: user.lastName
+      }
     });
   }
 
@@ -237,19 +228,16 @@ async function addUser(currentUser, id, payload) {
     }
 
     if (user.admin_id !== currentUser.id) {
-      commonHelpers.throwCustomError(
-        'Can not add user that is not created by you',
-        403,
-      );
+      commonHelpers.throwCustomError('Can not add user that is not created by you', 403);
     }
 
     const [userExam, isCreated] = await UserExam.findOrCreate({
       where: { user_id: userId, exam_id: id },
       defaults: {
         user_id: userId,
-        exam_id: id,
+        exam_id: id
       },
-      transaction: transactionContext,
+      transaction: transactionContext
     });
 
     if (!isCreated) {
@@ -259,19 +247,16 @@ async function addUser(currentUser, id, payload) {
     await transactionContext.commit();
 
     return userExam;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
 // get all users for that exam
 async function getAllUsers(currentUser, id, query) {
   const { page, limit: queryLimit } = query;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(
-    page,
-    queryLimit,
-  );
+  const { limit, offset } = commonHelpers.getPaginationAttributes(page, queryLimit);
 
   const users = await User.findAll({
     attributes: ['id', 'first_name', 'last_name', 'email'],
@@ -282,13 +267,13 @@ async function getAllUsers(currentUser, id, query) {
         attributes: ['id'],
         through: {
           attributes: ['id', 'score', 'status'],
-          where: { deleted_at: null },
+          where: { deleted_at: null }
         },
-        required: true,
-      },
+        required: true
+      }
     ],
     offset,
-    limit,
+    limit
   });
 
   return users;
@@ -306,16 +291,15 @@ async function getUser(currentUser, userId, id) {
     include: [
       {
         model: Exam,
-        where:
-          isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id },
+        where: isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id },
         attributes: ['id'],
         through: {
           attributes: ['id', 'score', 'status'],
-          where: { deleted_at: null },
+          where: { deleted_at: null }
         },
-        required: true,
-      },
-    ],
+        required: true
+      }
+    ]
   };
 
   if (isSuperAdmin || isAdmin) {
@@ -341,33 +325,31 @@ async function removeUser(currentUser, userId, id) {
 
   try {
     const user = await User.findOne({
-      where: { id: userId, admin_id: currentUser.id },
+      where: { id: userId, admin_id: currentUser.id }
     });
     if (!user) {
       commonHelpers.throwCustomError('User not found', 404);
     }
 
     const exam = await Exam.findOne({
-      where: { id: id, admin_id: currentUser.id },
+      where: { id: id, admin_id: currentUser.id }
     });
 
     if (!exam) {
       commonHelpers.throwCustomError('Exam not found', 404);
     }
+
     if (exam.is_published) {
       commonHelpers.throwCustomError('Exam is already published', 400);
     }
 
     const modifyCount = await UserExam.destroy(
       { where: { user_id: userId, exam_id: id } },
-      { transaction: transactionContext },
+      { transaction: transactionContext }
     );
 
     if (modifyCount === 0) {
-      commonHelpers.throwCustomError(
-        'User is not associated to this exam',
-        403,
-      );
+      commonHelpers.throwCustomError('User is not associated to this exam', 403);
     }
 
     console.log(modifyCount);
@@ -375,9 +357,9 @@ async function removeUser(currentUser, userId, id) {
     await transactionContext.commit();
 
     return 'User removed from exam successfully';
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -387,11 +369,12 @@ async function createQuestion(currentUser, id, payload) {
   const transactionContext = await sequelize.transaction();
 
   try {
-    if (!options || !options.length) {
+    if (!options || options.length === 0) {
       commonHelpers.throwCustomError('options are required', 400);
     }
 
     const exam = await Exam.findByPk(id);
+
     if (!exam) {
       commonHelpers.throwCustomError('Exam not found');
     }
@@ -404,19 +387,13 @@ async function createQuestion(currentUser, id, payload) {
       commonHelpers.throwCustomError('Exam is already published', 400);
     }
 
-    if (
-      type === 'single_choice' &&
-      questionHelpers.checkOptionsSingleChoice(options) > 1
-    ) {
-      commonHelpers.throwCustomError(
-        'Single choice question can not have multiple correct options',
-        400,
-      );
+    if (type === 'single_choice' && questionHelpers.checkOptionsSingleChoice(options) > 1) {
+      commonHelpers.throwCustomError('Single choice question can not have multiple correct options', 400);
     }
 
     const createdQuestion = await Question.create(
       { exam_id: id, question, type, negative_marks: negativeMarks },
-      { transaction: transactionContext },
+      { transaction: transactionContext }
     );
 
     const createdOptions = await Option.bulkCreate(
@@ -425,20 +402,20 @@ async function createQuestion(currentUser, id, payload) {
           question_id: createdQuestion.id,
           option: option.option,
           is_correct: option.isCorrect,
-          marks: option.marks,
+          marks: option.marks
         };
       }),
       {
-        transaction: transactionContext,
-      },
+        transaction: transactionContext
+      }
     );
 
     await transactionContext.commit();
 
     return { ...createdQuestion.dataValues, options: createdOptions };
-  } catch (err) {
+  } catch (error) {
     transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -446,15 +423,11 @@ async function createQuestion(currentUser, id, payload) {
 async function getAllQuestions(currentUser, id, query) {
   const { page, limit: queryLimit } = query;
   const roles = currentUser.roles;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(
-    page,
-    queryLimit,
-  );
+  const { limit, offset } = commonHelpers.getPaginationAttributes(page, queryLimit);
   const { isSuperAdmin, isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
   let questions;
 
-  const whereCondition =
-    isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id };
+  const whereCondition = isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id };
 
   const options = {
     attributes: ['id', 'question', 'type', 'negative_marks'],
@@ -464,18 +437,18 @@ async function getAllQuestions(currentUser, id, query) {
         as: 'exams',
         where: whereCondition,
         attributes: [],
-        required: true,
-      },
+        required: true
+      }
     ],
     offset,
-    limit,
+    limit
   };
 
   if (isSuperAdmin || isAdmin) {
     questions = await Question.findAll(options);
   } else if (isUser) {
     const userExam = await UserExam.findOne({
-      where: { user_id: currentUser.id, exam_id: id },
+      where: { user_id: currentUser.id, exam_id: id }
     });
 
     if (!userExam) {
@@ -498,8 +471,7 @@ async function getQuestion(currentUser, id, questionId) {
   const { isSuperAdmin, isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
 
   let question;
-  const whereCondition =
-    isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id };
+  const whereCondition = isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id };
 
   const options = {
     where: { id: questionId },
@@ -508,22 +480,22 @@ async function getQuestion(currentUser, id, questionId) {
       {
         model: Option,
         attributes: isSuperAdmin || isAdmin ? adminCanSee : userCanSee,
-        required: true,
+        required: true
       },
       {
         model: Exam,
         as: 'exams',
         where: whereCondition,
-        attributes: [],
-      },
-    ],
+        attributes: []
+      }
+    ]
   };
 
   if (isSuperAdmin || isAdmin) {
     question = await Question.findOne(options);
   } else if (isUser) {
     const userExam = await UserExam.findOne({
-      where: { user_id: currentUser.id, exam_id: id },
+      where: { user_id: currentUser.id, exam_id: id }
     });
 
     if (!userExam) {
@@ -550,7 +522,7 @@ async function updateQuestion(currentUser, id, questionId, payload) {
       {
         question,
         type,
-        negative_marks: negativeMarks,
+        negative_marks: negativeMarks
       },
       {
         where: { id: questionId, exam_id: id },
@@ -560,13 +532,13 @@ async function updateQuestion(currentUser, id, questionId, payload) {
             model: Exam,
             where: { admin_id: currentUser.id },
             attributes: [],
-            required: true,
-          },
-        ],
+            required: true
+          }
+        ]
       },
       {
-        transaction: transactionContext,
-      },
+        transaction: transactionContext
+      }
     );
 
     if (updateRowCount === 0) {
@@ -576,9 +548,9 @@ async function updateQuestion(currentUser, id, questionId, payload) {
     await transactionContext.commit();
 
     return updatedQuestion;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -594,13 +566,13 @@ async function removeQuestion(currentUser, id, questionId) {
           {
             model: Exam,
             where: { admin_id: currentUser.id },
-            required: true,
-          },
-        ],
+            required: true
+          }
+        ]
       },
       {
-        transaction: transactionContext,
-      },
+        transaction: transactionContext
+      }
     );
 
     if (modifyCount === 0) {
@@ -610,9 +582,9 @@ async function removeQuestion(currentUser, id, questionId) {
     await transactionContext.commit();
 
     return 'question removed successfully';
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -631,5 +603,5 @@ module.exports = {
   getAllQuestions,
   getQuestion,
   updateQuestion,
-  removeQuestion,
+  removeQuestion
 };

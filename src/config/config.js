@@ -14,8 +14,8 @@ module.exports = {
       timestamps: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
-      deletedAt: 'deleted_at',
-    },
+      deletedAt: 'deleted_at'
+    }
   },
   test: {
     host: process.env.DB_HOST,
@@ -30,7 +30,7 @@ module.exports = {
       timestamps: true,
       createdAt: 'created_at',
       updatedAt: 'updated_at',
-      deletedAt: 'deleted_at',
-    },
-  },
+      deletedAt: 'deleted_at'
+    }
+  }
 };

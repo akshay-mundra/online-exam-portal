@@ -13,40 +13,40 @@ const { SUPER_ADMIN, ADMIN } = require('../constants/common.constant');
 async function login(payload) {
   const { email, password } = payload;
 
-  let user = await User.findOne({
+  const user = await User.findOne({
     where: { email },
     include: [
       {
         model: Role,
         attributes: ['name'],
-        through: { attributes: [] },
-      },
-    ],
+        through: { attributes: [] }
+      }
+    ]
   });
+
   if (!user) {
-    return commonHelpers.throwCustomError(
-      'User with email does not exist',
-      401,
-    );
+    return commonHelpers.throwCustomError('User with email does not exist', 401);
   }
+
   const isPasswordMatch = await bcrypt.compare(password, user.password);
   if (!isPasswordMatch) {
     return commonHelpers.throwCustomError('Invalid email or password', 403);
   }
 
   const roles = user.Roles.map(role => role.name);
+
   const token = await jwtHelpers.signToken({
     id: user.id,
     email: user.email,
-    roles,
+    roles
   });
 
   return {
     user: {
       id: user.id,
-      roles,
+      roles
     },
-    token,
+    token
   };
 }
 
@@ -58,27 +58,24 @@ async function register(req, payload) {
 
   try {
     const userExists = await User.findOne({ where: { email } });
-    if (userExists)
-      return commonHelpers.throwCustomError('User already exists', 409);
+
+    if (userExists) return commonHelpers.throwCustomError('User already exists', 409);
 
     const roles = await Role.findAll({
       where: {
-        name: { [Op.in]: userRoles },
-      },
+        name: { [Op.in]: userRoles }
+      }
     });
 
     const roleNames = new Set(roles.map(role => role.name));
+
     if (userRoles.some(role => !roleNames.has(role))) {
       return commonHelpers.throwCustomError('Invalid roles', 422);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const admin_id = [ADMIN, SUPER_ADMIN].some(role =>
-      req?.user?.roles?.includes(role),
-    )
-      ? req.user.id
-      : null;
+    const admin_id = [ADMIN, SUPER_ADMIN].some(role => req?.user?.roles?.includes(role)) ? req.user.id : null;
 
     const user = await User.create(
       {
@@ -86,14 +83,14 @@ async function register(req, payload) {
         last_name: lastName,
         email,
         password: hashedPassword,
-        admin_id,
+        admin_id
       },
-      { transaction: transactionContext },
+      { transaction: transactionContext }
     );
 
     const userRoleIds = roles.map(role => ({
       user_id: user.id,
-      role_id: role.id,
+      role_id: role.id
     }));
 
     await UserRole.bulkCreate(userRoleIds, { transaction: transactionContext });
@@ -101,9 +98,9 @@ async function register(req, payload) {
     await transactionContext.commit();
 
     return 'User created successfully';
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -117,12 +114,12 @@ async function forgotPassword(payload) {
   }
 
   const key = `reset-token:${user?.id}`;
+
   const token = await redisClient.get(key);
   if (token) {
     await redisClient.del(key);
   }
-
-  let resetToken = crypto.randomBytes(32).toString('hex');
+  const resetToken = crypto.randomBytes(32).toString('hex');
   const hashedToken = await bcrypt.hash(resetToken, 10);
 
   await redisClient.set(key, hashedToken, 'EX', 60);
@@ -130,13 +127,13 @@ async function forgotPassword(payload) {
   nodemailerHelpers.sendEmail({
     to: user.email,
     subject: 'Password Reset Request',
-    message: `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&id=${user.id}`,
+    message: `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&id=${user.id}`
   });
 
-  console.log('reset token', resetToken);
-  console.log('userId', user.id);
+  console.log('reset token', resetToken); // temp
+  console.log('userId', user.id); // temp
   return {
-    message: 'Password reset link sent to email',
+    message: 'Password reset link sent to email'
   };
 }
 
@@ -151,23 +148,22 @@ async function resetPassword(payload) {
     }
 
     const user = await User.findOne({
-      where: { id: userId },
+      where: { id: userId }
     });
+
     if (!user) {
       return commonHelpers.throwCustomError('User does not exist', 404);
     }
 
     const key = `reset-token:${user.id}`;
-
     const resetToken = await redisClient.get(key);
+
     if (!resetToken) {
-      return commonHelpers.throwCustomError(
-        'Invalid or expired reset token',
-        401,
-      );
+      return commonHelpers.throwCustomError('Invalid or expired reset token', 401);
     }
 
     const isValid = await bcrypt.compare(token, resetToken);
+
     if (!isValid) {
       return commonHelpers.throwCustomError('Invalid token', 401);
     }
@@ -175,16 +171,15 @@ async function resetPassword(payload) {
     redisClient.del(key);
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     user.password = hashedPassword;
-    await user.save({ transaction: transactionContext });
 
+    await user.save({ transaction: transactionContext });
     await transactionContext.commit();
 
     return 'Password reset successful';
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 

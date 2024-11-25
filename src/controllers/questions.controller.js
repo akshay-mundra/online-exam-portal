@@ -8,9 +8,9 @@ async function bulkCreate(req, res, next) {
     res.data = result;
     res.statusCode = 201;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -21,9 +21,9 @@ async function createOption(req, res, next) {
     res.data = result;
     res.statusCode = 201;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -34,9 +34,9 @@ async function getOption(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -47,9 +47,9 @@ async function updateOption(req, res, next) {
     res.data = result;
     res.statusCode = 202;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -60,9 +60,9 @@ async function removeOption(req, res, next) {
     res.data = result;
     res.statusCode = 202;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -71,5 +71,5 @@ module.exports = {
   createOption,
   getOption,
   updateOption,
-  removeOption,
+  removeOption
 };

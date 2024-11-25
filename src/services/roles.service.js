@@ -12,17 +12,14 @@ async function create(payload) {
     if (role) {
       return commonHelpers.throwCustomError('Role already exist', 400);
     }
-    const newRole = await Role.create(
-      { name },
-      { transaction: transactionContext },
-    );
+    const newRole = await Role.create({ name }, { transaction: transactionContext });
 
     await transactionContext.commit();
 
     return newRole;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -49,14 +46,14 @@ async function update(id, payload) {
   try {
     const [updatedRowCount, updatedRole] = await Role.update(
       {
-        name,
+        name
       },
       {
-        where: { id },
+        where: { id }
       },
       {
-        transaction: transactionContext,
-      },
+        transaction: transactionContext
+      }
     );
     if (!updatedRowCount) {
       return commonHelpers.throwCustomError('Role not found', 404);
@@ -65,9 +62,9 @@ async function update(id, payload) {
     await transactionContext.commit();
 
     return updatedRole;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -81,17 +78,14 @@ async function remove(id) {
     if (!role) {
       return commonHelpers.throwCustomError('Role not found', 404);
     }
-    await Role.destroy(
-      { where: { id: role.id } },
-      { transaction: transactionContext },
-    );
+    await Role.destroy({ where: { id: role.id } }, { transaction: transactionContext });
 
     await transactionContext.commit();
 
     return 'Role removed successfully';
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 

@@ -10,7 +10,7 @@ function options(req, res, next) {
     questionId: option?.question_id,
     option: option?.option,
     isCorrect: option?.is_correct,
-    marks: option?.marks,
+    marks: option?.marks
   }));
 
   if (response.length === 1) {

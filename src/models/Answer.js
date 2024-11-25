@@ -10,17 +10,17 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Answer.belongsTo(models.Question, {
         foreignKey: 'question_id',
-        as: 'questions',
+        as: 'questions'
       });
 
       Answer.belongsTo(models.Option, {
         foreignKey: 'option_id',
-        as: 'options',
+        as: 'options'
       });
 
       Answer.belongsTo(models.UserExam, {
         foreignKey: 'user_exam_id',
-        as: 'users_exams',
+        as: 'users_exams'
       });
     }
   }
@@ -30,39 +30,39 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         primaryKey: true,
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: DataTypes.UUIDV4
       },
       option_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'options',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       question_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'questions',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       user_exam_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'users_exams',
-          key: 'id',
-        },
-      },
+          key: 'id'
+        }
+      }
     },
     {
       sequelize,
       modelName: 'Answer',
       tableName: 'answers',
-      paranoid: true,
-    },
+      paranoid: true
+    }
   );
   return Answer;
 };

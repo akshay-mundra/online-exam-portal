@@ -19,7 +19,7 @@ router.post(
   utilMiddlewares.convertQuestionFileToObject,
   questionValidators.bulkCreateSchema,
   questionControllers.bulkCreate,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.post(
@@ -29,7 +29,7 @@ router.post(
   optionValidators.createSchema,
   questionControllers.createOption,
   optionSerializers.options,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.get(
@@ -38,7 +38,7 @@ router.get(
   authMiddlewares.authorize([ADMIN]),
   questionControllers.getOption,
   optionSerializers.options,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.put(
@@ -48,7 +48,7 @@ router.put(
   optionValidators.createSchema,
   questionControllers.updateOption,
   optionSerializers.options,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.delete(
@@ -56,7 +56,7 @@ router.delete(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   questionControllers.removeOption,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 module.exports = router;

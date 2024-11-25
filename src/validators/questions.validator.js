@@ -11,21 +11,21 @@ async function bulkCreateSchema(req, res, next) {
       Joi.object({
         option: Joi.string().required(),
         isCorrect: Joi.boolean(),
-        marks: Joi.number(),
-      }),
-    ),
+        marks: Joi.number()
+      })
+    )
   });
 
   const schema = Joi.object({
     examId: Joi.string().required(),
-    questions: Joi.array().items(questionObj),
+    questions: Joi.array().items(questionObj)
   });
 
   try {
     validateHelpers.validateRequest(req, res, next, schema, 'body');
-  } catch (err) {
-    console.log('bulk create schema', err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log('bulk create schema', error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 

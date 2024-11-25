@@ -10,30 +10,30 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       User.hasMany(models.User, {
         as: 'users',
-        foreignKey: 'admin_id',
+        foreignKey: 'admin_id'
       });
 
       User.belongsTo(models.User, {
         as: 'admin',
         foreignKey: 'admin_id',
-        targetKey: 'id',
+        targetKey: 'id'
       });
 
       User.belongsToMany(models.Role, {
         through: 'users_roles',
         foreignKey: 'user_id',
-        other_key: 'role_id',
+        other_key: 'role_id'
       });
 
       User.hasMany(models.Exam, {
         as: 'exams',
-        foreignKey: 'admin_id',
+        foreignKey: 'admin_id'
       });
 
       User.belongsToMany(models.Exam, {
         through: 'users_exams',
         foreignKey: 'user_id',
-        other_key: 'exam_id',
+        other_key: 'exam_id'
       });
     }
   }
@@ -43,40 +43,40 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        primaryKey: true,
+        primaryKey: true
       },
       first_name: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       last_name: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
       },
       password: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       admin_id: {
         type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'users',
-          key: 'id',
-        },
-      },
+          key: 'id'
+        }
+      }
     },
     {
       sequelize,
       modelName: 'User',
       tableName: 'users',
-      paranoid: true,
-    },
+      paranoid: true
+    }
   );
   return User;
 };

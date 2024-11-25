@@ -15,7 +15,7 @@ const getAllRoutesPath = function () {
     if (fs.existsSync(fullPath) && fullPath.endsWith('.route.js')) {
       allRoutesPath.push({
         fullPath: fullPath.replace('.js', ''),
-        fileName: file.replace('.route.js', ''),
+        fileName: file.replace('.route.js', '')
       });
     }
   });
@@ -32,14 +32,11 @@ const registerRoutes = function (expressInstance) {
     if (routeFile.fileName === 'app') {
       expressInstance.use('/api', router);
     } else {
-      expressInstance.use(
-        `/api/${camelCaseToDash(routeFile.fileName)}`,
-        router,
-      );
+      expressInstance.use(`/api/${camelCaseToDash(routeFile.fileName)}`, router);
     }
   }
 };
 
 module.exports = {
-  registerRoutes,
+  registerRoutes
 };

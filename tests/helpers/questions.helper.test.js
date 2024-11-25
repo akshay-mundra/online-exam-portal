@@ -1,15 +1,12 @@
-const {
-  getQuestionExamOptions,
-  checkOptionsSingleChoice,
-} = require('../../src/helpers/questions.helper');
+const { getQuestionExamOptions, checkOptionsSingleChoice } = require('../../src/helpers/questions.helper');
 const { Question, Option, Exam } = require('../../src/models');
 
 jest.mock('../../src/models', () => ({
   Question: {
-    findOne: jest.fn(),
+    findOne: jest.fn()
   },
   Option: {},
-  Exam: {},
+  Exam: {}
 }));
 
 describe('Question Helper Functions', () => {
@@ -21,7 +18,7 @@ describe('Question Helper Functions', () => {
       const mockQuestion = {
         id: 1,
         exams: [{ admin_id: userId }],
-        options: [{ question_id: id, is_active: true }],
+        options: [{ question_id: id, is_active: true }]
       };
 
       Question.findOne.mockResolvedValue(mockQuestion);
@@ -34,14 +31,14 @@ describe('Question Helper Functions', () => {
           {
             model: Exam,
             as: 'exams',
-            where: { admin_id: userId },
+            where: { admin_id: userId }
           },
           {
             model: Option,
             where: { question_id: id, ...optionCondition },
-            required: true,
-          },
-        ],
+            required: true
+          }
+        ]
       });
 
       expect(result).toEqual(mockQuestion);
@@ -62,12 +59,7 @@ describe('Question Helper Functions', () => {
 
   describe('checkOptionsSingleChoice', () => {
     it('should return the correct count of correct options for single choice', () => {
-      const options = [
-        { is_correct: true },
-        { isCorrect: true },
-        { is_correct: false },
-        { isCorrect: false },
-      ];
+      const options = [{ is_correct: true }, { isCorrect: true }, { is_correct: false }, { isCorrect: false }];
 
       const result = checkOptionsSingleChoice(options);
 

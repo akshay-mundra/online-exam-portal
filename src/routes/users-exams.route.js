@@ -11,7 +11,7 @@ router.put(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   userExamControllers.createAnswer,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.get(
@@ -19,7 +19,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   userExamControllers.calculateUserScore,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.post(
@@ -27,7 +27,7 @@ router.post(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   userExamControllers.submitExam,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 module.exports = router;

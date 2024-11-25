@@ -8,9 +8,9 @@ async function login(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -21,9 +21,9 @@ async function register(req, res, next) {
     res.data = result;
     res.statusCode = 201;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -34,9 +34,9 @@ async function forgotPassword(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -47,9 +47,9 @@ async function resetPassword(req, res, next) {
     res.data = result;
     res.statusCode = 202;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -59,9 +59,9 @@ async function logout(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 

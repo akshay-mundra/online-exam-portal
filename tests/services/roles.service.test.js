@@ -1,10 +1,4 @@
-const {
-  create,
-  get,
-  getAll,
-  update,
-  remove,
-} = require('../../src/services/roles.service');
+const { create, get, getAll, update, remove } = require('../../src/services/roles.service');
 const { Role } = require('../../src/models');
 const commonHelpers = require('../../src/helpers/common.helper');
 const { sequelize } = require('../../src/models');
@@ -20,7 +14,7 @@ describe('Role Service', () => {
 
     transactionContext = {
       commit: jest.fn(),
-      rollback: jest.fn(),
+      rollback: jest.fn()
     };
 
     sequelize.transaction = jest.fn().mockResolvedValue(transactionContext);
@@ -41,12 +35,9 @@ describe('Role Service', () => {
       const result = await create(payload);
 
       expect(Role.findOne).toHaveBeenCalledWith({
-        where: { name: payload.name },
+        where: { name: payload.name }
       });
-      expect(Role.create).toHaveBeenCalledWith(
-        { name: payload.name },
-        { transaction: transactionContext },
-      );
+      expect(Role.create).toHaveBeenCalledWith({ name: payload.name }, { transaction: transactionContext });
       expect(transactionContext.commit).toHaveBeenCalled();
       expect(result).toEqual({ id: '1', name: 'Admin' });
     });
@@ -59,10 +50,7 @@ describe('Role Service', () => {
       await expect(create(payload)).rejects.toThrow('Role already exist');
 
       expect(Role.findOne).toHaveBeenCalled();
-      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(
-        'Role already exist',
-        400,
-      );
+      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('Role already exist', 400);
       expect(transactionContext.rollback).toHaveBeenCalled();
     });
 
@@ -78,13 +66,11 @@ describe('Role Service', () => {
 
   describe('update', () => {
     beforeEach(() => {
-      commonHelpers.throwCustomError.mockImplementation(
-        (message, statusCode) => {
-          const error = new Error(message);
-          error.statusCode = statusCode;
-          throw error;
-        },
-      );
+      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
+        const error = new Error(message);
+        error.statusCode = statusCode;
+        throw error;
+      });
     });
     it('should update a role successfully', async () => {
       const id = '1';
@@ -97,7 +83,7 @@ describe('Role Service', () => {
       expect(Role.update).toHaveBeenCalledWith(
         { name: payload.name },
         { where: { id } },
-        { transaction: transactionContext },
+        { transaction: transactionContext }
       );
       expect(transactionContext.commit).toHaveBeenCalled();
       expect(result).toEqual([role]);
@@ -134,10 +120,7 @@ describe('Role Service', () => {
       const result = await remove(id);
 
       expect(Role.findOne).toHaveBeenCalledWith({ where: { id } });
-      expect(Role.destroy).toHaveBeenCalledWith(
-        { where: { id: role.id } },
-        { transaction: transactionContext },
-      );
+      expect(Role.destroy).toHaveBeenCalledWith({ where: { id: role.id } }, { transaction: transactionContext });
       expect(transactionContext.commit).toHaveBeenCalled();
       expect(result).toBe('Role removed successfully');
     });
@@ -158,10 +141,7 @@ describe('Role Service', () => {
 
       await expect(remove(id)).rejects.toThrow('Role not found');
 
-      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(
-        'Role not found',
-        404,
-      );
+      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('Role not found', 404);
       expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });

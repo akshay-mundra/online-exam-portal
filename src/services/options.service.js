@@ -12,19 +12,19 @@ async function create(questionId, payload) {
         option,
         is_correct: isCorrect,
         marks,
-        question_id: questionId,
+        question_id: questionId
       },
       {
-        transaction: transactionContext,
-      },
+        transaction: transactionContext
+      }
     );
 
     await transactionContext.commit();
 
     return createdOption;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -38,15 +38,15 @@ async function update(id, payload) {
       {
         option,
         is_correct: isCorrect,
-        marks,
+        marks
       },
       {
         where: { id },
-        returning: true,
+        returning: true
       },
       {
-        transaction: transactionContext,
-      },
+        transaction: transactionContext
+      }
     );
 
     if (!updateRowCount) {
@@ -56,9 +56,9 @@ async function update(id, payload) {
     await transactionContext.commit();
 
     return updatedOption;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -67,10 +67,7 @@ async function remove(id) {
   const transactionContext = await sequelize.transaction();
 
   try {
-    const rowsModified = await Option.destroy(
-      { where: { id } },
-      { transaction: transactionContext },
-    );
+    const rowsModified = await Option.destroy({ where: { id } }, { transaction: transactionContext });
 
     if (rowsModified === 0) {
       commonHelpers.throwCustomError('Option not found', 404);
@@ -79,9 +76,9 @@ async function remove(id) {
     await transactionContext.commit();
 
     return 'Option deleted successfully';
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 

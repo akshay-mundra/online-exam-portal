@@ -18,7 +18,7 @@ router.get(
   authMiddlewares.authorize([ADMIN]),
   userControllers.getAll,
   userSerializers.users,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.get(
@@ -27,7 +27,7 @@ router.get(
   authMiddlewares.authorize([ADMIN, USER]),
   userControllers.getMe,
   userSerializers.users,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.post(
@@ -38,7 +38,7 @@ router.post(
   utilMiddlewares.convertUserFileToObject,
   userValidators.bulkCreateSchema,
   userControllers.bulkCreate,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.get(
@@ -47,7 +47,7 @@ router.get(
   authMiddlewares.authorize([ADMIN, USER]),
   userControllers.get,
   userSerializers.users,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.put(
@@ -57,7 +57,7 @@ router.put(
   userValidators.updateSchema,
   userControllers.update,
   userSerializers.users,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.delete(
@@ -65,7 +65,7 @@ router.delete(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   userControllers.remove,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.get(
@@ -74,7 +74,7 @@ router.get(
   authMiddlewares.authorize([ADMIN, USER]),
   userControllers.getAllExams,
   examSerializers.exams,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.post(
@@ -83,7 +83,7 @@ router.post(
   authMiddlewares.authorize([USER]),
   userControllers.startExam,
   userExamSerializers.usersExams,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 module.exports = router;

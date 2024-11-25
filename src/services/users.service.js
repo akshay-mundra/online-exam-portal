@@ -8,10 +8,7 @@ const moment = require('moment');
 // get all users created by that admin
 async function getAll(currentUser, query) {
   const { limit: queryLimit, page } = query;
-  const { limit, offset } = commonHelpers.getPaginationAttributes(
-    page,
-    queryLimit,
-  );
+  const { limit, offset } = commonHelpers.getPaginationAttributes(page, queryLimit);
   const roles = currentUser.roles;
   const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
 
@@ -19,13 +16,13 @@ async function getAll(currentUser, query) {
     where: isSuperAdmin ? {} : { admin_id: currentUser.id },
     attributes: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
     offset,
-    limit,
+    limit
   };
   const { count: total, rows: users } = await User.findAndCountAll(options);
 
   return {
     users,
-    total,
+    total
   };
 }
 
@@ -49,7 +46,7 @@ async function get(currentUser, id) {
 
   let user;
   const options = {
-    where: isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id },
+    where: isSuperAdmin || isUser ? { id } : { id, admin_id: currentUser.id }
   };
 
   if (isSuperAdmin || isAdmin) {
@@ -78,15 +75,15 @@ async function update(currentUser, id, payload) {
         ? { id }
         : {
             id,
-            admin_id: currentUser.id,
+            admin_id: currentUser.id
           },
       returning: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
-      transaction: transactionContext,
+      transaction: transactionContext
     };
 
     const [updatedRowCount, updatedUser] = await User.update(
       { first_name: firstName, last_name: lastName, email },
-      options,
+      options
     );
 
     if (updatedRowCount === 0) {
@@ -95,9 +92,9 @@ async function update(currentUser, id, payload) {
 
     await transactionContext.commit();
     return updatedUser[0];
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -110,7 +107,7 @@ async function remove(currentUser, id) {
   try {
     const options = {
       where: isSuperAdmin ? { id } : { id, admin_id: currentUser.id },
-      transaction: transactionContext,
+      transaction: transactionContext
     };
     const countChanged = await User.destroy(options);
     if (countChanged === 0) {
@@ -119,9 +116,9 @@ async function remove(currentUser, id) {
     await transactionContext.commit();
 
     return { count: countChanged, message: 'User removed successfully' };
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -134,7 +131,7 @@ async function bulkCreate(currentUser, payload) {
     const bulkUsers = [];
     const userRole = await Role.findOne({ where: { name: 'user' } });
 
-    for (let user of users) {
+    for (const user of users) {
       const hashedPassword = await bcrypt.hash(user.password, 10);
 
       const userObj = {
@@ -142,44 +139,42 @@ async function bulkCreate(currentUser, payload) {
         last_name: user.lastName,
         email: user.email,
         password: hashedPassword,
-        admin_id: currentUser.id,
+        admin_id: currentUser.id
       };
 
       const userExists = await User.findOne({
-        where: { [Op.or]: [{ id: user.id }, { email: user.email }] },
+        where: { [Op.or]: [{ id: user.id }, { email: user.email }] }
       });
 
       if (userExists) {
         if (userExists.admin_id !== currentUser.id) {
-          return commonHelpers.throwCustomError(
-            'The user you are updating is not created by you',
-            403,
-          );
+          return commonHelpers.throwCustomError('The user you are updating is not created by you', 403);
         }
+
         const updatedUser = await User.update(
           userObj,
           {
             where: { id: userExists.id },
             returning: true,
-            plain: true,
+            plain: true
           },
-          { transaction: transactionContext },
+          { transaction: transactionContext }
         );
 
         bulkUsers.push(updatedUser[1].id);
       } else {
         const createdUser = await User.create(userObj, {
-          transaction: transactionContext,
+          transaction: transactionContext
         });
 
         await UserRole.create(
           {
             user_id: createdUser?.id,
-            role_id: userRole?.id,
+            role_id: userRole?.id
           },
           {
-            transaction: transactionContext,
-          },
+            transaction: transactionContext
+          }
         );
 
         bulkUsers.push(createdUser.id);
@@ -189,9 +184,9 @@ async function bulkCreate(currentUser, payload) {
     await transactionContext.commit();
 
     return bulkUsers;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -211,21 +206,19 @@ async function getAllExams(currentUser, params) {
         required: true,
         through: {
           attributes: [],
-          where: { deleted_at: null },
-        },
-      },
-    ],
+          where: { deleted_at: null }
+        }
+      }
+    ]
   };
 
   let exams;
+
   if (isAdmin) {
     exams = await Exam.findAll(options);
   } else if (isUser) {
     if (id !== currentUser.id) {
-      return commonHelpers.throwCustomError(
-        'Other user is not accessible to you',
-        403,
-      );
+      return commonHelpers.throwCustomError('Other user is not accessible to you', 403);
     }
 
     exams = await Exam.findAll(options);
@@ -242,10 +235,7 @@ async function startExam(currentUser, params) {
 
   try {
     if (currentUser.id !== id) {
-      return commonHelpers.throwCustomError(
-        'you can not access another user',
-        403,
-      );
+      return commonHelpers.throwCustomError('you can not access another user', 403);
     }
 
     const exam = await Exam.findOne({ id: examId });
@@ -256,32 +246,27 @@ async function startExam(currentUser, params) {
 
     const currentTime = moment.utc();
 
-    const isExamAvailable =
-      currentTime.isAfter(exam.start_time) &&
-      currentTime.isBefore(exam.end_time);
+    const isExamAvailable = currentTime.isAfter(exam.start_time) && currentTime.isBefore(exam.end_time);
 
     if (!isExamAvailable) {
-      commonHelpers.throwCustomError(
-        'You can only join the exam within the allowed time window',
-        403,
-      );
+      commonHelpers.throwCustomError('You can only join the exam within the allowed time window', 403);
     }
 
     const [updatedRowCount, updatedUserExam] = await UserExam.update(
       {
-        status: 'on-going',
+        status: 'on-going'
       },
       {
         where: {
           user_id: id,
           exam_id: examId,
-          status: { [Op.not]: 'completed' },
+          status: { [Op.not]: 'completed' }
         },
-        returning: true,
+        returning: true
       },
       {
-        transaction: transactionContext,
-      },
+        transaction: transactionContext
+      }
     );
 
     if (updatedRowCount === 0) {
@@ -291,9 +276,9 @@ async function startExam(currentUser, params) {
     await transactionContext.commit();
 
     return updatedUserExam[0];
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -305,5 +290,5 @@ module.exports = {
   remove,
   bulkCreate,
   getAllExams,
-  startExam,
+  startExam
 };

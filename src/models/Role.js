@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       Role.belongsToMany(models.User, {
         through: 'users_roles',
         foreignKey: 'role_id',
-        other_key: 'user_id',
+        other_key: 'user_id'
       });
     }
   }
@@ -21,20 +21,20 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        primaryKey: true,
+        primaryKey: true
       },
       name: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
-      },
+        unique: true
+      }
     },
     {
       sequelize,
       modelName: 'Role',
       tableName: 'roles',
-      paranoid: true,
-    },
+      paranoid: true
+    }
   );
   return Role;
 };

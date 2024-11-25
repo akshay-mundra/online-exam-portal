@@ -1,11 +1,4 @@
-const {
-  getAll,
-  get,
-  update,
-  remove,
-  bulkCreate,
-  getAllExams,
-} = require('../../src/controllers/users.controller');
+const { getAll, get, update, remove, bulkCreate, getAllExams } = require('../../src/controllers/users.controller');
 const userServices = require('../../src/services/users.service');
 const commonHelpers = require('../../src/helpers/common.helper');
 const { faker } = require('@faker-js/faker');
@@ -29,7 +22,7 @@ describe('User Controller', () => {
     it('should get all users successfully', async () => {
       const mockResponse = [
         { id: faker.string.uuid(), name: faker.name.fullName() },
-        { id: faker.string.uuid(), name: faker.name.fullName() },
+        { id: faker.string.uuid(), name: faker.name.fullName() }
       ];
       userServices.getAll.mockResolvedValue(mockResponse);
 
@@ -48,12 +41,7 @@ describe('User Controller', () => {
 
       await getAll(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -82,12 +70,7 @@ describe('User Controller', () => {
 
       await get(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        404,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 404);
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -103,11 +86,7 @@ describe('User Controller', () => {
 
       await update(req, res, next);
 
-      expect(userServices.update).toHaveBeenCalledWith(
-        req.user,
-        userId,
-        req.body,
-      );
+      expect(userServices.update).toHaveBeenCalledWith(req.user, userId, req.body);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
@@ -121,12 +100,7 @@ describe('User Controller', () => {
 
       await update(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -155,12 +129,7 @@ describe('User Controller', () => {
 
       await remove(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -169,12 +138,9 @@ describe('User Controller', () => {
     it('should create users in bulk successfully', async () => {
       const mockUsers = [
         { id: faker.string.uuid(), name: faker.name.fullName() },
-        { id: faker.string.uuid(), name: faker.name.fullName() },
+        { id: faker.string.uuid(), name: faker.name.fullName() }
       ];
-      req.body = [
-        { name: faker.name.fullName() },
-        { name: faker.name.fullName() },
-      ];
+      req.body = [{ name: faker.name.fullName() }, { name: faker.name.fullName() }];
       userServices.bulkCreate.mockResolvedValue(mockUsers);
 
       await bulkCreate(req, res, next);
@@ -193,12 +159,7 @@ describe('User Controller', () => {
 
       await bulkCreate(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -207,17 +168,14 @@ describe('User Controller', () => {
     it('should get all exams successfully for a user', async () => {
       const mockExams = [
         { id: faker.string.uuid(), title: faker.lorem.words() },
-        { id: faker.string.uuid(), title: faker.lorem.words() },
+        { id: faker.string.uuid(), title: faker.lorem.words() }
       ];
       req.params = { userId: faker.string.uuid() };
       userServices.getAllExams.mockResolvedValue(mockExams);
 
       await getAllExams(req, res, next);
 
-      expect(userServices.getAllExams).toHaveBeenCalledWith(
-        req.user,
-        req.params,
-      );
+      expect(userServices.getAllExams).toHaveBeenCalledWith(req.user, req.params);
       expect(res.data).toEqual(mockExams);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -231,12 +189,7 @@ describe('User Controller', () => {
 
       await getAllExams(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
       expect(next).not.toHaveBeenCalled();
     });
   });
