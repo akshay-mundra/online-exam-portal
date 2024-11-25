@@ -29,6 +29,19 @@ async function getAll(currentUser, query) {
   };
 }
 
+// get the current logged in user
+async function getMe(currentUser) {
+  const { id } = currentUser;
+
+  const user = await User.findByPk(id);
+
+  if (!user) {
+    return commonHelpers.throwCustomError('User not found', 404);
+  }
+
+  return user;
+}
+
 // admin can get users created by him, user can only see details of self.
 async function get(currentUser, id) {
   const roles = currentUser.roles;
@@ -286,6 +299,7 @@ async function startExam(currentUser, params) {
 
 module.exports = {
   getAll,
+  getMe,
   get,
   update,
   remove,

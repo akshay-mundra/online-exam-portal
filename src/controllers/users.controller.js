@@ -17,7 +17,8 @@ async function getAll(req, res, next) {
 async function getMe(req, res, next) {
   try {
     const user = req.user;
-    res.data = user;
+    const result = await userServices.getMe(user);
+    res.data = result;
     res.statusCode = 200;
     next();
   } catch (err) {
