@@ -10,7 +10,7 @@ async function authenticate(req, res, next) {
     if (!token) {
       commonHelpers.throwCustomError('Access Denied | Token Not Found', 401);
     }
-    const decodedData = jwtHelpers.verifyToken(token);
+    const decodedData = await jwtHelpers.verifyToken(token);
     let user = await User.findOne({ where: { id: decodedData.id } });
     if (!user) {
       commonHelpers.throwCustomError('User not found', 403);

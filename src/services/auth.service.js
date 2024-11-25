@@ -35,7 +35,7 @@ async function login(payload) {
   }
 
   const roles = user.Roles.map(role => role.name);
-  const token = jwtHelpers.signToken({
+  const token = await jwtHelpers.signToken({
     id: user.id,
     email: user.email,
     roles,
