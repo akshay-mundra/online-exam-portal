@@ -12,7 +12,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   roleController.getAll,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.post(
@@ -21,7 +21,7 @@ router.post(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   roleController.create,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.get(
@@ -29,7 +29,7 @@ router.get(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   roleController.get,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.patch(
@@ -38,7 +38,7 @@ router.patch(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   roleController.update,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 router.delete(
@@ -46,7 +46,7 @@ router.delete(
   authMiddlewares.authenticate,
   authMiddlewares.authorize([ADMIN]),
   roleController.remove,
-  commonHelpers.responseHandler,
+  commonHelpers.responseHandler
 );
 
 module.exports = router;

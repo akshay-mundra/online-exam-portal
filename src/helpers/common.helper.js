@@ -1,5 +1,4 @@
-const { SUPER_ADMIN, ADMIN, USER } =
-  require('../constants/common.constant').roles;
+const { SUPER_ADMIN, ADMIN, USER } = require('../constants/common.constant').roles;
 
 // throw custom error with message and statuscode
 function throwCustomError(message, statusCode = 400, isCustom = false) {
@@ -17,14 +16,14 @@ function errorHandler(req, res, message, statusCode = 400) {
   message = message ? message : 'Something went wrong';
 
   res.status(statusCode).json({
-    message,
+    message
   });
 }
 
 // send response if all good
 function responseHandler(req, res) {
   const response = {
-    data: res.data,
+    data: res.data
   };
   res.status(res.statusCode).json(response);
 }
@@ -34,8 +33,9 @@ function getRolesAsBool(roles) {
   const rolesAsBool = {
     isSuperAdmin: false,
     isAdmin: false,
-    isUser: false,
+    isUser: false
   };
+
   if (roles?.includes(SUPER_ADMIN)) {
     rolesAsBool.isSuperAdmin = true;
   } else if (roles?.includes(ADMIN)) {
@@ -53,7 +53,7 @@ function getPaginationAttributes(page = 0, limit = 10) {
 
   return {
     limit,
-    offset,
+    offset
   };
 }
 
@@ -62,5 +62,5 @@ module.exports = {
   errorHandler,
   responseHandler,
   getRolesAsBool,
-  getPaginationAttributes,
+  getPaginationAttributes
 };

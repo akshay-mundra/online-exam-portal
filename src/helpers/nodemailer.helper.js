@@ -7,16 +7,16 @@ async function sendEmail(options) {
     port: process.env.SMPT_PORT,
     auth: {
       user: process.env.SMPT_MAIL,
-      pass: process.env.SMPT_APP_PASS,
+      pass: process.env.SMPT_APP_PASS
     },
-    authMethod: 'LOGIN',
+    authMethod: 'LOGIN'
   });
 
   const mailOptions = {
     from: process.env.SMPT_MAIL,
     to: options.to,
     subject: options.subject,
-    html: options.message,
+    html: options.message
   };
 
   await transporter.sendMail(mailOptions);

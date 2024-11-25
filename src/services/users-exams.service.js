@@ -1,11 +1,4 @@
-const {
-  UserExam,
-  Exam,
-  Option,
-  Question,
-  Answer,
-  sequelize,
-} = require('../models');
+const { UserExam, Exam, Option, Question, Answer, sequelize } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 const moment = require('moment');
 const { Op } = require('sequelize');
@@ -20,7 +13,7 @@ async function createAnswer(currentUser, params, payload) {
 
   try {
     const userExam = await UserExam.findOne({
-      where: { id },
+      where: { id }
     });
 
     if (!userExam) {
@@ -40,7 +33,7 @@ async function createAnswer(currentUser, params, payload) {
       include: [
         {
           model: Exam,
-          as: 'exams',
+          as: 'exams'
         },
         {
           model: Option,
@@ -48,11 +41,11 @@ async function createAnswer(currentUser, params, payload) {
           attributes: ['id'],
           where: {
             id: {
-              [Op.in]: optionIds,
-            },
-          },
-        },
-      ],
+              [Op.in]: optionIds
+            }
+          }
+        }
+      ]
     });
 
     if (!question) {
@@ -60,23 +53,16 @@ async function createAnswer(currentUser, params, payload) {
     }
 
     if (question.type === 'single_choice' && optionIds.length > 1) {
-      commonHelpers.throwCustomError(
-        'Cannot select multiple options for the single choice type question',
-        400,
-      );
+      commonHelpers.throwCustomError('Cannot select multiple options for the single choice type question', 400);
     }
 
     const currentTime = moment();
 
     const isExamAvailable =
-      currentTime.isAfter(question.exams.start_time) &&
-      currentTime.isBefore(question.exams.end_time);
+      currentTime.isAfter(question.exams.start_time) && currentTime.isBefore(question.exams.end_time);
 
     if (!isExamAvailable) {
-      commonHelpers.throwCustomError(
-        'You can only submit answers within the allowed time window',
-        403,
-      );
+      commonHelpers.throwCustomError('You can only submit answers within the allowed time window', 403);
     }
 
     const validOptionIds = question.Options?.map(option => option.id);
@@ -86,7 +72,7 @@ async function createAnswer(currentUser, params, payload) {
     // and if present then do nothing and if new option then create it
     const prevAns = await Answer.findAll({
       where: { user_exam_id: id, question_id: questionId },
-      attributes: ['id', 'option_id'],
+      attributes: ['id', 'option_id']
     });
 
     const prevAnswerIds = prevAns.map(ans => ans.option_id);
@@ -96,7 +82,7 @@ async function createAnswer(currentUser, params, payload) {
         acc?.push({
           option_id: option.id,
           question_id: questionId,
-          user_exam_id: id,
+          user_exam_id: id
         });
       }
       return acc;
@@ -109,34 +95,34 @@ async function createAnswer(currentUser, params, payload) {
       return acc;
     }, []);
 
-    if (ansToDelete && ansToDelete.length) {
+    if (ansToDelete && ansToDelete.length > 0) {
       await Answer.destroy(
         {
           where: {
             id: {
-              [Op.in]: ansToDelete,
-            },
-          },
+              [Op.in]: ansToDelete
+            }
+          }
         },
         {
-          transaction: transactionContext,
-        },
+          transaction: transactionContext
+        }
       );
     }
 
-    if (ansToCreate && ansToCreate.length) {
+    if (ansToCreate && ansToCreate.length > 0) {
       await Answer.bulkCreate(ansToCreate, {
         transaction: transactionContext,
-        returning: true,
+        returning: true
       });
     }
 
     await transactionContext.commit();
 
     return 'Answer submitted successfully';
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -156,7 +142,7 @@ async function calculateUserScore(currentUser, params) {
 
   try {
     const userExam = await UserExam.findOne({
-      where: { id: id },
+      where: { id: id }
     });
 
     if (!userExam) {
@@ -177,27 +163,27 @@ async function calculateUserScore(currentUser, params) {
 
     const questionAnswers = await Question.findAll({
       where: {
-        exam_id: userExam.exam_id,
+        exam_id: userExam.exam_id
       },
       attributes: ['id', 'type', 'negative_marks'],
       include: [
         {
           model: Option,
           attributes: ['id', 'marks', 'is_correct'],
-          required: true,
+          required: true
         },
         {
           model: Answer,
-          attributes: ['id', 'option_id'],
-        },
-      ],
+          attributes: ['id', 'option_id']
+        }
+      ]
     });
 
     let totalScore = 0;
 
     questionAnswers.forEach(question => {
-      let answers = question.Answers;
-      let options = question.Options;
+      const answers = question.Answers;
+      const options = question.Options;
 
       if (question.type === 'single_choice') {
         if (answers?.length === 0) {
@@ -205,9 +191,7 @@ async function calculateUserScore(currentUser, params) {
         } else if (answers?.length > 1) {
           totalScore += question.negative_marks;
         } else {
-          const selectedOption = options.find(
-            option => option.id === answers[0].option_id,
-          );
+          const selectedOption = options.find(option => option.id === answers[0].option_id);
 
           if (selectedOption && selectedOption.is_correct) {
             totalScore += selectedOption.marks;
@@ -219,10 +203,8 @@ async function calculateUserScore(currentUser, params) {
         let isIncorrect = false;
         let questionMarks = 0;
 
-        for (let answer of answers) {
-          const selectedOption = options.find(
-            option => option.id === answer.option_id,
-          );
+        for (const answer of answers) {
+          const selectedOption = options.find(option => option.id === answer.option_id);
 
           if (selectedOption) {
             if (selectedOption.is_correct) {
@@ -246,16 +228,16 @@ async function calculateUserScore(currentUser, params) {
       { score: totalScore },
       {
         where: { id: id },
-        transaction: transactionContext,
-      },
+        transaction: transactionContext
+      }
     );
 
     await transactionContext.commit();
 
     return totalScore;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -289,24 +271,24 @@ async function submitExam(currentUser, params) {
 
     await UserExam.update(
       {
-        status: 'completed',
+        status: 'completed'
       },
       {
         where: {
-          id: id,
-        },
+          id: id
+        }
       },
       {
-        transaction: transactionContext,
-      },
+        transaction: transactionContext
+      }
     );
 
     await transactionContext.commit();
 
     return 'Exam submited successfully';
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 

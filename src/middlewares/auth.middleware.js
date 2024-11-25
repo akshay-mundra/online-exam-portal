@@ -1,7 +1,6 @@
 const commonHelpers = require('../helpers/common.helper');
 const jwtHelpers = require('../helpers/jwt.helper');
-const { SUPER_ADMIN, ADMIN, USER } =
-  require('../constants/common.constant').roles;
+const { SUPER_ADMIN, ADMIN, USER } = require('../constants/common.constant').roles;
 
 async function authenticate(req, res, next) {
   try {
@@ -13,9 +12,9 @@ async function authenticate(req, res, next) {
     req.user = decodedData;
 
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -31,9 +30,9 @@ function authorize(allowedRoles) {
       } else {
         commonHelpers.throwCustomError('Access Denied | Forbidden', 403);
       }
-    } catch (err) {
-      console.log(err);
-      commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+    } catch (error) {
+      console.log(error);
+      commonHelpers.errorHandler(req, res, error.message, error.statusCode);
     }
   };
 }
@@ -43,14 +42,10 @@ async function authorizeRegister(req, res, next) {
     const { body: payload } = req;
     const { roles } = payload;
 
-    if (!roles || roles.length === 0)
-      commonHelpers.throwCustomError('roles are required', 400);
+    if (!roles || roles.length === 0) commonHelpers.throwCustomError('roles are required', 400);
 
     if (roles.includes(SUPER_ADMIN)) {
-      return commonHelpers.throwCustomError(
-        'Not allowed to create super_admin',
-        401,
-      );
+      return commonHelpers.throwCustomError('Not allowed to create super_admin', 401);
     } else if (roles.includes(USER)) {
       await authenticate(req, res, () => {
         authorize([ADMIN])(req, res, next);
@@ -58,9 +53,9 @@ async function authorizeRegister(req, res, next) {
     } else {
       next();
     }
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 

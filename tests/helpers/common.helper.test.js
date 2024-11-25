@@ -3,16 +3,15 @@ const {
   errorHandler,
   responseHandler,
   getRolesAsBool,
-  getPaginationAttributes,
+  getPaginationAttributes
 } = require('../../src/helpers/common.helper');
-const { SUPER_ADMIN, ADMIN, USER } =
-  require('../../src/constants/common.constant').roles;
+const { SUPER_ADMIN, ADMIN, USER } = require('../../src/constants/common.constant').roles;
 
 jest.mock('express', () => ({
   response: {
     status: jest.fn().mockReturnThis(),
-    json: jest.fn().mockReturnThis(),
-  },
+    json: jest.fn().mockReturnThis()
+  }
 }));
 
 describe('Helper Functions', () => {
@@ -47,24 +46,24 @@ describe('Helper Functions', () => {
     it('should send a response with the default message and status code', () => {
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis(),
+        json: jest.fn().mockReturnThis()
       };
       errorHandler({}, res, null);
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Something went wrong',
+        message: 'Something went wrong'
       });
     });
 
     it('should send a response with a custom message and status code', () => {
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis(),
+        json: jest.fn().mockReturnThis()
       };
       errorHandler({}, res, 'Custom error message', 404);
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
-        message: 'Custom error message',
+        message: 'Custom error message'
       });
     });
   });
@@ -75,7 +74,7 @@ describe('Helper Functions', () => {
         statusCode: 200,
         data: { id: 1, name: 'John Doe' },
         status: jest.fn().mockReturnThis(),
-        json: jest.fn().mockReturnThis(),
+        json: jest.fn().mockReturnThis()
       };
       responseHandler({}, res);
       expect(res.status).toHaveBeenCalledWith(200);
@@ -120,7 +119,7 @@ describe('Helper Functions', () => {
       expect(getRolesAsBool()).toEqual({
         isSuperAdmin: false,
         isAdmin: false,
-        isUser: false,
+        isUser: false
       });
     });
   });

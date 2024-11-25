@@ -9,9 +9,7 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    await queryInterface.sequelize.query(
-      'CREATE EXTENSION IF NOT EXISTS "uuid-ossp"',
-    );
+    await queryInterface.sequelize.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
   },
 
   async down(queryInterface) {
@@ -21,8 +19,6 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
-    await queryInterface.sequelize.query(
-      'DROP EXTENSION IF EXISTS "uuid-ossp"',
-    );
-  },
+    await queryInterface.sequelize.query('DROP EXTENSION IF EXISTS "uuid-ossp"');
+  }
 };

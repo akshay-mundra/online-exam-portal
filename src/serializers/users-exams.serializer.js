@@ -17,7 +17,7 @@ function usersExams(req, res, next) {
       examId: userExam?.exam_id,
       isMarked: userExam?.is_marked,
       status: userExam?.status,
-      score: userExam?.score,
+      score: userExam?.score
     });
   }
 

@@ -3,7 +3,7 @@ const {
   createOption,
   getOption,
   updateOption,
-  removeOption,
+  removeOption
 } = require('../../src/controllers/questions.controller');
 const questionServices = require('../../src/services/questions.service');
 const commonHelpers = require('../../src/helpers/common.helper');
@@ -27,21 +27,18 @@ describe('Questions Controller', () => {
     it('should create multiple questions successfully', async () => {
       const payload = [
         { question: faker.lorem.sentence(), options: [faker.lorem.word()] },
-        { question: faker.lorem.sentence(), options: [faker.lorem.word()] },
+        { question: faker.lorem.sentence(), options: [faker.lorem.word()] }
       ];
       req.body = payload;
       const mockResponse = [
         { id: faker.string.uuid(), ...payload[0] },
-        { id: faker.string.uuid(), ...payload[1] },
+        { id: faker.string.uuid(), ...payload[1] }
       ];
       questionServices.bulkCreate.mockResolvedValue(mockResponse);
 
       await bulkCreate(req, res, next);
 
-      expect(questionServices.bulkCreate).toHaveBeenCalledWith(
-        req.user,
-        payload,
-      );
+      expect(questionServices.bulkCreate).toHaveBeenCalledWith(req.user, payload);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(201);
       expect(next).toHaveBeenCalled();
@@ -55,12 +52,7 @@ describe('Questions Controller', () => {
 
       await bulkCreate(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 
@@ -77,11 +69,7 @@ describe('Questions Controller', () => {
 
       await createOption(req, res, next);
 
-      expect(questionServices.createOption).toHaveBeenCalledWith(
-        req.user,
-        params,
-        payload,
-      );
+      expect(questionServices.createOption).toHaveBeenCalledWith(req.user, params, payload);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(201);
       expect(next).toHaveBeenCalled();
@@ -95,12 +83,7 @@ describe('Questions Controller', () => {
 
       await createOption(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 
@@ -108,7 +91,7 @@ describe('Questions Controller', () => {
     it('should get a specific option for a question successfully', async () => {
       const params = {
         questionId: faker.string.uuid(),
-        optionId: faker.string.uuid(),
+        optionId: faker.string.uuid()
       };
       req.params = params;
       req.user = { id: faker.string.uuid() };
@@ -132,12 +115,7 @@ describe('Questions Controller', () => {
 
       await getOption(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 
@@ -145,7 +123,7 @@ describe('Questions Controller', () => {
     it('should update an option for a question successfully', async () => {
       const params = {
         questionId: faker.string.uuid(),
-        optionId: faker.string.uuid(),
+        optionId: faker.string.uuid()
       };
       const payload = { optionText: faker.lorem.word(), isCorrect: true };
       req.params = params;
@@ -157,11 +135,7 @@ describe('Questions Controller', () => {
 
       await updateOption(req, res, next);
 
-      expect(questionServices.updateOption).toHaveBeenCalledWith(
-        req.user,
-        params,
-        payload,
-      );
+      expect(questionServices.updateOption).toHaveBeenCalledWith(req.user, params, payload);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
@@ -175,12 +149,7 @@ describe('Questions Controller', () => {
 
       await updateOption(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 
@@ -188,23 +157,20 @@ describe('Questions Controller', () => {
     it('should remove an option for a question successfully', async () => {
       const params = {
         questionId: faker.string.uuid(),
-        optionId: faker.string.uuid(),
+        optionId: faker.string.uuid()
       };
       req.params = params;
       req.user = { id: faker.string.uuid() };
 
       const mockResponse = {
         id: params.optionId,
-        message: 'Option deleted successfully',
+        message: 'Option deleted successfully'
       };
       questionServices.removeOption.mockResolvedValue(mockResponse);
 
       await removeOption(req, res, next);
 
-      expect(questionServices.removeOption).toHaveBeenCalledWith(
-        req.user,
-        params,
-      );
+      expect(questionServices.removeOption).toHaveBeenCalledWith(req.user, params);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
@@ -218,12 +184,7 @@ describe('Questions Controller', () => {
 
       await removeOption(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 });

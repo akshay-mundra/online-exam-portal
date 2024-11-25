@@ -8,9 +8,9 @@ async function getAll(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -21,9 +21,9 @@ async function create(req, res, next) {
     res.data = result;
     res.statusCode = 201;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -35,9 +35,9 @@ async function get(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -49,9 +49,9 @@ async function update(req, res, next) {
     res.data = result;
     res.statusCode = 202;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -63,9 +63,9 @@ async function remove(req, res, next) {
     res.data = result;
     res.statusCode = 202;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -77,9 +77,9 @@ async function getResult(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -91,9 +91,9 @@ async function addUser(req, res, next) {
     res.data = result;
     res.statusCode = 201;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -105,9 +105,9 @@ async function getAllUsers(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -119,9 +119,9 @@ async function getUser(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -133,9 +133,9 @@ async function removeUser(req, res, next) {
     res.data = result;
     res.statusCode = 202;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -147,9 +147,9 @@ async function createQuestion(req, res, next) {
     res.data = result;
     res.statusCode = 201;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -161,9 +161,9 @@ async function getAllQuestions(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -175,9 +175,9 @@ async function getQuestion(req, res, next) {
     res.data = result;
     res.statusCode = 200;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -185,18 +185,13 @@ async function updateQuestion(req, res, next) {
   try {
     const { user, params, body: payload } = req;
     const { id, questionId } = params;
-    const result = await examServices.updateQuestion(
-      user,
-      id,
-      questionId,
-      payload,
-    );
+    const result = await examServices.updateQuestion(user, id, questionId, payload);
     res.data = result;
     res.statusCode = 202;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -208,9 +203,9 @@ async function removeQuestion(req, res, next) {
     res.data = result;
     res.statusCode = 202;
     next();
-  } catch (err) {
-    console.log(err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log(error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 
@@ -229,5 +224,5 @@ module.exports = {
   getAllQuestions,
   getQuestion,
   updateQuestion,
-  removeQuestion,
+  removeQuestion
 };

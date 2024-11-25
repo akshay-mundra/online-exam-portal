@@ -19,7 +19,7 @@ const convertUserFileToObject = async (req, res, next) => {
             firstName: row[1],
             lastName: row[2],
             email: row[3],
-            password: row[4],
+            password: row[4]
           };
           userObjArray.push(tempObj);
         });
@@ -36,7 +36,7 @@ const convertUserFileToObject = async (req, res, next) => {
             firstName: row.firstName,
             lastName: row.lastName,
             email: row.email,
-            password: row.password,
+            password: row.password
           };
           userObjArray.push(tempObj);
         })
@@ -45,13 +45,10 @@ const convertUserFileToObject = async (req, res, next) => {
           return next();
         });
     } else {
-      commonHelpers.throwCustomError(
-        'Invalid file format. Only .xlsx, .xls, or .csv files are allowed',
-        422,
-      );
+      commonHelpers.throwCustomError('Invalid file format. Only .xlsx, .xls, or .csv files are allowed', 422);
     }
-  } catch (err) {
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 };
 
@@ -69,17 +66,17 @@ const convertQuestionFileToObject = async (req, res, next) => {
           const tempObj = {
             question: row[0],
             type: row[1],
-            negativeMarks: row[2],
+            negativeMarks: row[2]
           };
 
           const optionsCount = row[3];
-          let options = [];
+          const options = [];
           for (let i = 0; i < optionsCount; i++) {
             const col = i * 3 + 4;
             options.push({
               option: row[col],
               isCorrect: row[col + 1],
-              marks: row[col + 2],
+              marks: row[col + 2]
             });
           }
           tempObj.options = options;
@@ -98,17 +95,17 @@ const convertQuestionFileToObject = async (req, res, next) => {
           const tempObj = {
             question: row[0],
             type: row[1],
-            negativeMarks: row[2],
+            negativeMarks: row[2]
           };
 
           const optionsCount = row[3];
-          let options = [];
+          const options = [];
           for (let i = 0; i < optionsCount; i++) {
             const col = i * 3 + 4;
             options.push({
               option: row[col],
               isCorrect: row[col + 1],
-              marks: row[col + 2],
+              marks: row[col + 2]
             });
           }
           tempObj.options = options;
@@ -120,13 +117,10 @@ const convertQuestionFileToObject = async (req, res, next) => {
           return next();
         });
     } else {
-      commonHelpers.throwCustomError(
-        'Invalid file format. Only .xlsx, .xls, or .csv files are allowed',
-        422,
-      );
+      commonHelpers.throwCustomError('Invalid file format. Only .xlsx, .xls, or .csv files are allowed', 422);
     }
-  } catch (err) {
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 };
 

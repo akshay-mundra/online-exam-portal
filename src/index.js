@@ -20,8 +20,8 @@ const startServer = async function () {
     console.log('Db Connected Successfully!');
 
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  } catch (err) {
-    console.log('Error runing server', err);
+  } catch (error) {
+    console.log('Error runing server', error);
   }
 };
 

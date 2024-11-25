@@ -8,16 +8,16 @@ module.exports = {
       'roles',
       [
         {
-          name: 'super_admin',
+          name: 'super_admin'
         },
         {
-          name: 'admin',
+          name: 'admin'
         },
         {
-          name: 'user',
-        },
+          name: 'user'
+        }
       ],
-      { returning: ['id'] },
+      { returning: ['id'] }
     );
 
     const [super_admin] = await queryInterface.bulkInsert(
@@ -27,20 +27,20 @@ module.exports = {
           first_name: 'Akshay',
           last_name: 'Mundra',
           email: 'akshay.mundra1010@gmail.com',
-          password: await bcrypt.hash(process.env.SUPER_ADMIN_PASS, 10),
-        },
+          password: await bcrypt.hash(process.env.SUPER_ADMIN_PASS, 10)
+        }
       ],
-      { returning: ['id'] },
+      { returning: ['id'] }
     );
 
-    let super_admin_role_id = roles.id;
+    const super_admin_role_id = roles.id;
     const admin_id = super_admin.id;
 
     await queryInterface.bulkInsert('users_roles', [
       {
         user_id: admin_id,
-        role_id: super_admin_role_id,
-      },
+        role_id: super_admin_role_id
+      }
     ]);
   },
 
@@ -51,5 +51,5 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-  },
+  }
 };

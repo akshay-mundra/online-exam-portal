@@ -1,10 +1,4 @@
-const {
-  login,
-  register,
-  forgotPassword,
-  resetPassword,
-  logout,
-} = require('../../src/controllers/auth.controller');
+const { login, register, forgotPassword, resetPassword, logout } = require('../../src/controllers/auth.controller');
 const authServices = require('../../src/services/auth.service');
 const commonHelpers = require('../../src/helpers/common.helper');
 const { getMockReq, getMockRes } = require('@jest-mock/express');
@@ -16,10 +10,10 @@ jest.mock('redis', () => {
   const mRedisClient = {
     connect: jest.fn().mockResolvedValue(),
     on: jest.fn(),
-    quit: jest.fn().mockResolvedValue(),
+    quit: jest.fn().mockResolvedValue()
   };
   return {
-    createClient: jest.fn(() => mRedisClient),
+    createClient: jest.fn(() => mRedisClient)
   };
 });
 
@@ -60,12 +54,7 @@ describe('Auth Controller', () => {
 
       await login(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        401,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 401);
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -93,12 +82,7 @@ describe('Auth Controller', () => {
 
       await register(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        409,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 409);
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -126,12 +110,7 @@ describe('Auth Controller', () => {
 
       await forgotPassword(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -161,12 +140,7 @@ describe('Auth Controller', () => {
 
       await resetPassword(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        401,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 401);
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -192,12 +166,7 @@ describe('Auth Controller', () => {
 
       await logout(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        401,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 401);
       expect(next).not.toHaveBeenCalled();
     });
   });

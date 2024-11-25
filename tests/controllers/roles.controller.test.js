@@ -1,10 +1,4 @@
-const {
-  create,
-  getAll,
-  get,
-  update,
-  remove,
-} = require('../../src/controllers/roles.controller');
+const { create, getAll, get, update, remove } = require('../../src/controllers/roles.controller');
 const roleServices = require('../../src/services/roles.service');
 const commonHelpers = require('../../src/helpers/common.helper');
 const { faker } = require('@faker-js/faker');
@@ -47,12 +41,7 @@ describe('Roles Controller', () => {
 
       await create(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 
@@ -60,7 +49,7 @@ describe('Roles Controller', () => {
     it('should get all roles successfully', async () => {
       const mockResponse = [
         { id: faker.string.uuid(), name: faker.lorem.word() },
-        { id: faker.string.uuid(), name: faker.lorem.word() },
+        { id: faker.string.uuid(), name: faker.lorem.word() }
       ];
       roleServices.getAll.mockResolvedValue(mockResponse);
 
@@ -80,12 +69,7 @@ describe('Roles Controller', () => {
 
       await getAll(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 
@@ -114,12 +98,7 @@ describe('Roles Controller', () => {
 
       await get(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 
@@ -149,12 +128,7 @@ describe('Roles Controller', () => {
 
       await update(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 
@@ -182,12 +156,7 @@ describe('Roles Controller', () => {
 
       await remove(req, res, next);
 
-      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(
-        req,
-        res,
-        errorMessage,
-        400,
-      );
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
     });
   });
 });

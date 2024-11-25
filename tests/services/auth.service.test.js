@@ -4,12 +4,7 @@ const jwtHelpers = require('../../src/helpers/jwt.helper');
 const nodemailerHelpers = require('../../src/helpers/nodemailer.helper');
 const { sequelize } = require('../../src/models');
 const commonHelpers = require('../../src/helpers/common.helper');
-const {
-  login,
-  register,
-  forgotPassword,
-  resetPassword,
-} = require('../../src/services/auth.service');
+const { login, register, forgotPassword, resetPassword } = require('../../src/services/auth.service');
 const { faker } = require('@faker-js/faker');
 const { redisClient } = require('../../src/config/redis');
 
@@ -23,8 +18,8 @@ jest.mock('../../src/config/redis', () => ({
   redisClient: {
     get: jest.fn(),
     set: jest.fn(),
-    del: jest.fn(),
-  },
+    del: jest.fn()
+  }
 }));
 
 describe('Auth Service', () => {
@@ -41,7 +36,7 @@ describe('Auth Service', () => {
         id: faker.string.uuid(),
         email,
         password: hashedPassword,
-        Roles: [{ name: 'user' }],
+        Roles: [{ name: 'user' }]
       };
       User.findOne.mockResolvedValue(mockUser);
       bcrypt.compare.mockResolvedValue(true);
@@ -52,13 +47,13 @@ describe('Auth Service', () => {
 
       expect(User.findOne).toHaveBeenCalledWith({
         where: { email },
-        include: expect.any(Array),
+        include: expect.any(Array)
       });
       expect(bcrypt.compare).toHaveBeenCalledWith(password, mockUser.password);
       expect(jwtHelpers.signToken).toHaveBeenCalledWith({
         id: mockUser.id,
         email: mockUser.email,
-        roles: ['user'],
+        roles: ['user']
       });
     });
 
@@ -74,10 +69,7 @@ describe('Auth Service', () => {
 
       const errMessage = 'User with email does not exist';
 
-      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(
-        errMessage,
-        401,
-      );
+      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(errMessage, 401);
     });
 
     it('should throw an error for invalid password', async () => {
@@ -87,7 +79,7 @@ describe('Auth Service', () => {
         id: faker.string.uuid(),
         email,
         password: 'hashed-password',
-        Roles: [{ name: 'user' }],
+        Roles: [{ name: 'user' }]
       };
       User.findOne.mockResolvedValue(mockUser);
       bcrypt.compare.mockResolvedValue(false);
@@ -100,10 +92,7 @@ describe('Auth Service', () => {
 
       const errMessage = 'Invalid email or password';
 
-      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(
-        errMessage,
-        403,
-      );
+      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(errMessage, 403);
     });
   });
 
@@ -115,7 +104,7 @@ describe('Auth Service', () => {
         lastName: 'Doe',
         email: faker.internet.email(),
         password: 'password123',
-        roles: ['user'],
+        roles: ['user']
       };
       const mockRole = { id: faker.string.uuid(), name: 'user' };
       Role.findAll.mockResolvedValue([mockRole]);
@@ -124,18 +113,17 @@ describe('Auth Service', () => {
       UserRole.bulkCreate.mockResolvedValue([]);
       sequelize.transaction.mockReturnValue({
         commit: jest.fn(),
-        rollback: jest.fn(),
+        rollback: jest.fn()
       });
 
       const result = await register(req, payload);
 
       expect(User.findOne).toHaveBeenCalledWith({
-        where: { email: payload.email },
+        where: { email: payload.email }
       });
-      expect(User.create).toHaveBeenCalledWith(
-        expect.objectContaining({ email: payload.email }),
-        { transaction: expect.any(Object) },
-      );
+      expect(User.create).toHaveBeenCalledWith(expect.objectContaining({ email: payload.email }), {
+        transaction: expect.any(Object)
+      });
       expect(result).toBeDefined();
     });
 
@@ -146,13 +134,10 @@ describe('Auth Service', () => {
       await register({}, payload);
 
       expect(User.findOne).toHaveBeenCalledWith({
-        where: { email: payload.email },
+        where: { email: payload.email }
       });
 
-      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(
-        'User already exists',
-        409,
-      );
+      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('User already exists', 409);
     });
   });
 
@@ -167,15 +152,10 @@ describe('Auth Service', () => {
       const result = await forgotPassword({ email });
 
       expect(User.findOne).toHaveBeenCalledWith({ where: { email } });
-      expect(redisClient.set).toHaveBeenCalledWith(
-        `reset-token:${user.id}`,
-        'hashedResetToken',
-        'EX',
-        60,
-      );
+      expect(redisClient.set).toHaveBeenCalledWith(`reset-token:${user.id}`, 'hashedResetToken', 'EX', 60);
       expect(nodemailerHelpers.sendEmail).toHaveBeenCalled();
       expect(result).toEqual({
-        message: 'Password reset link sent to email',
+        message: 'Password reset link sent to email'
       });
     });
 
@@ -187,10 +167,7 @@ describe('Auth Service', () => {
 
       expect(User.findOne).toHaveBeenCalledWith({ where: { email } });
 
-      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(
-        'User does not exist',
-        401,
-      );
+      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('User does not exist', 401);
     });
   });
 
@@ -200,7 +177,7 @@ describe('Auth Service', () => {
         password: 'newPassword123',
         confirmPassword: 'newPassword123',
         token: 'resetToken',
-        userId: faker.string.uuid(),
+        userId: faker.string.uuid()
       };
       const user = { id: payload.userId, save: jest.fn() };
       User.findOne.mockResolvedValue(user);
@@ -209,18 +186,15 @@ describe('Auth Service', () => {
       bcrypt.hash.mockResolvedValue('newHashedPassword');
       sequelize.transaction.mockReturnValue({
         commit: jest.fn(),
-        rollback: jest.fn(),
+        rollback: jest.fn()
       });
 
       const result = await resetPassword(payload);
 
       expect(User.findOne).toHaveBeenCalledWith({
-        where: { id: payload.userId },
+        where: { id: payload.userId }
       });
-      expect(bcrypt.compare).toHaveBeenCalledWith(
-        payload.token,
-        'hashedResetToken',
-      );
+      expect(bcrypt.compare).toHaveBeenCalledWith(payload.token, 'hashedResetToken');
       expect(user.save).toHaveBeenCalled();
       expect(result).toBe('Password reset successful');
     });
@@ -230,15 +204,12 @@ describe('Auth Service', () => {
         password: 'password123',
         confirmPassword: 'differentPassword',
         token: 'resetToken',
-        userId: faker.string.uuid(),
+        userId: faker.string.uuid()
       };
 
       await resetPassword(payload);
 
-      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(
-        'Both passwords should match',
-        422,
-      );
+      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('Both passwords should match', 422);
     });
   });
 });

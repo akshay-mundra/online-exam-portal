@@ -11,7 +11,7 @@ function users(req, res, next) {
       id: user?.id,
       firstName: user?.first_name,
       lastName: user?.last_name,
-      email: user?.email,
+      email: user?.email
     });
   }
 

@@ -17,25 +17,25 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
-        allowNull: false,
+        allowNull: false
       },
       user_id: {
         type: DataTypes.UUID,
         allowNull: false,
-        primaryKey: true,
+        primaryKey: true
       },
       role_id: {
         type: DataTypes.UUID,
         allowNull: false,
-        primaryKey: true,
-      },
+        primaryKey: true
+      }
     },
     {
       sequelize,
       modelName: 'UserRole',
       tableName: 'users_roles',
-      paranoid: true,
-    },
+      paranoid: true
+    }
   );
   return UserRole;
 };

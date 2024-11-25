@@ -1,16 +1,5 @@
-const {
-  createAnswer,
-  calculateUserScore,
-  submitExam,
-} = require('../../src/services/users-exams.service');
-const {
-  UserExam,
-  Exam,
-  Question,
-  Option,
-  Answer,
-  sequelize,
-} = require('../../src/models');
+const { createAnswer, calculateUserScore, submitExam } = require('../../src/services/users-exams.service');
+const { UserExam, Exam, Question, Option, Answer, sequelize } = require('../../src/models');
 const commonHelpers = require('../../src/helpers/common.helper');
 const moment = require('moment');
 
@@ -18,31 +7,31 @@ jest.mock('../../src/models', () => ({
   UserExam: {
     findOne: jest.fn(),
     update: jest.fn(),
-    findByPk: jest.fn(),
+    findByPk: jest.fn()
   },
   Exam: {
-    findByPk: jest.fn(),
+    findByPk: jest.fn()
   },
   Question: {
     findOne: jest.fn(),
-    findAll: jest.fn(),
+    findAll: jest.fn()
   },
   Option: {
-    findOne: jest.fn(),
+    findOne: jest.fn()
   },
   Answer: {
     findAll: jest.fn(),
     bulkCreate: jest.fn(),
-    destroy: jest.fn(),
+    destroy: jest.fn()
   },
   sequelize: {
-    transaction: jest.fn(),
-  },
+    transaction: jest.fn()
+  }
 }));
 
 jest.mock('../../src/helpers/common.helper', () => ({
   throwCustomError: jest.fn(),
-  getRolesAsBool: jest.fn(),
+  getRolesAsBool: jest.fn()
 }));
 
 describe('Exam Service', () => {
@@ -64,14 +53,14 @@ describe('Exam Service', () => {
           id: 1,
           user_id: 1,
           status: 'on-going',
-          exam_id: 1,
+          exam_id: 1
         };
         const mockExam = { id: 1, start_time: moment().subtract(1, 'hour') };
         const mockQuestion = {
           id: 1,
           exam_id: 1,
           type: 'single_choice',
-          Options: [{ id: 1 }],
+          Options: [{ id: 1 }]
         };
         const mockOption = { id: 1, is_correct: true, marks: 2 };
         const mockAnswer = { option_id: 1, question_id: 1, user_exam_id: 1 };
@@ -90,21 +79,19 @@ describe('Exam Service', () => {
         id: 1,
         user_id: 2,
         status: 'on-going',
-        exam_id: 1,
+        exam_id: 1
       };
       UserExam.findOne.mockResolvedValue(mockUserExam);
 
-      commonHelpers.throwCustomError.mockImplementation(
-        (message, statusCode) => {
-          const error = new Error(message);
-          error.statusCode = statusCode;
-          throw error;
-        },
-      );
+      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
+        const error = new Error(message);
+        error.statusCode = statusCode;
+        throw error;
+      });
 
-      await expect(
-        createAnswer({ id: 1 }, { id: 1 }, { questionId: 1, optionIds: [1] }),
-      ).rejects.toThrow('User not match');
+      await expect(createAnswer({ id: 1 }, { id: 1 }, { questionId: 1, optionIds: [1] })).rejects.toThrow(
+        'User not match'
+      );
     });
   });
 
@@ -115,23 +102,21 @@ describe('Exam Service', () => {
         user_id: 1,
         exam_id: 1,
         status: 'completed',
-        score: null,
+        score: null
       };
       const mockQuestion = {
         id: 1,
         type: 'single_choice',
         negative_marks: -1,
         Options: [{ id: 1, is_correct: true, marks: 2 }],
-        Answers: [{ option_id: 1 }],
+        Answers: [{ option_id: 1 }]
       };
 
       UserExam.findOne.mockResolvedValue(mockUserExam);
       Question.findAll.mockResolvedValue([mockQuestion]);
       commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
 
-      await expect(
-        calculateUserScore({ id: 1, roles: [] }, { id: 1 }),
-      ).resolves.toBe(2);
+      await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(2);
 
       expect(transactionContext.commit).toHaveBeenCalled();
     });
@@ -139,17 +124,13 @@ describe('Exam Service', () => {
     it('should throw "User Exam not found" error if user exam is not found', async () => {
       UserExam.findOne.mockResolvedValue(null);
 
-      commonHelpers.throwCustomError.mockImplementation(
-        (message, statusCode) => {
-          const error = new Error(message);
-          error.statusCode = statusCode;
-          throw error;
-        },
-      );
+      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
+        const error = new Error(message);
+        error.statusCode = statusCode;
+        throw error;
+      });
 
-      await expect(calculateUserScore({ id: 1 }, { id: 1 })).rejects.toThrow(
-        'User Exam not found',
-      );
+      await expect(calculateUserScore({ id: 1 }, { id: 1 })).rejects.toThrow('User Exam not found');
     });
 
     it('should handle incorrect answers for multiple-choice questions', async () => {
@@ -158,7 +139,7 @@ describe('Exam Service', () => {
         user_id: 1,
         exam_id: 1,
         status: 'completed',
-        score: null,
+        score: null
       };
       const mockQuestion = {
         id: 1,
@@ -166,18 +147,16 @@ describe('Exam Service', () => {
         negative_marks: -2,
         Options: [
           { id: 1, is_correct: true, marks: 2 },
-          { id: 2, is_correct: false, marks: 0 },
+          { id: 2, is_correct: false, marks: 0 }
         ],
-        Answers: [{ option_id: 1 }, { option_id: 2 }],
+        Answers: [{ option_id: 1 }, { option_id: 2 }]
       };
 
       UserExam.findOne.mockResolvedValue(mockUserExam);
       Question.findAll.mockResolvedValue([mockQuestion]);
       commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
 
-      await expect(
-        calculateUserScore({ id: 1, roles: [] }, { id: 1 }),
-      ).resolves.toBe(-2);
+      await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(-2);
 
       expect(transactionContext.commit).toHaveBeenCalled();
     });
@@ -189,16 +168,14 @@ describe('Exam Service', () => {
         id: 1,
         user_id: 1,
         exam_id: 1,
-        status: 'on-going',
+        status: 'on-going'
       };
       const mockExam = { id: 1, start_time: moment().subtract(1, 'hour') };
 
       UserExam.findByPk.mockResolvedValue(mockUserExam);
       Exam.findByPk.mockResolvedValue(mockExam);
 
-      await expect(submitExam({ id: 1 }, { id: 1 })).resolves.toBe(
-        'Exam submited successfully',
-      );
+      await expect(submitExam({ id: 1 }, { id: 1 })).resolves.toBe('Exam submited successfully');
 
       expect(transactionContext.commit).toHaveBeenCalled();
     });
@@ -207,17 +184,13 @@ describe('Exam Service', () => {
       const mockUserExam = { id: 1, user_id: 2, status: 'on-going' };
       UserExam.findByPk.mockResolvedValue(mockUserExam);
 
-      commonHelpers.throwCustomError.mockImplementation(
-        (message, statusCode) => {
-          const error = new Error(message);
-          error.statusCode = statusCode;
-          throw error;
-        },
-      );
+      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
+        const error = new Error(message);
+        error.statusCode = statusCode;
+        throw error;
+      });
 
-      await expect(submitExam({ id: 1 }, { id: 1 })).rejects.toThrow(
-        'Can not access other user',
-      );
+      await expect(submitExam({ id: 1 }, { id: 1 })).rejects.toThrow('Can not access other user');
     });
 
     it('should throw "Exam is not started yet" error if exam has not started', async () => {
@@ -225,16 +198,14 @@ describe('Exam Service', () => {
         id: 1,
         user_id: 1,
         exam_id: 1,
-        status: 'on-going',
+        status: 'on-going'
       };
       const mockExam = { id: 1, start_time: moment().add(1, 'hour') };
 
       UserExam.findByPk.mockResolvedValue(mockUserExam);
       Exam.findByPk.mockResolvedValue(mockExam);
 
-      await expect(submitExam({ id: 1 }, { id: 1 })).rejects.toThrow(
-        'Exam is not started yet',
-      );
+      await expect(submitExam({ id: 1 }, { id: 1 })).rejects.toThrow('Exam is not started yet');
     });
   });
 });

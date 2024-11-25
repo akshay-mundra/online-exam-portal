@@ -13,25 +13,22 @@ async function bulkCreate(currentUser, payload) {
   try {
     const exam = await Exam.findOne({ id: examId, admin_id: currentUser.id });
     if (!exam) {
-      commonHelpers.throwCustomError(
-        'You can only access exams created by you',
-        403,
-      );
+      commonHelpers.throwCustomError('You can only access exams created by you', 403);
     }
 
     const bulkQuestions = [];
 
-    for (let question of questions) {
+    for (const question of questions) {
       const questionObj = {
         question: question.question,
         type: question.type,
         negative_marks: question.negativeMarks,
-        exam_id: exam.id,
+        exam_id: exam.id
       };
       const options = question.options;
 
       const createdQuestion = await Question.create(questionObj, {
-        transaction: transactionContext,
+        transaction: transactionContext
       });
 
       await Promise.all(
@@ -41,13 +38,13 @@ async function bulkCreate(currentUser, payload) {
               question_id: createdQuestion.id,
               option: option.option,
               is_correct: option.isCorrect,
-              marks: option.marks,
+              marks: option.marks
             },
             {
-              transaction: transactionContext,
-            },
-          ),
-        ),
+              transaction: transactionContext
+            }
+          )
+        )
       );
 
       bulkQuestions.push(createdQuestion.id);
@@ -56,9 +53,9 @@ async function bulkCreate(currentUser, payload) {
     await transactionContext.commit();
 
     return bulkQuestions;
-  } catch (err) {
+  } catch (error) {
     await transactionContext.rollback();
-    throw err;
+    throw error;
   }
 }
 
@@ -66,16 +63,10 @@ async function bulkCreate(currentUser, payload) {
 async function createOption(currentUser, params, payload) {
   const { id } = params;
 
-  const question = await questionHelpers.getQuestionExamOptions(
-    id,
-    currentUser.id,
-  );
+  const question = await questionHelpers.getQuestionExamOptions(id, currentUser.id);
 
   if (!question) {
-    commonHelpers.throwCustomError(
-      'question not found or you do not have access to it',
-      403,
-    );
+    commonHelpers.throwCustomError('question not found or you do not have access to it', 403);
   }
 
   if (
@@ -83,10 +74,7 @@ async function createOption(currentUser, params, payload) {
     question.type === 'single_choice' &&
     !questionHelpers.checkOptionsSingleChoice(question.Options)
   ) {
-    commonHelpers.throwCustomError(
-      'Single choice question can only have single option as correct',
-      400,
-    );
+    commonHelpers.throwCustomError('Single choice question can only have single option as correct', 400);
   }
 
   return await optionServices.create(id, payload);
@@ -96,17 +84,10 @@ async function createOption(currentUser, params, payload) {
 async function getOption(currentUser, params) {
   const { id, optionId } = params;
 
-  const question = await questionHelpers.getQuestionExamOptions(
-    id,
-    currentUser.id,
-    { id: optionId },
-  );
+  const question = await questionHelpers.getQuestionExamOptions(id, currentUser.id, { id: optionId });
 
   if (!question) {
-    commonHelpers.throwCustomError(
-      'question not found or you do not have access to it',
-      403,
-    );
+    commonHelpers.throwCustomError('question not found or you do not have access to it', 403);
   }
 
   return question.Options[0];
@@ -116,17 +97,10 @@ async function getOption(currentUser, params) {
 async function updateOption(currentUser, params, payload) {
   const { id, optionId } = params;
 
-  const question = await questionHelpers.getQuestionExamOptions(
-    id,
-    currentUser.id,
-    { id: optionId },
-  );
+  const question = await questionHelpers.getQuestionExamOptions(id, currentUser.id, { id: optionId });
 
   if (!question) {
-    commonHelpers.throwCustomError(
-      'question or option not found or you do not have access to it',
-      403,
-    );
+    commonHelpers.throwCustomError('question or option not found or you do not have access to it', 403);
   }
 
   if (
@@ -134,10 +108,7 @@ async function updateOption(currentUser, params, payload) {
     question.type === 'single_choice' &&
     questionHelpers.checkOptionsSingleChoice(question.Options) > 1
   ) {
-    commonHelpers.throwCustomError(
-      'Single choice question can only have single option as correct',
-      400,
-    );
+    commonHelpers.throwCustomError('Single choice question can only have single option as correct', 400);
   }
 
   return await optionServices.update(optionId, payload);
@@ -147,17 +118,10 @@ async function updateOption(currentUser, params, payload) {
 async function removeOption(currentUser, params) {
   const { id, optionId } = params;
 
-  const question = await questionHelpers.getQuestionExamOptions(
-    id,
-    currentUser.id,
-    { id: optionId },
-  );
+  const question = await questionHelpers.getQuestionExamOptions(id, currentUser.id, { id: optionId });
 
   if (!question) {
-    commonHelpers.throwCustomError(
-      'question or option not found or you do not have access to it',
-      403,
-    );
+    commonHelpers.throwCustomError('question or option not found or you do not have access to it', 403);
   }
 
   return await optionServices.remove(optionId);
@@ -168,5 +132,5 @@ module.exports = {
   createOption,
   getOption,
   updateOption,
-  removeOption,
+  removeOption
 };

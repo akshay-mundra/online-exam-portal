@@ -7,50 +7,50 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
-        defaultValue: Sequelize.literal('uuid_generate_v4()'),
+        defaultValue: Sequelize.literal('uuid_generate_v4()')
       },
       option_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
           model: 'options',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       question_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
           model: 'questions',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       user_exam_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
           model: 'users_exams',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
       updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-        onUpdate: Sequelize.literal('CURRENT_TIMESTAMP'),
+        onUpdate: Sequelize.literal('CURRENT_TIMESTAMP')
       },
       deleted_at: {
         type: Sequelize.DATE,
-        allowNull: true,
-      },
+        allowNull: true
+      }
     });
   },
   async down(queryInterface) {
     await queryInterface.dropTable('answers');
-  },
+  }
 };

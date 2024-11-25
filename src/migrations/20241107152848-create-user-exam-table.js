@@ -7,54 +7,54 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
-        defaultValue: Sequelize.literal('uuid_generate_v4()'),
+        defaultValue: Sequelize.literal('uuid_generate_v4()')
       },
       user_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
           model: 'users',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       exam_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
           model: 'exams',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       is_marked: {
         type: Sequelize.BOOLEAN,
-        defaultValue: false,
+        defaultValue: false
       },
       status: {
         type: Sequelize.ENUM('pending', 'on-going', 'completed'),
-        defaultValue: 'pending',
+        defaultValue: 'pending'
       },
       score: {
         type: Sequelize.INTEGER,
-        allowNull: true,
+        allowNull: true
       },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
       },
       updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-        onUpdate: Sequelize.literal('CURRENT_TIMESTAMP'),
+        onUpdate: Sequelize.literal('CURRENT_TIMESTAMP')
       },
       deleted_at: {
         type: Sequelize.DATE,
-        allowNull: true,
-      },
+        allowNull: true
+      }
     });
   },
   async down(queryInterface) {
     await queryInterface.dropTable('users_exams');
-  },
+  }
 };

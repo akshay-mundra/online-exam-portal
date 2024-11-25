@@ -17,7 +17,7 @@ function exams(req, res, next) {
       title: exam?.title,
       isPublished: exam?.is_published,
       startTime: exam?.start_time,
-      endTime: exam?.end_time,
+      endTime: exam?.end_time
     });
   }
 
@@ -48,8 +48,8 @@ function userWithExams(req, res, next) {
       id: user?.Exams[0]?.id,
       userExamId: user?.Exams[0]?.users_exams?.id,
       score: user?.Exams[0]?.users_exams?.score,
-      status: user?.Exams[0]?.users_exams?.status,
-    },
+      status: user?.Exams[0]?.users_exams?.status
+    }
   }));
 
   if (response.length > 1) {

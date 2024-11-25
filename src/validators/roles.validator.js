@@ -4,14 +4,14 @@ const commonHelpers = require('../helpers/common.helper');
 
 async function roleSchema(req, res, next) {
   const schema = Joi.object({
-    firstName: Joi.string().min(3).required(),
+    firstName: Joi.string().min(3).required()
   });
 
   try {
     validateHelpers.validateRequest(req, res, next, schema, 'body');
-  } catch (err) {
-    console.log('login schema', err);
-    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  } catch (error) {
+    console.log('login schema', error);
+    commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
 

@@ -4,9 +4,7 @@ const jose = require('jose');
 jest.mock('jose');
 
 describe('JWT Helper Functions', () => {
-  const mockDecodedSecret = Buffer.from([
-    154, 135, 36, 250, 199, 156, 173, 235,
-  ]);
+  const mockDecodedSecret = Buffer.from([154, 135, 36, 250, 199, 156, 173, 235]);
   const mockPayload = { id: 1, role: 'admin' };
   const mockOptions = { expiresIn: '1h' };
   const mockToken = 'mock-jwt-token';
@@ -16,7 +14,7 @@ describe('JWT Helper Functions', () => {
     process.env.JWT_EXPIRE_IN = '1h';
 
     jose.base64url = {
-      decode: jest.fn(() => mockDecodedSecret),
+      decode: jest.fn(() => mockDecodedSecret)
     };
   });
 
@@ -30,7 +28,7 @@ describe('JWT Helper Functions', () => {
         setProtectedHeader: jest.fn().mockReturnThis(),
         setIssuedAt: jest.fn().mockReturnThis(),
         setExpirationTime: jest.fn().mockReturnThis(),
-        encrypt: jest.fn().mockResolvedValue(mockToken),
+        encrypt: jest.fn().mockResolvedValue(mockToken)
       };
       jest.spyOn(jose, 'EncryptJWT').mockReturnValue(mockEncryptJWT);
 
@@ -39,12 +37,10 @@ describe('JWT Helper Functions', () => {
       expect(jose.EncryptJWT).toHaveBeenCalledWith(mockPayload);
       expect(mockEncryptJWT.setProtectedHeader).toHaveBeenCalledWith({
         alg: 'dir',
-        enc: 'A128CBC-HS256',
+        enc: 'A128CBC-HS256'
       });
       expect(mockEncryptJWT.setIssuedAt).toHaveBeenCalled();
-      expect(mockEncryptJWT.setExpirationTime).toHaveBeenCalledWith(
-        mockOptions.expiresIn,
-      );
+      expect(mockEncryptJWT.setExpirationTime).toHaveBeenCalledWith(mockOptions.expiresIn);
       expect(mockEncryptJWT.encrypt).toHaveBeenCalled();
       expect(token).toBe(mockToken);
     });
@@ -54,9 +50,7 @@ describe('JWT Helper Functions', () => {
         throw new Error('Encryption failed');
       });
 
-      await expect(signToken(mockPayload, mockOptions)).rejects.toThrow(
-        'Encryption failed',
-      );
+      await expect(signToken(mockPayload, mockOptions)).rejects.toThrow('Encryption failed');
     });
   });
 

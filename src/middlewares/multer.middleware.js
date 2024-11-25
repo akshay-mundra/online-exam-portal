@@ -6,7 +6,7 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
-  },
+  }
 });
 
 const upload = multer({
@@ -14,13 +14,10 @@ const upload = multer({
   fileFilter(req, file, callback) {
     const fileTypes = /\.(xlsx|csv|xls)$/i;
     if (!file.originalname.match(fileTypes)) {
-      return callback(
-        new Error('Only .xlsx or .csv files are allowed!'),
-        false,
-      );
+      return callback(new Error('Only .xlsx or .csv files are allowed!'), false);
     }
     callback(null, true);
-  },
+  }
 });
 
 module.exports = { upload };

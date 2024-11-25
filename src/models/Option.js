@@ -10,11 +10,11 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Option.belongsTo(models.Question, {
         foreignKey: 'question_id',
-        as: 'questions',
+        as: 'questions'
       });
 
       Option.hasMany(models.Answer, {
-        foreignKey: 'option_id',
+        foreignKey: 'option_id'
       });
     }
   }
@@ -24,36 +24,36 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         primaryKey: true,
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: DataTypes.UUIDV4
       },
       question_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'questions',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       option: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       is_correct: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
-        allowNull: false,
+        allowNull: false
       },
       marks: {
         type: DataTypes.INTEGER,
-        defaultValue: 0,
-      },
+        defaultValue: 0
+      }
     },
     {
       sequelize,
       modelName: 'Option',
       tableName: 'options',
-      paranoid: true,
-    },
+      paranoid: true
+    }
   );
   return Option;
 };

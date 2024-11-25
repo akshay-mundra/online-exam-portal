@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       UserExam.hasMany(models.Answer, {
-        foreignKey: 'user_exam_id',
+        foreignKey: 'user_exam_id'
       });
     }
   }
@@ -19,43 +19,43 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: DataTypes.UUIDV4
       },
       user_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'users',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       exam_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'exams',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       is_marked: {
         type: DataTypes.BOOLEAN,
-        defaultValue: false,
+        defaultValue: false
       },
       status: {
         type: DataTypes.ENUM('pending', 'on-going', 'completed'),
-        defaultValue: 'pending',
+        defaultValue: 'pending'
       },
       score: {
         type: DataTypes.INTEGER,
-        allowNull: true,
-      },
+        allowNull: true
+      }
     },
     {
       sequelize,
       modelName: 'UserExam',
       tableName: 'users_exams',
-      paranoid: true,
-    },
+      paranoid: true
+    }
   );
   return UserExam;
 };

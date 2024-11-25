@@ -1,11 +1,4 @@
-const {
-  getAll,
-  get,
-  update,
-  remove,
-  bulkCreate,
-  getAllExams,
-} = require('../../src/services/users.service');
+const { getAll, get, update, remove, bulkCreate, getAllExams } = require('../../src/services/users.service');
 const { User, Exam } = require('../../src/models');
 const commonHelpers = require('../../src/helpers/common.helper');
 const { sequelize } = require('../../src/models');
@@ -23,7 +16,7 @@ describe('User Service', () => {
 
     transactionContext = {
       commit: jest.fn(),
-      rollback: jest.fn(),
+      rollback: jest.fn()
     };
 
     sequelize.transaction = jest.fn().mockResolvedValue(transactionContext);
@@ -53,9 +46,9 @@ describe('User Service', () => {
             id: 1,
             first_name: 'John',
             last_name: 'Doe',
-            email: 'john@example.com',
-          },
-        ],
+            email: 'john@example.com'
+          }
+        ]
       });
 
       const result = await getAll(currentUser, page);
@@ -64,7 +57,7 @@ describe('User Service', () => {
         where: {},
         attributes: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
         offset,
-        limit,
+        limit
       });
       expect(result).toEqual({
         users: [
@@ -72,10 +65,10 @@ describe('User Service', () => {
             id: 1,
             first_name: 'John',
             last_name: 'Doe',
-            email: 'john@example.com',
-          },
+            email: 'john@example.com'
+          }
         ],
-        total: 5,
+        total: 5
       });
     });
 
@@ -94,9 +87,9 @@ describe('User Service', () => {
             id: 1,
             first_name: 'John',
             last_name: 'Doe',
-            email: 'john@example.com',
-          },
-        ],
+            email: 'john@example.com'
+          }
+        ]
       });
 
       const result = await getAll(currentUser, page);
@@ -105,7 +98,7 @@ describe('User Service', () => {
         where: { admin_id: currentUser.id },
         attributes: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
         offset,
-        limit,
+        limit
       });
       expect(result).toEqual({
         users: [
@@ -113,10 +106,10 @@ describe('User Service', () => {
             id: 1,
             first_name: 'John',
             last_name: 'Doe',
-            email: 'john@example.com',
-          },
+            email: 'john@example.com'
+          }
         ],
-        total: 2,
+        total: 2
       });
     });
   });
@@ -130,7 +123,7 @@ describe('User Service', () => {
         id,
         first_name: 'John',
         last_name: 'Doe',
-        email: 'john@example.com',
+        email: 'john@example.com'
       });
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: true });
 
@@ -156,7 +149,7 @@ describe('User Service', () => {
       const payload = {
         firstName: 'Jane',
         lastName: 'Smith',
-        email: 'jane@example.com',
+        email: 'jane@example.com'
       };
 
       User.update.mockResolvedValue([
@@ -166,9 +159,9 @@ describe('User Service', () => {
             id,
             first_name: 'Jane',
             last_name: 'Smith',
-            email: 'jane@example.com',
-          },
-        ],
+            email: 'jane@example.com'
+          }
+        ]
       ]);
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: true });
 
@@ -178,19 +171,19 @@ describe('User Service', () => {
         {
           first_name: payload.firstName,
           last_name: payload.lastName,
-          email: payload.email,
+          email: payload.email
         },
         expect.objectContaining({
           where: { id },
-          transaction: transactionContext,
-        }),
+          transaction: transactionContext
+        })
       );
       expect(transactionContext.commit).toHaveBeenCalled();
       expect(result).toEqual({
         id,
         first_name: 'Jane',
         last_name: 'Smith',
-        email: 'jane@example.com',
+        email: 'jane@example.com'
       });
     });
 
@@ -200,15 +193,13 @@ describe('User Service', () => {
       const payload = {
         firstName: 'Jane',
         lastName: 'Smith',
-        email: 'jane@example.com',
+        email: 'jane@example.com'
       };
 
       User.update.mockRejectedValue(new Error('Update failed'));
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: true });
 
-      await expect(update(currentUser, id, payload)).rejects.toThrow(
-        'Update failed',
-      );
+      await expect(update(currentUser, id, payload)).rejects.toThrow('Update failed');
       expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });
@@ -224,12 +215,12 @@ describe('User Service', () => {
 
       expect(User.destroy).toHaveBeenCalledWith({
         where: { id },
-        transaction: transactionContext,
+        transaction: transactionContext
       });
       expect(transactionContext.commit).toHaveBeenCalled();
       expect(result).toEqual({
         count: 1,
-        message: 'User removed successfully',
+        message: 'User removed successfully'
       });
     });
 
@@ -253,17 +244,15 @@ describe('User Service', () => {
             firstName: 'John',
             lastName: 'Doe',
             email: 'john@example.com',
-            password: 'password123',
-          },
-        ],
+            password: 'password123'
+          }
+        ]
       };
 
       const existingUser = { id: 2, email: 'john@example.com', admin_id: 2 };
       User.findOne.mockResolvedValue(existingUser);
 
-      await expect(bulkCreate(currentUser, payload)).rejects.toThrow(
-        'The user you are updating is not created by you',
-      );
+      await expect(bulkCreate(currentUser, payload)).rejects.toThrow('The user you are updating is not created by you');
     });
   });
 
@@ -278,9 +267,7 @@ describe('User Service', () => {
 
       const result = await getAllExams(currentUser, params);
 
-      expect(Exam.findAll).toHaveBeenCalledWith(
-        expect.objectContaining({ where: { admin_id: currentUser.id } }),
-      );
+      expect(Exam.findAll).toHaveBeenCalledWith(expect.objectContaining({ where: { admin_id: currentUser.id } }));
       expect(result).toEqual([{ id: 1, name: 'Math Exam' }]);
     });
 
@@ -290,9 +277,7 @@ describe('User Service', () => {
 
       commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
 
-      await expect(getAllExams(currentUser, params)).rejects.toThrow(
-        'Other user is not accessible to you',
-      );
+      await expect(getAllExams(currentUser, params)).rejects.toThrow('Other user is not accessible to you');
     });
   });
 });

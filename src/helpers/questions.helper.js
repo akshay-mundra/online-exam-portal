@@ -10,21 +10,21 @@ async function getQuestionExamOptions(id, userId, optionCondition) {
       {
         model: Exam,
         as: 'exams',
-        where: { admin_id: userId },
+        where: { admin_id: userId }
       },
       {
         model: Option,
         where: optionWhereCondition,
-        required: true,
-      },
-    ],
+        required: true
+      }
+    ]
   });
 }
 
 // single choice question should have only one option as correct
 function checkOptionsSingleChoice(options) {
   let count = 0;
-  for (let option of options) {
+  for (const option of options) {
     if (option.is_correct || option.isCorrect) count++;
   }
 

@@ -1,8 +1,4 @@
-const {
-  create,
-  update,
-  remove,
-} = require('../../src/services/options.service');
+const { create, update, remove } = require('../../src/services/options.service');
 const { Option } = require('../../src/models');
 const commonHelpers = require('../../src/helpers/common.helper');
 const { sequelize } = require('../../src/models');
@@ -18,7 +14,7 @@ describe('Option Service', () => {
 
     transactionContext = {
       commit: jest.fn(),
-      rollback: jest.fn(),
+      rollback: jest.fn()
     };
 
     sequelize.transaction = jest.fn().mockResolvedValue(transactionContext);
@@ -37,7 +33,7 @@ describe('Option Service', () => {
       Option.create.mockResolvedValue({
         id: '1',
         ...payload,
-        question_id: questionId,
+        question_id: questionId
       });
 
       const result = await create(questionId, payload);
@@ -47,9 +43,9 @@ describe('Option Service', () => {
           option: 'Option A',
           is_correct: true,
           marks: 5,
-          question_id: questionId,
+          question_id: questionId
         },
-        { transaction: transactionContext },
+        { transaction: transactionContext }
       );
       expect(transactionContext.commit).toHaveBeenCalled();
       expect(result).toEqual({ id: '1', ...payload, question_id: questionId });
@@ -60,9 +56,7 @@ describe('Option Service', () => {
       const payload = { option: 'Option A', isCorrect: true, marks: 5 };
       Option.create.mockRejectedValue(new Error('Database Error'));
 
-      await expect(create(questionId, payload)).rejects.toThrow(
-        'Database Error',
-      );
+      await expect(create(questionId, payload)).rejects.toThrow('Database Error');
       expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });
@@ -79,13 +73,13 @@ describe('Option Service', () => {
         {
           option: 'Updated Option',
           is_correct: false,
-          marks: 10,
+          marks: 10
         },
         {
           where: { id },
-          returning: true,
+          returning: true
         },
-        { transaction: transactionContext },
+        { transaction: transactionContext }
       );
       expect(transactionContext.commit).toHaveBeenCalled();
       expect(result).toEqual([{ id, ...payload }]);
@@ -98,10 +92,7 @@ describe('Option Service', () => {
 
       await expect(update(id, payload)).rejects.toThrow('Option not found');
 
-      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(
-        'Option not found',
-        404,
-      );
+      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('Option not found', 404);
       expect(transactionContext.rollback).toHaveBeenCalled();
     });
 
@@ -122,10 +113,7 @@ describe('Option Service', () => {
 
       const result = await remove(id);
 
-      expect(Option.destroy).toHaveBeenCalledWith(
-        { where: { id } },
-        { transaction: transactionContext },
-      );
+      expect(Option.destroy).toHaveBeenCalledWith({ where: { id } }, { transaction: transactionContext });
       expect(transactionContext.commit).toHaveBeenCalled();
       expect(result).toBe('Option deleted successfully');
     });
@@ -136,10 +124,7 @@ describe('Option Service', () => {
 
       await expect(remove(id)).rejects.toThrow('Option not found');
 
-      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith(
-        'Option not found',
-        404,
-      );
+      expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('Option not found', 404);
       expect(transactionContext.rollback).toHaveBeenCalled();
     });
 

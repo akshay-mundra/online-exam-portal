@@ -10,17 +10,17 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       Exam.belongsTo(models.User, {
         as: 'admin',
-        foreignKey: 'admin_id',
+        foreignKey: 'admin_id'
       });
 
       Exam.belongsToMany(models.User, {
         through: 'users_exams',
         foreignKey: 'exam_id',
-        other_key: 'user_id',
+        other_key: 'user_id'
       });
 
       Exam.hasMany(models.Question, {
-        foreignKey: 'exam_id',
+        foreignKey: 'exam_id'
       });
     }
   }
@@ -30,39 +30,39 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         primaryKey: true,
         allowNull: false,
-        defaultValue: DataTypes.UUIDV4,
+        defaultValue: DataTypes.UUIDV4
       },
       admin_id: {
         type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'users',
-          key: 'id',
-        },
+          key: 'id'
+        }
       },
       title: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: false
       },
       is_published: {
         type: DataTypes.BOOLEAN,
-        defaultValue: 'false',
+        defaultValue: 'false'
       },
       start_time: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: false
       },
       end_time: {
         type: DataTypes.DATE,
-        allowNull: false,
-      },
+        allowNull: false
+      }
     },
     {
       sequelize,
       modelName: 'Exam',
       tableName: 'exams',
-      paranoid: true,
-    },
+      paranoid: true
+    }
   );
   return Exam;
 };
