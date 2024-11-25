@@ -21,6 +21,15 @@ router.get(
   commonHelpers.responseHandler,
 );
 
+router.get(
+  '/me',
+  authMiddlewares.authenticate,
+  authMiddlewares.authorize([ADMIN, USER]),
+  userControllers.getMe,
+  userSerializers.users,
+  commonHelpers.responseHandler,
+);
+
 router.post(
   '/bulk-create',
   authMiddlewares.authenticate,

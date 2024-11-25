@@ -14,6 +14,18 @@ async function getAll(req, res, next) {
   }
 }
 
+async function getMe(req, res, next) {
+  try {
+    const user = req.user;
+    res.data = user;
+    res.statusCode = 200;
+    next();
+  } catch (err) {
+    console.log(err);
+    commonHelpers.errorHandler(req, res, err.message, err.statusCode);
+  }
+}
+
 async function get(req, res, next) {
   try {
     const { id } = req.params;
@@ -97,6 +109,7 @@ async function startExam(req, res, next) {
 
 module.exports = {
   getAll,
+  getMe,
   get,
   update,
   remove,
