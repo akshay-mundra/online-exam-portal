@@ -1,6 +1,6 @@
 const commonHelpers = require('../helpers/common.helper');
 const jwtHelpers = require('../helpers/jwt.helper');
-const { SUPER_ADMIN, ADMIN, USER } = require('../constants/common.constant').roles;
+const { SUPER_ADMIN, ADMIN } = require('../constants/common.constant').roles;
 
 async function authenticate(req, res, next) {
   try {
@@ -13,6 +13,11 @@ async function authenticate(req, res, next) {
 
     next();
   } catch (error) {
+    // handle jose token expired error
+    if (error.code === 'ERR_JWT_EXPIRED' || error.message.includes('exp')) {
+      error.message = 'Token expired';
+      error.statusCode = 401;
+    }
     console.log(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
@@ -40,14 +45,19 @@ function authorize(allowedRoles) {
 async function authorizeRegister(req, res, next) {
   try {
     const { body: payload } = req;
-    const { roles } = payload;
+    let { roles } = payload;
 
-    if (!roles || roles.length === 0) commonHelpers.throwCustomError('roles are required', 400);
+    if (!roles || roles.length === 0) {
+      roles = [ADMIN];
+      req.body.roles = roles;
+    }
 
-    if (roles.includes(SUPER_ADMIN)) {
+    const { isSuperAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
+
+    if (isSuperAdmin) {
       return commonHelpers.throwCustomError('Not allowed to create super_admin', 401);
-    } else if (roles.includes(USER)) {
-      await authenticate(req, res, () => {
+    } else if (isUser) {
+      return await authenticate(req, res, () => {
         authorize([ADMIN])(req, res, next);
       });
     } else {
