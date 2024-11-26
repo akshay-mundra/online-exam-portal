@@ -41,13 +41,7 @@ async function login(payload) {
     roles
   });
 
-  return {
-    user: {
-      id: user.id,
-      roles
-    },
-    token
-  };
+  return { token };
 }
 
 // register new user
