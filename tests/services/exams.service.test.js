@@ -127,7 +127,7 @@ describe('Exam Service', () => {
       Exam.findOne.mockResolvedValue(mockExam);
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: true });
 
-      const result = await get({ roles: ['super_admin'] }, 1);
+      const result = await get({ roles: ['super_admin'] }, { id: 1 });
 
       expect(Exam.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
       expect(result).toEqual(mockExam);
@@ -143,7 +143,7 @@ describe('Exam Service', () => {
         throw new Error(msg);
       });
 
-      await expect(get({ roles: ['user'], id: 1 }, 1)).rejects.toThrow('User is not assigned to this exam');
+      await expect(get({ roles: ['user'], id: 1 }, { id: 1 })).rejects.toThrow('User is not assigned to this exam');
 
       expect(UserExam.findOne).toHaveBeenCalledWith({
         where: { exam_id: 1, user_id: 1 }
@@ -157,11 +157,15 @@ describe('Exam Service', () => {
       sequelize.transaction.mockResolvedValue(mockTransaction);
       Exam.update.mockResolvedValue([1, [{ id: 1, title: 'Updated Exam' }]]);
 
-      const result = await update({ id: 1 }, 1, {
-        title: 'Updated Exam',
-        startTime: '2024-01-01',
-        endTime: '2024-01-02'
-      });
+      const result = await update(
+        { id: 1 },
+        { id: 1 },
+        {
+          title: 'Updated Exam',
+          startTime: '2024-01-01',
+          endTime: '2024-01-02'
+        }
+      );
 
       expect(Exam.update).toHaveBeenCalledWith(
         {
@@ -236,7 +240,7 @@ describe('Exam Service', () => {
       User.findAll.mockResolvedValue(mockUsers);
       mockCalculateUserScore.mockResolvedValue(50);
 
-      await getResult({ id: 1 }, 1);
+      await getResult({ id: 1 }, { id: 1 });
 
       expect(Exam.findByPk).toHaveBeenCalledWith(1);
       expect(User.findAll).toHaveBeenCalled();
@@ -271,7 +275,7 @@ describe('Exam Service', () => {
       User.findByPk.mockResolvedValue(mockUser);
       UserExam.findOrCreate.mockResolvedValue([mockUserExam, true]);
 
-      const result = await addUser({ id: 1 }, 1, { userId: 2 });
+      const result = await addUser({ id: 1 }, { id: 1 }, { userId: 2 });
 
       expect(Exam.findByPk).toHaveBeenCalledWith(1);
       expect(User.findByPk).toHaveBeenCalledWith(2);
@@ -372,7 +376,7 @@ describe('Exam Service', () => {
       User.findOne.mockResolvedValue(mockUser);
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: true });
 
-      const result = await getUser({ roles: ['super_admin'], id: 1 }, 1, 1);
+      const result = await getUser({ roles: ['super_admin'], id: 1 }, { id: 1, userId: 1 });
 
       expect(User.findOne).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 1 } }));
       expect(result).toEqual(mockUser);
@@ -411,7 +415,7 @@ describe('Exam Service', () => {
       Exam.findOne.mockResolvedValue(mockExam);
       UserExam.destroy.mockResolvedValue(1);
 
-      const result = await removeUser({ id: 1 }, 1, 2);
+      const result = await removeUser({ id: 1 }, { id: 1, userId: 2 });
 
       expect(User.findOne).toHaveBeenCalledWith({
         where: { id: 1, admin_id: 1 }
@@ -469,12 +473,16 @@ describe('Exam Service', () => {
       Question.create.mockResolvedValue(mockQuestion);
       Option.bulkCreate.mockResolvedValue(mockOptions);
 
-      await createQuestion({ id: 1 }, 1, {
-        question: 'Sample Question',
-        type: 'single_choice',
-        negativeMarks: 0,
-        options: mockOptions
-      });
+      await createQuestion(
+        { id: 1 },
+        { id: 1 },
+        {
+          question: 'Sample Question',
+          type: 'single_choice',
+          negativeMarks: 0,
+          options: mockOptions
+        }
+      );
 
       expect(Question.create).toHaveBeenCalledWith(
         {
@@ -574,7 +582,7 @@ describe('Exam Service', () => {
           isSuperAdmin: true
         });
 
-        await getQuestion({ roles: ['super_admin'] }, 1, 1, 1);
+        await getQuestion({ roles: ['super_admin'] }, { id: 1, questionId: 1 });
 
         expect(Question.findOne).toHaveBeenCalledWith(
           expect.objectContaining({
