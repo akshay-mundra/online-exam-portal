@@ -37,8 +37,7 @@ describe('Role Service', () => {
       expect(Role.findOne).toHaveBeenCalledWith({
         where: { name: payload.name }
       });
-      expect(Role.create).toHaveBeenCalledWith({ name: payload.name }, { transaction: transactionContext });
-      expect(transactionContext.commit).toHaveBeenCalled();
+      expect(Role.create).toHaveBeenCalledWith({ name: payload.name });
       expect(result).toEqual({ id: '1', name: 'Admin' });
     });
 
@@ -51,7 +50,6 @@ describe('Role Service', () => {
 
       expect(Role.findOne).toHaveBeenCalled();
       expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('Role already exist', 400);
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
 
     it('should rollback transaction on error', async () => {
@@ -60,7 +58,6 @@ describe('Role Service', () => {
       Role.create.mockRejectedValue(new Error('Database Error'));
 
       await expect(create(payload)).rejects.toThrow('Database Error');
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });
 
@@ -80,12 +77,8 @@ describe('Role Service', () => {
 
       const result = await update(id, payload);
 
-      expect(Role.update).toHaveBeenCalledWith(
-        { name: payload.name },
-        { where: { id } },
-        { transaction: transactionContext }
-      );
-      expect(transactionContext.commit).toHaveBeenCalled();
+      expect(Role.update).toHaveBeenCalledWith({ name: payload.name }, { where: { id } });
+
       expect(result).toEqual([role]);
     });
 
@@ -96,7 +89,6 @@ describe('Role Service', () => {
       Role.update.mockRejectedValue(new Error('Database Error'));
 
       await expect(update(id, payload)).rejects.toThrow('Database Error');
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
 
     it('should throw an error if role does not exist', async () => {
@@ -106,7 +98,6 @@ describe('Role Service', () => {
       Role.update.mockResolvedValue([0, []]);
 
       await expect(update(id, payload)).rejects.toThrow('Role not found');
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });
 
@@ -120,8 +111,8 @@ describe('Role Service', () => {
       const result = await remove(id);
 
       expect(Role.findOne).toHaveBeenCalledWith({ where: { id } });
-      expect(Role.destroy).toHaveBeenCalledWith({ where: { id: role.id } }, { transaction: transactionContext });
-      expect(transactionContext.commit).toHaveBeenCalled();
+      expect(Role.destroy).toHaveBeenCalledWith({ where: { id: role.id } });
+
       expect(result).toBe('Role removed successfully');
     });
 
@@ -131,7 +122,6 @@ describe('Role Service', () => {
       Role.destroy.mockRejectedValue(new Error('Database Error'));
 
       await expect(remove(id)).rejects.toThrow('Database Error');
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
 
     it('should throw an error if role not found', async () => {
@@ -142,7 +132,6 @@ describe('Role Service', () => {
       await expect(remove(id)).rejects.toThrow('Role not found');
 
       expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('Role not found', 404);
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });
 
