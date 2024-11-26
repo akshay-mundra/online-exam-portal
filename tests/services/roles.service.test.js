@@ -75,7 +75,7 @@ describe('Role Service', () => {
       const role = { id, name: 'Super Admin', save: jest.fn() };
       Role.update.mockResolvedValue([1, [role]]);
 
-      const result = await update(id, payload);
+      const result = await update({ id }, payload);
 
       expect(Role.update).toHaveBeenCalledWith({ name: payload.name }, { where: { id } });
 
@@ -108,7 +108,7 @@ describe('Role Service', () => {
       Role.findOne.mockResolvedValue(role);
       Role.destroy.mockResolvedValue(1);
 
-      const result = await remove(id);
+      const result = await remove({ id });
 
       expect(Role.findOne).toHaveBeenCalledWith({ where: { id } });
       expect(Role.destroy).toHaveBeenCalledWith({ where: { id: role.id } });
@@ -141,7 +141,7 @@ describe('Role Service', () => {
       const role = { id, name: 'Admin' };
       Role.findOne.mockResolvedValue(role);
 
-      const result = await get(id);
+      const result = await get({ id });
 
       expect(Role.findOne).toHaveBeenCalledWith({ where: { id } });
       expect(result).toEqual(role);

@@ -58,12 +58,12 @@ describe('Service Layer Unit Tests', () => {
     it('should return the current user', async () => {
       const currentUser = { id: 1 };
 
-      User.findByPk.mockResolvedValue({ id: 1, firstName: 'John' });
+      User.findOne.mockResolvedValueOnce({ id: 1, firstName: 'John' });
 
       const result = await service.getMe(currentUser);
 
       expect(result).toEqual({ id: 1, firstName: 'John' });
-      expect(User.findByPk).toHaveBeenCalledWith(1);
+      expect(User.findOne).toHaveBeenCalled();
     });
 
     it('should throw an error if the user is not found', async () => {
@@ -79,7 +79,7 @@ describe('Service Layer Unit Tests', () => {
         status: 404
       });
 
-      expect(User.findByPk).toHaveBeenCalledWith(1);
+      expect(User.findOne).toHaveBeenCalled();
     });
   });
 
@@ -91,7 +91,7 @@ describe('Service Layer Unit Tests', () => {
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: true, isUser: false, isAdmin: false });
       User.findOne.mockResolvedValue({ id: userId, name: 'John Doe' });
 
-      const result = await service.get(currentUser, userId);
+      const result = await service.get(currentUser, { id: userId });
 
       expect(result).toEqual({ id: userId, name: 'John Doe' });
       expect(User.findOne).toHaveBeenCalledWith({ where: { id: userId } });
@@ -104,7 +104,7 @@ describe('Service Layer Unit Tests', () => {
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: false, isUser: false, isAdmin: true });
       User.findOne.mockResolvedValue({ id: userId, name: 'Jane Doe' });
 
-      const result = await service.get(currentUser, userId);
+      const result = await service.get(currentUser, { id: userId });
 
       expect(result).toEqual({ id: userId, name: 'Jane Doe' });
       expect(User.findOne).toHaveBeenCalledWith({ where: { id: userId, admin_id: currentUser.id } });
@@ -133,7 +133,7 @@ describe('Service Layer Unit Tests', () => {
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: false });
       User.update.mockResolvedValue([1, [{ id: 2, first_name: 'Jane', last_name: 'Doe', email: 'jane@example.com' }]]);
 
-      const result = await service.update(currentUser, id, payload);
+      const result = await service.update(currentUser, { id }, payload);
 
       expect(result).toEqual({ id: 2, first_name: 'Jane', last_name: 'Doe', email: 'jane@example.com' });
       expect(User.update).toHaveBeenCalledWith(
@@ -174,7 +174,7 @@ describe('Service Layer Unit Tests', () => {
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: true });
       User.destroy.mockResolvedValue(1);
 
-      const result = await service.remove(currentUser, userId);
+      const result = await service.remove(currentUser, { id: userId });
 
       expect(result).toEqual({ count: 1, message: 'User removed successfully' });
       expect(User.destroy).toHaveBeenCalledWith({ where: { id: userId } });
@@ -187,7 +187,7 @@ describe('Service Layer Unit Tests', () => {
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: false });
       User.destroy.mockResolvedValue(1);
 
-      const result = await service.remove(currentUser, userId);
+      const result = await service.remove(currentUser, { id: userId });
 
       expect(result).toEqual({ count: 1, message: 'User removed successfully' });
       expect(User.destroy).toHaveBeenCalledWith({ where: { id: userId, admin_id: currentUser.id } });

@@ -116,7 +116,7 @@ describe('Auth Service', () => {
         rollback: jest.fn()
       });
 
-      const result = await register(req, payload);
+      const result = await register(req.user, payload);
 
       expect(User.findOne).toHaveBeenCalledWith({
         where: { email: payload.email }

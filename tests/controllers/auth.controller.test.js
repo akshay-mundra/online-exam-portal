@@ -67,7 +67,7 @@ describe('Auth Controller', () => {
 
       await register(req, res, next);
 
-      expect(authServices.register).toHaveBeenCalledWith(req, req.body);
+      expect(authServices.register).toHaveBeenCalledWith(req.user, req.body);
       expect(res.data).toEqual(mockUser);
       expect(res.statusCode).toBe(201);
       expect(next).toHaveBeenCalled();

@@ -83,7 +83,7 @@ describe('Roles Controller', () => {
 
       await get(req, res, next);
 
-      expect(roleServices.get).toHaveBeenCalledWith(roleId);
+      expect(roleServices.get).toHaveBeenCalledWith({ id: roleId });
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -113,7 +113,7 @@ describe('Roles Controller', () => {
 
       await update(req, res, next);
 
-      expect(roleServices.update).toHaveBeenCalledWith(roleId, req.body);
+      expect(roleServices.update).toHaveBeenCalledWith({ id: roleId }, req.body);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
@@ -142,7 +142,7 @@ describe('Roles Controller', () => {
 
       await remove(req, res, next);
 
-      expect(roleServices.remove).toHaveBeenCalledWith(roleId);
+      expect(roleServices.remove).toHaveBeenCalledWith({ id: roleId });
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
