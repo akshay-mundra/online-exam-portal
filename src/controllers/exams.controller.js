@@ -29,9 +29,8 @@ async function create(req, res, next) {
 
 async function get(req, res, next) {
   try {
-    const user = req.user;
-    const { id } = req.params;
-    const result = await examServices.get(user, id);
+    const { user, params } = req;
+    const result = await examServices.get(user, params);
     res.data = result;
     res.statusCode = 200;
     next();
@@ -43,9 +42,8 @@ async function get(req, res, next) {
 
 async function update(req, res, next) {
   try {
-    const { id } = req.params;
-    const { body: payload, user } = req;
-    const result = await examServices.update(user, id, payload);
+    const { body: payload, user, params } = req;
+    const result = await examServices.update(user, params, payload);
     res.data = result;
     res.statusCode = 202;
     next();
@@ -57,9 +55,8 @@ async function update(req, res, next) {
 
 async function remove(req, res, next) {
   try {
-    const user = req.user;
-    const { id } = req.params;
-    const result = await examServices.remove(user, id);
+    const { user, params } = req;
+    const result = await examServices.remove(user, params);
     res.data = result;
     res.statusCode = 202;
     next();
@@ -71,9 +68,8 @@ async function remove(req, res, next) {
 
 async function getResult(req, res, next) {
   try {
-    const user = req.user;
-    const { id } = req.params;
-    const result = await examServices.getResult(user, id);
+    const { user, params } = req;
+    const result = await examServices.getResult(user, params);
     res.data = result;
     res.statusCode = 200;
     next();
@@ -85,9 +81,8 @@ async function getResult(req, res, next) {
 
 async function addUser(req, res, next) {
   try {
-    const { id } = req.params;
-    const { body: payload, user } = req;
-    const result = await examServices.addUser(user, id, payload);
+    const { body: payload, user, params } = req;
+    const result = await examServices.addUser(user, params, payload);
     res.data = result;
     res.statusCode = 201;
     next();
@@ -99,9 +94,8 @@ async function addUser(req, res, next) {
 
 async function getAllUsers(req, res, next) {
   try {
-    const { id } = req.params;
-    const { query, user } = req;
-    const result = await examServices.getAllUsers(user, id, query);
+    const { query, user, params } = req;
+    const result = await examServices.getAllUsers(user, params, query);
     res.data = result;
     res.statusCode = 200;
     next();
@@ -113,9 +107,8 @@ async function getAllUsers(req, res, next) {
 
 async function getUser(req, res, next) {
   try {
-    const user = req.user;
-    const { id, userId } = req.params;
-    const result = await examServices.getUser(user, userId, id);
+    const { user, params } = req;
+    const result = await examServices.getUser(user, params);
     res.data = result;
     res.statusCode = 200;
     next();
@@ -127,9 +120,8 @@ async function getUser(req, res, next) {
 
 async function removeUser(req, res, next) {
   try {
-    const user = req.user;
-    const { id, userId } = req.params;
-    const result = await examServices.removeUser(user, userId, id);
+    const { user, params } = req;
+    const result = await examServices.removeUser(user, params);
     res.data = result;
     res.statusCode = 202;
     next();
@@ -141,9 +133,8 @@ async function removeUser(req, res, next) {
 
 async function createQuestion(req, res, next) {
   try {
-    const { id } = req.params;
-    const { body: payload, user } = req;
-    const result = await examServices.createQuestion(user, id, payload);
+    const { body: payload, user, params } = req;
+    const result = await examServices.createQuestion(user, params, payload);
     res.data = result;
     res.statusCode = 201;
     next();
@@ -155,9 +146,8 @@ async function createQuestion(req, res, next) {
 
 async function getAllQuestions(req, res, next) {
   try {
-    const { id } = req.params;
-    const { query, user } = req;
-    const result = await examServices.getAllQuestions(user, id, query);
+    const { query, user, params } = req;
+    const result = await examServices.getAllQuestions(user, params, query);
     res.data = result;
     res.statusCode = 200;
     next();
@@ -169,9 +159,8 @@ async function getAllQuestions(req, res, next) {
 
 async function getQuestion(req, res, next) {
   try {
-    const user = req.user;
-    const { id, questionId } = req.params;
-    const result = await examServices.getQuestion(user, id, questionId);
+    const { user, params } = req;
+    const result = await examServices.getQuestion(user, params);
     res.data = result;
     res.statusCode = 200;
     next();
@@ -184,8 +173,7 @@ async function getQuestion(req, res, next) {
 async function updateQuestion(req, res, next) {
   try {
     const { user, params, body: payload } = req;
-    const { id, questionId } = params;
-    const result = await examServices.updateQuestion(user, id, questionId, payload);
+    const result = await examServices.updateQuestion(user, params, payload);
     res.data = result;
     res.statusCode = 202;
     next();
@@ -198,8 +186,7 @@ async function updateQuestion(req, res, next) {
 async function removeQuestion(req, res, next) {
   try {
     const { user, params } = req;
-    const { id, questionId } = params;
-    const result = await examServices.removeQuestion(user, id, questionId);
+    const result = await examServices.removeQuestion(user, params);
     res.data = result;
     res.statusCode = 202;
     next();

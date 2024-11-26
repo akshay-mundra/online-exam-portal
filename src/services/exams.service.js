@@ -48,7 +48,8 @@ async function create(currentUser, payload) {
 }
 
 // get single exam by id
-async function get(currentUser, id) {
+async function get(currentUser, params) {
+  const { id } = params;
   const roles = currentUser.roles;
   const { isSuperAdmin, isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
   let exam;
@@ -78,8 +79,9 @@ async function get(currentUser, id) {
 }
 
 // update exam details only the admin who created it can update the exam.
-async function update(currentUser, id, payload) {
+async function update(currentUser, params, payload) {
   const { title, startTime, endTime } = payload;
+  const { id } = params;
 
   const [updateRowCount, updatedExam] = await Exam.update(
     { title, start_time: startTime, end_time: endTime },
@@ -97,7 +99,8 @@ async function update(currentUser, id, payload) {
 }
 
 // remove exam by id
-async function remove(currentUser, id) {
+async function remove(currentUser, params) {
+  const { id } = params;
   const currentTime = moment.utc();
 
   const countChanged = await Exam.destroy({
@@ -127,7 +130,9 @@ async function remove(currentUser, id) {
 }
 
 // get result of all the users in that exam
-async function getResult(currentUser, id) {
+async function getResult(currentUser, params) {
+  const { id } = params;
+
   const exam = await Exam.findByPk(id);
 
   if (!exam) {
@@ -174,7 +179,8 @@ async function getResult(currentUser, id) {
 }
 
 // add user to exam if user exist and is created by that admin.
-async function addUser(currentUser, id, payload) {
+async function addUser(currentUser, params, payload) {
+  const { id } = params;
   const { userId } = payload;
 
   const exam = await Exam.findByPk(id);
@@ -213,7 +219,8 @@ async function addUser(currentUser, id, payload) {
 }
 
 // get all users for that exam
-async function getAllUsers(currentUser, id, query) {
+async function getAllUsers(currentUser, params, query) {
+  const { id } = params;
   const { page, limit: queryLimit } = query;
   const { limit, offset } = commonHelpers.getPaginationAttributes(page, queryLimit);
 
@@ -239,7 +246,8 @@ async function getAllUsers(currentUser, id, query) {
 }
 
 // get a user and its details for this exam (only admin and the user itself and access)
-async function getUser(currentUser, userId, id) {
+async function getUser(currentUser, params) {
+  const { userId, id } = params;
   const roles = currentUser.roles;
   const { isSuperAdmin, isAdmin, isUser } = commonHelpers.getRolesAsBool(roles);
   let user;
@@ -279,7 +287,9 @@ async function getUser(currentUser, userId, id) {
 }
 
 // remove user from exam
-async function removeUser(currentUser, userId, id) {
+async function removeUser(currentUser, params) {
+  const { userId, id } = params;
+
   const user = await User.findOne({
     where: { id: userId, admin_id: currentUser.id }
   });
@@ -310,7 +320,8 @@ async function removeUser(currentUser, userId, id) {
 }
 
 // create question for exam
-async function createQuestion(currentUser, id, payload) {
+async function createQuestion(currentUser, params, payload) {
+  const { id } = params;
   const { question, type, negativeMarks, options } = payload;
   const transactionContext = await sequelize.transaction();
 
@@ -366,7 +377,8 @@ async function createQuestion(currentUser, id, payload) {
 }
 
 // get all questions for the exam
-async function getAllQuestions(currentUser, id, query) {
+async function getAllQuestions(currentUser, params, query) {
+  const { id } = params;
   const { page, limit: queryLimit } = query;
   const roles = currentUser.roles;
   const { limit, offset } = commonHelpers.getPaginationAttributes(page, queryLimit);
@@ -408,7 +420,8 @@ async function getAllQuestions(currentUser, id, query) {
 }
 
 // get single question details with options by exam id and questionId
-async function getQuestion(currentUser, id, questionId) {
+async function getQuestion(currentUser, params) {
+  const { id, questionId } = params;
   const roles = currentUser.roles;
 
   const userCanSee = ['id', 'option', 'marks'];
@@ -459,7 +472,8 @@ async function getQuestion(currentUser, id, questionId) {
 }
 
 // update question details by exam id and questionId
-async function updateQuestion(currentUser, id, questionId, payload) {
+async function updateQuestion(currentUser, params, payload) {
+  const { id, questionId } = params;
   const { question, type, negativeMarks } = payload;
 
   const [updateRowCount, updatedQuestion] = await Question.update(
@@ -490,7 +504,9 @@ async function updateQuestion(currentUser, id, questionId, payload) {
 }
 
 // remove question
-async function removeQuestion(currentUser, id, questionId) {
+async function removeQuestion(currentUser, params) {
+  const { id, questionId } = params;
+
   const modifyCount = await Question.destroy({
     where: { id: questionId, exam_id: id },
     include: [
