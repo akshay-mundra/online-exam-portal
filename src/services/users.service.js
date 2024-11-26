@@ -67,35 +67,26 @@ async function update(currentUser, id, payload) {
   const roles = currentUser.roles;
   const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
 
-  const transactionContext = await sequelize.transaction();
+  const options = {
+    where: isSuperAdmin
+      ? { id }
+      : {
+          id,
+          admin_id: currentUser.id
+        },
+    returning: ['id', 'first_name', 'last_name', 'email', 'admin_id']
+  };
 
-  try {
-    const options = {
-      where: isSuperAdmin
-        ? { id }
-        : {
-            id,
-            admin_id: currentUser.id
-          },
-      returning: ['id', 'first_name', 'last_name', 'email', 'admin_id'],
-      transaction: transactionContext
-    };
+  const [updatedRowCount, updatedUser] = await User.update(
+    { first_name: firstName, last_name: lastName, email },
+    options
+  );
 
-    const [updatedRowCount, updatedUser] = await User.update(
-      { first_name: firstName, last_name: lastName, email },
-      options
-    );
-
-    if (updatedRowCount === 0) {
-      return commonHelpers.throwCustomError('User not found', 404);
-    }
-
-    await transactionContext.commit();
-    return updatedUser[0];
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (updatedRowCount === 0) {
+    return commonHelpers.throwCustomError('User not found', 404);
   }
+
+  return updatedUser[0];
 }
 
 // remove user (only by admin and superadmin)
@@ -103,23 +94,16 @@ async function remove(currentUser, id) {
   const roles = currentUser.roles;
   const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
 
-  const transactionContext = await sequelize.transaction();
-  try {
-    const options = {
-      where: isSuperAdmin ? { id } : { id, admin_id: currentUser.id },
-      transaction: transactionContext
-    };
-    const countChanged = await User.destroy(options);
-    if (countChanged === 0) {
-      return commonHelpers.throwCustomError('User not found', 404);
-    }
-    await transactionContext.commit();
+  const options = {
+    where: isSuperAdmin ? { id } : { id, admin_id: currentUser.id }
+  };
 
-    return { count: countChanged, message: 'User removed successfully' };
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  const countChanged = await User.destroy(options);
+  if (countChanged === 0) {
+    return commonHelpers.throwCustomError('User not found', 404);
   }
+
+  return { count: countChanged, message: 'User removed successfully' };
 }
 
 // bulk create users from csv or excel file
@@ -231,55 +215,43 @@ async function getAllExams(currentUser, params) {
 async function startExam(currentUser, params) {
   const { id, examId } = params;
 
-  const transactionContext = await sequelize.transaction();
-
-  try {
-    if (currentUser.id !== id) {
-      return commonHelpers.throwCustomError('you can not access another user', 403);
-    }
-
-    const exam = await Exam.findOne({ id: examId });
-
-    if (!exam) {
-      return commonHelpers.throwCustomError('Exam not found', 404);
-    }
-
-    const currentTime = moment.utc();
-
-    const isExamAvailable = currentTime.isAfter(exam.start_time) && currentTime.isBefore(exam.end_time);
-
-    if (!isExamAvailable) {
-      commonHelpers.throwCustomError('You can only join the exam within the allowed time window', 403);
-    }
-
-    const [updatedRowCount, updatedUserExam] = await UserExam.update(
-      {
-        status: 'on-going'
-      },
-      {
-        where: {
-          user_id: id,
-          exam_id: examId,
-          status: { [Op.not]: 'completed' }
-        },
-        returning: true
-      },
-      {
-        transaction: transactionContext
-      }
-    );
-
-    if (updatedRowCount === 0) {
-      commonHelpers.throwCustomError('User is not assigned to this exam', 403);
-    }
-
-    await transactionContext.commit();
-
-    return updatedUserExam[0];
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (currentUser.id !== id) {
+    return commonHelpers.throwCustomError('you can not access another user', 403);
   }
+
+  const exam = await Exam.findOne({ id: examId });
+
+  if (!exam) {
+    return commonHelpers.throwCustomError('Exam not found', 404);
+  }
+
+  const currentTime = moment.utc();
+
+  const isExamAvailable = currentTime.isAfter(exam.start_time) && currentTime.isBefore(exam.end_time);
+
+  if (!isExamAvailable) {
+    commonHelpers.throwCustomError('You can only join the exam within the allowed time window', 403);
+  }
+
+  const [updatedRowCount, updatedUserExam] = await UserExam.update(
+    {
+      status: 'on-going'
+    },
+    {
+      where: {
+        user_id: id,
+        exam_id: examId,
+        status: { [Op.not]: 'completed' }
+      },
+      returning: true
+    }
+  );
+
+  if (updatedRowCount === 0) {
+    commonHelpers.throwCustomError('User is not assigned to this exam', 403);
+  }
+
+  return updatedUserExam[0];
 }
 
 module.exports = {

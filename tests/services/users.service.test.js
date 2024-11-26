@@ -174,11 +174,9 @@ describe('User Service', () => {
           email: payload.email
         },
         expect.objectContaining({
-          where: { id },
-          transaction: transactionContext
+          where: { id }
         })
       );
-      expect(transactionContext.commit).toHaveBeenCalled();
       expect(result).toEqual({
         id,
         first_name: 'Jane',
@@ -200,7 +198,6 @@ describe('User Service', () => {
       commonHelpers.getRolesAsBool.mockReturnValue({ isSuperAdmin: true });
 
       await expect(update(currentUser, id, payload)).rejects.toThrow('Update failed');
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });
 
@@ -214,10 +211,9 @@ describe('User Service', () => {
       const result = await remove(currentUser, id);
 
       expect(User.destroy).toHaveBeenCalledWith({
-        where: { id },
-        transaction: transactionContext
+        where: { id }
       });
-      expect(transactionContext.commit).toHaveBeenCalled();
+
       expect(result).toEqual({
         count: 1,
         message: 'User removed successfully'
@@ -231,7 +227,6 @@ describe('User Service', () => {
       User.destroy.mockRejectedValue(new Error('Delete failed'));
 
       await expect(remove(currentUser, id)).rejects.toThrow('Delete failed');
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });
 
