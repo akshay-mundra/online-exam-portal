@@ -237,7 +237,6 @@ paths:
     get:
       tags:
         - users
-        - exams
       summary: get all exams
       description: get all exams
       operationId: getAllExams
@@ -255,7 +254,6 @@ paths:
     post:
       tags:
         - users
-        - exams
       summary: start exam
       description: start exam
       operationId: startExam
@@ -369,8 +367,7 @@ paths:
   /exams/{id}/users:
     get:
       tags:
-        - exams1
-        - users1
+        - exams
       summary: get all users
       description: get all users
       operationId: getAllUsers1
@@ -379,8 +376,7 @@ paths:
           description: ''
     post:
       tags:
-        - exams1
-        - users1
+        - exams
       summary: add user
       description: add user
       operationId: addUser
@@ -410,8 +406,7 @@ paths:
   /exams/{id}/users/{userId}:
     get:
       tags:
-        - exams1
-        - users1
+        - exams
       summary: get a user
       description: get a user
       operationId: getAUser1
@@ -420,8 +415,7 @@ paths:
           description: ''
     delete:
       tags:
-        - exams1
-        - users1
+        - exams
       summary: remove user
       description: remove user
       operationId: removeUser
@@ -444,8 +438,7 @@ paths:
   /exams/{id}/questions:
     get:
       tags:
-        - exams1
-        - questions
+        - exams
       summary: get all questions
       description: get all questions
       operationId: getAllQuestions
@@ -454,8 +447,7 @@ paths:
           description: ''
     post:
       tags:
-        - exams1
-        - questions
+        - exams
       summary: create question
       description: create question
       operationId: createQuestion
@@ -525,8 +517,7 @@ paths:
   /exams/{id}/questions/{questionId}:
     get:
       tags:
-        - exams1
-        - questions
+        - exams
       summary: get a question
       description: get a question
       operationId: getAQuestion
@@ -535,8 +526,7 @@ paths:
           description: ''
     put:
       tags:
-        - exams1
-        - questions
+        - exams
       summary: update question
       description: update question
       operationId: updateQuestion
@@ -566,8 +556,7 @@ paths:
           description: ''
     delete:
       tags:
-        - exams1
-        - questions
+        - exams
       summary: delete question
       description: delete question
       operationId: deleteQuestion
@@ -590,7 +579,7 @@ paths:
   /exams:
     get:
       tags:
-        - exams1
+        - exams
       summary: get all exams
       description: get all exams
       operationId: getAllExams1
@@ -615,7 +604,7 @@ paths:
           description: ''
     post:
       tags:
-        - exams1
+        - exams
       summary: create exam
       description: create exam
       operationId: createExam
@@ -646,7 +635,7 @@ paths:
   /exams/{id}:
     get:
       tags:
-        - exams1
+        - exams
       summary: get a exam
       description: get a exam
       operationId: getAExam
@@ -655,7 +644,7 @@ paths:
           description: ''
     put:
       tags:
-        - exams1
+        - exams
       summary: udpate exam
       description: udpate exam
       operationId: udpateExam
@@ -675,7 +664,7 @@ paths:
           description: ''
     delete:
       tags:
-        - exams1
+        - exams
       summary: delete exam
       description: delete exam
       operationId: deleteExam
@@ -692,7 +681,7 @@ paths:
   /exams/{id}/result:
     get:
       tags:
-        - exams1
+        - exams
       summary: results
       description: results
       operationId: results
@@ -709,8 +698,7 @@ paths:
   /questions/{id}/options:
     post:
       tags:
-        - questions1
-        - options
+        - questions
       summary: create option
       description: create option
       operationId: createOption
@@ -748,8 +736,7 @@ paths:
   /questions/{id}/options/{optionId}:
     get:
       tags:
-        - questions1
-        - options
+        - questions
       summary: get option
       description: get option
       operationId: getOption
@@ -758,8 +745,7 @@ paths:
           description: ''
     put:
       tags:
-        - questions1
-        - options
+        - questions
       summary: update question
       description: update question
       operationId: updateQuestion1
@@ -789,8 +775,7 @@ paths:
           description: ''
     delete:
       tags:
-        - questions1
-        - options
+        - questions
       summary: delete option
       description: delete option
       operationId: deleteOption
@@ -813,7 +798,7 @@ paths:
   /questions/bulk-create:
     post:
       tags:
-        - questions1
+        - questions
       summary: bulk create
       description: bulk create
       operationId: bulkCreate
@@ -835,7 +820,7 @@ paths:
   /users-exams/{id}/answers:
     put:
       tags:
-        - users- exams
+        - users-exams
       summary: create answer
       description: create answer
       operationId: createAnswer
@@ -876,7 +861,7 @@ paths:
   /users-exams/{id}/result:
     get:
       tags:
-        - users- exams
+        - users-exams
       summary: get result
       description: get result
       operationId: getResult
@@ -893,7 +878,7 @@ paths:
   /users-exams/{id}/submit-exam:
     post:
       tags:
-        - users- exams
+        - users-exams
       summary: submit exam
       description: submit exam
       operationId: submitExam
@@ -919,9 +904,5 @@ tags:
   - name: roles
   - name: users
   - name: exams
-  - name: exams1
-  - name: users1
   - name: questions
-  - name: questions1
-  - name: options
-  - name: users- exams
+  - name: users-exams
