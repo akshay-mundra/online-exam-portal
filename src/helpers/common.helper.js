@@ -38,9 +38,13 @@ function getRolesAsBool(roles) {
 
   if (roles?.includes(SUPER_ADMIN)) {
     rolesAsBool.isSuperAdmin = true;
-  } else if (roles?.includes(ADMIN)) {
+  }
+
+  if (roles?.includes(ADMIN)) {
     rolesAsBool.isAdmin = true;
-  } else if (roles?.includes(USER)) {
+  }
+
+  if (roles?.includes(USER)) {
     rolesAsBool.isUser = true;
   }
 
