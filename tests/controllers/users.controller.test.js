@@ -56,7 +56,7 @@ describe('User Controller', () => {
 
       await get(req, res, next);
 
-      expect(userServices.get).toHaveBeenCalledWith(req.user, userId);
+      expect(userServices.get).toHaveBeenCalledWith(req.user, { id: userId });
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -86,7 +86,7 @@ describe('User Controller', () => {
 
       await update(req, res, next);
 
-      expect(userServices.update).toHaveBeenCalledWith(req.user, userId, req.body);
+      expect(userServices.update).toHaveBeenCalledWith(req.user, { id: userId }, req.body);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
@@ -115,7 +115,7 @@ describe('User Controller', () => {
 
       await remove(req, res, next);
 
-      expect(userServices.remove).toHaveBeenCalledWith(req.user, userId);
+      expect(userServices.remove).toHaveBeenCalledWith(req.user, { id: userId });
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();

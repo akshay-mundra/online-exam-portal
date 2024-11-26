@@ -101,7 +101,7 @@ describe('Exams Controller', () => {
 
       await get(req, res, next);
 
-      expect(examServices.get).toHaveBeenCalledWith(req.user, examId);
+      expect(examServices.get).toHaveBeenCalledWith(req.user, { id: examId });
       expect(res.data).toEqual(mockExam);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -131,7 +131,7 @@ describe('Exams Controller', () => {
 
       await update(req, res, next);
 
-      expect(examServices.update).toHaveBeenCalledWith(req.user, examId, req.body);
+      expect(examServices.update).toHaveBeenCalledWith(req.user, { id: examId }, req.body);
       expect(res.data).toEqual(mockExam);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
@@ -160,7 +160,7 @@ describe('Exams Controller', () => {
 
       await remove(req, res, next);
 
-      expect(examServices.remove).toHaveBeenCalledWith(req.user, examId);
+      expect(examServices.remove).toHaveBeenCalledWith(req.user, { id: examId });
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
@@ -188,7 +188,7 @@ describe('Exams Controller', () => {
 
       await getResult(req, res, next);
 
-      expect(examServices.getResult).toHaveBeenCalledWith(req.user, examId);
+      expect(examServices.getResult).toHaveBeenCalledWith(req.user, { id: examId });
       expect(res.data).toEqual(mockResult);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -217,7 +217,7 @@ describe('Exams Controller', () => {
 
       await addUser(req, res, next);
 
-      expect(examServices.addUser).toHaveBeenCalledWith(req.user, examId, req.body);
+      expect(examServices.addUser).toHaveBeenCalledWith(req.user, { id: examId }, req.body);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(201);
       expect(next).toHaveBeenCalled();
@@ -249,7 +249,7 @@ describe('Exams Controller', () => {
 
       await getAllUsers(req, res, next);
 
-      expect(examServices.getAllUsers).toHaveBeenCalledWith(req.user, examId, req.query);
+      expect(examServices.getAllUsers).toHaveBeenCalledWith(req.user, { id: examId }, req.query);
       expect(res.data).toEqual(mockUsers);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -279,7 +279,7 @@ describe('Exams Controller', () => {
 
       await getUser(req, res, next);
 
-      expect(examServices.getUser).toHaveBeenCalledWith(req.user, userId, examId);
+      expect(examServices.getUser).toHaveBeenCalledWith(req.user, { userId, id: examId });
       expect(res.data).toEqual(mockUser);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -309,7 +309,7 @@ describe('Exams Controller', () => {
 
       await removeUser(req, res, next);
 
-      expect(examServices.removeUser).toHaveBeenCalledWith(req.user, userId, examId);
+      expect(examServices.removeUser).toHaveBeenCalledWith(req.user, { userId, id: examId });
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
@@ -338,7 +338,7 @@ describe('Exams Controller', () => {
 
       await createQuestion(req, res, next);
 
-      expect(examServices.createQuestion).toHaveBeenCalledWith(req.user, examId, req.body);
+      expect(examServices.createQuestion).toHaveBeenCalledWith(req.user, { id: examId }, req.body);
       expect(res.data).toEqual(mockQuestion);
       expect(res.statusCode).toBe(201);
       expect(next).toHaveBeenCalled();
@@ -370,7 +370,7 @@ describe('Exams Controller', () => {
 
       await getAllQuestions(req, res, next);
 
-      expect(examServices.getAllQuestions).toHaveBeenCalledWith(req.user, examId, req.query);
+      expect(examServices.getAllQuestions).toHaveBeenCalledWith(req.user, { id: examId }, req.query);
       expect(res.data).toEqual(mockQuestions);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -400,7 +400,7 @@ describe('Exams Controller', () => {
 
       await getQuestion(req, res, next);
 
-      expect(examServices.getQuestion).toHaveBeenCalledWith(req.user, examId, questionId);
+      expect(examServices.getQuestion).toHaveBeenCalledWith(req.user, { id: examId, questionId });
       expect(res.data).toEqual(mockQuestion);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
@@ -431,7 +431,7 @@ describe('Exams Controller', () => {
 
       await updateQuestion(req, res, next);
 
-      expect(examServices.updateQuestion).toHaveBeenCalledWith(req.user, examId, questionId, req.body);
+      expect(examServices.updateQuestion).toHaveBeenCalledWith(req.user, { id: examId, questionId }, req.body);
       expect(res.data).toEqual(mockUpdatedQuestion);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
@@ -461,7 +461,7 @@ describe('Exams Controller', () => {
 
       await removeQuestion(req, res, next);
 
-      expect(examServices.removeQuestion).toHaveBeenCalledWith(req.user, examId, questionId);
+      expect(examServices.removeQuestion).toHaveBeenCalledWith(req.user, { id: examId, questionId });
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(202);
       expect(next).toHaveBeenCalled();
