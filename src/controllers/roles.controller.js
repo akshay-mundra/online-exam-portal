@@ -28,8 +28,8 @@ async function getAll(req, res, next) {
 
 async function get(req, res, next) {
   try {
-    const { id } = req.params;
-    const result = await roleServices.get(id);
+    const { params } = req;
+    const result = await roleServices.get(params);
     res.data = result;
     res.statusCode = 200;
     next();
@@ -41,9 +41,8 @@ async function get(req, res, next) {
 
 async function update(req, res, next) {
   try {
-    const { body: payload } = req;
-    const { id } = req.params;
-    const result = await roleServices.update(id, payload);
+    const { body: payload, params } = req;
+    const result = await roleServices.update(params, payload);
     res.data = result;
     res.statusCode = 202;
     next();
@@ -55,8 +54,8 @@ async function update(req, res, next) {
 
 async function remove(req, res, next) {
   try {
-    const { id } = req.params;
-    const result = await roleServices.remove(id);
+    const { params } = req;
+    const result = await roleServices.remove(params);
     res.data = result;
     res.statusCode = 202;
     next();

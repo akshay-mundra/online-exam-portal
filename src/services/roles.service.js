@@ -16,7 +16,8 @@ async function create(payload) {
 }
 
 // get role by id
-async function get(id) {
+async function get(params) {
+  const { id } = params;
   const role = await Role.findOne({ where: { id } });
 
   if (!role) {
@@ -33,7 +34,8 @@ async function getAll() {
 }
 
 // update role by id
-async function update(id, payload) {
+async function update(params, payload) {
+  const { id } = params;
   const { name } = payload;
 
   const [updatedRowCount, updatedRole] = await Role.update(
@@ -53,7 +55,9 @@ async function update(id, payload) {
 }
 
 // remove role by id
-async function remove(id) {
+async function remove(params) {
+  const { id } = params;
+
   const role = await Role.findOne({ where: { id } });
 
   if (!role) {
