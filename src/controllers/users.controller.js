@@ -29,9 +29,8 @@ async function getMe(req, res, next) {
 
 async function get(req, res, next) {
   try {
-    const { id } = req.params;
-    const user = req.user;
-    const result = await userServices.get(user, id);
+    const { user, params } = req;
+    const result = await userServices.get(user, params);
     res.data = result;
     res.statusCode = 200;
     next();
@@ -43,9 +42,8 @@ async function get(req, res, next) {
 
 async function update(req, res, next) {
   try {
-    const { body: payload, user } = req;
-    const { id } = req.params;
-    const result = await userServices.update(user, id, payload);
+    const { body: payload, user, params } = req;
+    const result = await userServices.update(user, params, payload);
     res.data = result;
     res.statusCode = 202;
     next();
@@ -57,9 +55,8 @@ async function update(req, res, next) {
 
 async function remove(req, res, next) {
   try {
-    const { id } = req.params;
-    const user = req.user;
-    const result = await userServices.remove(user, id);
+    const { user, params } = req;
+    const result = await userServices.remove(user, params);
     res.data = result;
     res.statusCode = 202;
     next();

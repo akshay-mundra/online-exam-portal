@@ -45,7 +45,7 @@ async function login(payload) {
 }
 
 // register new user
-async function register(req, payload) {
+async function register(user, payload) {
   const { firstName, lastName, email, password, roles: userRoles } = payload;
 
   const transactionContext = await sequelize.transaction();
@@ -69,7 +69,7 @@ async function register(req, payload) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const admin_id = [ADMIN, SUPER_ADMIN].some(role => req?.user?.roles?.includes(role)) ? req.user.id : null;
+    const admin_id = [ADMIN, SUPER_ADMIN].some(role => user?.roles?.includes(role)) ? user.id : null;
 
     const user = await User.create(
       {

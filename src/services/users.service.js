@@ -51,7 +51,8 @@ async function getMe(currentUser) {
 }
 
 // admin can get users created by him, user can only see details of self.
-async function get(currentUser, id) {
+async function get(currentUser, params) {
+  const { id } = params;
   const roles = currentUser.roles;
   const { isSuperAdmin, isUser, isAdmin } = commonHelpers.getRolesAsBool(roles);
 
@@ -73,7 +74,8 @@ async function get(currentUser, id) {
 }
 
 // update user if user created by admin or the current user is superadmin
-async function update(currentUser, id, payload) {
+async function update(currentUser, params, payload) {
+  const { id } = params;
   const { firstName, lastName, email } = payload;
   const roles = currentUser.roles;
   const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
@@ -101,7 +103,8 @@ async function update(currentUser, id, payload) {
 }
 
 // remove user (only by admin and superadmin)
-async function remove(currentUser, id) {
+async function remove(currentUser, params) {
+  const { id } = params;
   const roles = currentUser.roles;
   const { isSuperAdmin } = commonHelpers.getRolesAsBool(roles);
 
