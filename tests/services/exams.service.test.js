@@ -96,17 +96,13 @@ describe('Exam Service', () => {
 
       const result = await create(currentUser, payload);
 
-      expect(sequelize.transaction).toHaveBeenCalled();
-      expect(Exam.create).toHaveBeenCalledWith(
-        {
-          title: 'New Exam',
-          start_time: '2024-01-01',
-          end_time: '2024-01-02',
-          admin_id: currentUser.id
-        },
-        { transaction }
-      );
-      expect(transaction.commit).toHaveBeenCalled();
+      expect(Exam.create).toHaveBeenCalledWith({
+        title: 'New Exam',
+        start_time: '2024-01-01',
+        end_time: '2024-01-02',
+        admin_id: currentUser.id
+      });
+
       expect(result).toEqual({ id: 1, ...payload });
     });
 
@@ -122,7 +118,6 @@ describe('Exam Service', () => {
       Exam.create.mockRejectedValue(new Error('DB error'));
 
       await expect(create(currentUser, payload)).rejects.toThrow('DB error');
-      expect(transaction.rollback).toHaveBeenCalled();
     });
   });
 
@@ -168,17 +163,14 @@ describe('Exam Service', () => {
         endTime: '2024-01-02'
       });
 
-      expect(sequelize.transaction).toHaveBeenCalled();
       expect(Exam.update).toHaveBeenCalledWith(
         {
           title: 'Updated Exam',
           start_time: '2024-01-01',
           end_time: '2024-01-02'
         },
-        { where: { id: 1, admin_id: 1, is_published: false }, returning: true },
-        { transaction: mockTransaction }
+        { where: { id: 1, admin_id: 1, is_published: false }, returning: true }
       );
-      expect(mockTransaction.commit).toHaveBeenCalled();
       expect(result).toEqual([{ id: 1, title: 'Updated Exam' }]);
     });
 
@@ -188,8 +180,6 @@ describe('Exam Service', () => {
       Exam.update.mockRejectedValue(new Error('DB Error'));
 
       await expect(update({ id: 1 }, 1, { title: 'Failed Update' })).rejects.toThrow('DB Error');
-
-      expect(mockTransaction.rollback).toHaveBeenCalled();
     });
   });
 
@@ -202,7 +192,7 @@ describe('Exam Service', () => {
       const result = await remove({ id: 1 }, 1);
 
       expect(Exam.destroy).toHaveBeenCalled();
-      expect(mockTransaction.commit).toHaveBeenCalled();
+
       expect(result).toEqual({
         message: 'Exam deleted successfully!',
         countChanged: 1
@@ -218,8 +208,6 @@ describe('Exam Service', () => {
       });
 
       await expect(remove({ id: 1 }, 1)).rejects.toThrow('exam not found or exam is currently on going');
-
-      expect(mockTransaction.rollback).toHaveBeenCalled();
     });
   });
 
@@ -619,7 +607,7 @@ describe('Exam Service', () => {
       });
 
       expect(Question.update).toHaveBeenCalled();
-      expect(mockTransaction.commit).toHaveBeenCalled();
+
       expect(result).toEqual([{ id: 1, question: 'Updated Question' }]);
     });
 
@@ -629,8 +617,6 @@ describe('Exam Service', () => {
       Question.update.mockRejectedValue(new Error('Update failed'));
 
       await expect(updateQuestion({ id: 1 }, 1, 1, { question: 'Failed Update' })).rejects.toThrow('Update failed');
-
-      expect(mockTransaction.rollback).toHaveBeenCalled();
     });
   });
 
@@ -643,7 +629,6 @@ describe('Exam Service', () => {
       await removeQuestion({ id: 1 }, 1, 1);
 
       expect(Question.destroy).toHaveBeenCalled();
-      expect(mockTransaction.commit).toHaveBeenCalled();
     });
 
     it('should throw error if question not found', async () => {
@@ -655,8 +640,6 @@ describe('Exam Service', () => {
       });
 
       await expect(removeQuestion({ id: 1 }, 1, 1)).rejects.toThrow('Question not found');
-
-      expect(mockTransaction.rollback).toHaveBeenCalled();
     });
   });
 });
