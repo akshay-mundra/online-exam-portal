@@ -138,158 +138,137 @@ async function calculateUserScore(currentUser, params) {
   const roles = currentUser.roles;
   const { isUser } = commonHelpers.getRolesAsBool(roles);
 
-  const transactionContext = await sequelize.transaction();
+  const userExam = await UserExam.findOne({
+    where: { id: id }
+  });
 
-  try {
-    const userExam = await UserExam.findOne({
-      where: { id: id }
-    });
-
-    if (!userExam) {
-      commonHelpers.throwCustomError('User Exam not found', 404);
-    }
-
-    if (isUser && userExam.user_id !== currentUser.id) {
-      commonHelpers.throwCustomError('Can not see result of other user', 403);
-    }
-
-    if (userExam.status === 'on-going' || userExam.status === 'pending') {
-      commonHelpers.throwCustomError('User has not completed the exam', 400);
-    }
-
-    if (userExam.score !== null) {
-      return userExam.score;
-    }
-
-    const questionAnswers = await Question.findAll({
-      where: {
-        exam_id: userExam.exam_id
-      },
-      attributes: ['id', 'type', 'negative_marks'],
-      include: [
-        {
-          model: Option,
-          attributes: ['id', 'marks', 'is_correct'],
-          required: true
-        },
-        {
-          model: Answer,
-          attributes: ['id', 'option_id']
-        }
-      ]
-    });
-
-    let totalScore = 0;
-
-    questionAnswers.forEach(question => {
-      const answers = question.Answers;
-      const options = question.Options;
-
-      if (question.type === 'single_choice') {
-        if (answers?.length === 0) {
-          return;
-        } else if (answers?.length > 1) {
-          totalScore += question.negative_marks;
-        } else {
-          const selectedOption = options.find(option => option.id === answers[0].option_id);
-
-          if (selectedOption && selectedOption.is_correct) {
-            totalScore += selectedOption.marks;
-          } else {
-            totalScore += question.negative_marks;
-          }
-        }
-      } else {
-        let isIncorrect = false;
-        let questionMarks = 0;
-
-        for (const answer of answers) {
-          const selectedOption = options.find(option => option.id === answer.option_id);
-
-          if (selectedOption) {
-            if (selectedOption.is_correct) {
-              questionMarks += selectedOption.marks;
-            } else {
-              isIncorrect = true;
-              break;
-            }
-          }
-        }
-
-        if (isIncorrect) {
-          totalScore += question.negative_marks;
-        } else {
-          totalScore += questionMarks;
-        }
-      }
-    });
-
-    await UserExam.update(
-      { score: totalScore },
-      {
-        where: { id: id },
-        transaction: transactionContext
-      }
-    );
-
-    await transactionContext.commit();
-
-    return totalScore;
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (!userExam) {
+    commonHelpers.throwCustomError('User Exam not found', 404);
   }
+
+  if (isUser && userExam.user_id !== currentUser.id) {
+    commonHelpers.throwCustomError('Can not see result of other user', 403);
+  }
+
+  if (userExam.status === 'on-going' || userExam.status === 'pending') {
+    commonHelpers.throwCustomError('User has not completed the exam', 400);
+  }
+
+  if (userExam.score !== null) {
+    return userExam.score;
+  }
+
+  const questionAnswers = await Question.findAll({
+    where: {
+      exam_id: userExam.exam_id
+    },
+    attributes: ['id', 'type', 'negative_marks'],
+    include: [
+      {
+        model: Option,
+        attributes: ['id', 'marks', 'is_correct'],
+        required: true
+      },
+      {
+        model: Answer,
+        attributes: ['id', 'option_id']
+      }
+    ]
+  });
+
+  let totalScore = 0;
+
+  questionAnswers.forEach(question => {
+    const answers = question.Answers;
+    const options = question.Options;
+
+    if (question.type === 'single_choice') {
+      if (answers?.length === 0) {
+        return;
+      } else if (answers?.length > 1) {
+        totalScore += question.negative_marks;
+      } else {
+        const selectedOption = options.find(option => option.id === answers[0].option_id);
+
+        if (selectedOption && selectedOption.is_correct) {
+          totalScore += selectedOption.marks;
+        } else {
+          totalScore += question.negative_marks;
+        }
+      }
+    } else {
+      let isIncorrect = false;
+      let questionMarks = 0;
+
+      for (const answer of answers) {
+        const selectedOption = options.find(option => option.id === answer.option_id);
+
+        if (selectedOption) {
+          if (selectedOption.is_correct) {
+            questionMarks += selectedOption.marks;
+          } else {
+            isIncorrect = true;
+            break;
+          }
+        }
+      }
+
+      if (isIncorrect) {
+        totalScore += question.negative_marks;
+      } else {
+        totalScore += questionMarks;
+      }
+    }
+  });
+
+  await UserExam.update(
+    { score: totalScore },
+    {
+      where: { id: id }
+    }
+  );
+
+  return totalScore;
 }
 
 // submit exam - change the exam status for the user
 async function submitExam(currentUser, params) {
   const { id } = params;
-  const transactionContext = await sequelize.transaction();
 
-  try {
-    const userExam = await UserExam.findByPk(id);
+  const userExam = await UserExam.findByPk(id);
 
-    if (!userExam) {
-      commonHelpers.throwCustomError('user exam not found', 404);
-    }
-
-    if (userExam.user_id !== currentUser.id) {
-      commonHelpers.throwCustomError('Can not access other user', 403);
-    }
-
-    const exam = await Exam.findByPk(userExam.exam_id);
-
-    if (!exam) {
-      commonHelpers.throwCustomError('Exam not found', 404);
-    }
-
-    const currentTime = moment();
-
-    if (!currentTime.isAfter(exam.start_time)) {
-      commonHelpers.throwCustomError('Exam is not started yet', 400);
-    }
-
-    await UserExam.update(
-      {
-        status: 'completed'
-      },
-      {
-        where: {
-          id: id
-        }
-      },
-      {
-        transaction: transactionContext
-      }
-    );
-
-    await transactionContext.commit();
-
-    return 'Exam submited successfully';
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (!userExam) {
+    commonHelpers.throwCustomError('user exam not found', 404);
   }
+
+  if (userExam.user_id !== currentUser.id) {
+    commonHelpers.throwCustomError('Can not access other user', 403);
+  }
+
+  const exam = await Exam.findByPk(userExam.exam_id);
+
+  if (!exam) {
+    commonHelpers.throwCustomError('Exam not found', 404);
+  }
+
+  const currentTime = moment();
+
+  if (!currentTime.isAfter(exam.start_time)) {
+    commonHelpers.throwCustomError('Exam is not started yet', 400);
+  }
+
+  await UserExam.update(
+    {
+      status: 'completed'
+    },
+    {
+      where: {
+        id: id
+      }
+    }
+  );
+
+  return 'Exam submited successfully';
 }
 
 module.exports = { createAnswer, calculateUserScore, submitExam };

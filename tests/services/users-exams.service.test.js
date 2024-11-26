@@ -117,8 +117,6 @@ describe('Exam Service', () => {
       commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
 
       await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(2);
-
-      expect(transactionContext.commit).toHaveBeenCalled();
     });
 
     it('should throw "User Exam not found" error if user exam is not found', async () => {
@@ -157,8 +155,6 @@ describe('Exam Service', () => {
       commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
 
       await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(-2);
-
-      expect(transactionContext.commit).toHaveBeenCalled();
     });
   });
 
@@ -176,8 +172,6 @@ describe('Exam Service', () => {
       Exam.findByPk.mockResolvedValue(mockExam);
 
       await expect(submitExam({ id: 1 }, { id: 1 })).resolves.toBe('Exam submited successfully');
-
-      expect(transactionContext.commit).toHaveBeenCalled();
     });
 
     it('should throw "Can not access other user" error if user ids do not match', async () => {
