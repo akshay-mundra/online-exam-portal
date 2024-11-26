@@ -30,7 +30,18 @@ async function getAll(currentUser, query) {
 async function getMe(currentUser) {
   const { id } = currentUser;
 
-  const user = await User.findByPk(id);
+  const user = await User.findOne({
+    where: { id },
+    include: [
+      {
+        model: Role,
+        attributes: ['name'],
+        through: {
+          attributes: []
+        }
+      }
+    ]
+  });
 
   if (!user) {
     return commonHelpers.throwCustomError('User not found', 404);
