@@ -1,85 +1,52 @@
-const { Option, sequelize } = require('../models');
+const { Option } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
 
 // create a option for the question
 async function create(questionId, payload) {
   const { option, isCorrect, marks } = payload;
-  const transactionContext = await sequelize.transaction();
 
-  try {
-    const createdOption = await Option.create(
-      {
-        option,
-        is_correct: isCorrect,
-        marks,
-        question_id: questionId
-      },
-      {
-        transaction: transactionContext
-      }
-    );
+  const createdOption = await Option.create({
+    option,
+    is_correct: isCorrect,
+    marks,
+    question_id: questionId
+  });
 
-    await transactionContext.commit();
-
-    return createdOption;
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
-  }
+  return createdOption;
 }
 
 // update the option
 async function update(id, payload) {
   const { option, isCorrect, marks } = payload;
-  const transactionContext = await sequelize.transaction();
 
-  try {
-    const [updateRowCount, updatedOption] = await Option.update(
-      {
-        option,
-        is_correct: isCorrect,
-        marks
-      },
-      {
-        where: { id },
-        returning: true
-      },
-      {
-        transaction: transactionContext
-      }
-    );
-
-    if (!updateRowCount) {
-      commonHelpers.throwCustomError('Option not found', 404);
+  const [updateRowCount, updatedOption] = await Option.update(
+    {
+      option,
+      is_correct: isCorrect,
+      marks
+    },
+    {
+      where: { id },
+      returning: true
     }
+  );
 
-    await transactionContext.commit();
-
-    return updatedOption;
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (!updateRowCount) {
+    commonHelpers.throwCustomError('Option not found', 404);
   }
+
+  return updatedOption;
 }
 
 // remove the option
 async function remove(id) {
-  const transactionContext = await sequelize.transaction();
+  const rowsModified = await Option.destroy({ where: { id } });
 
-  try {
-    const rowsModified = await Option.destroy({ where: { id } }, { transaction: transactionContext });
-
-    if (rowsModified === 0) {
-      commonHelpers.throwCustomError('Option not found', 404);
-    }
-
-    await transactionContext.commit();
-
-    return 'Option deleted successfully';
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (rowsModified === 0) {
+    commonHelpers.throwCustomError('Option not found', 404);
   }
+
+  return 'Option deleted successfully';
 }
 
 module.exports = { create, update, remove };

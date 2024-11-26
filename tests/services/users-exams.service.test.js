@@ -47,31 +47,29 @@ describe('Exam Service', () => {
   });
 
   describe('createAnswer', () => {
-    describe('createAnswer', () => {
-      it('should successfully create or update answers', async () => {
-        const mockUserExam = {
-          id: 1,
-          user_id: 1,
-          status: 'on-going',
-          exam_id: 1
-        };
-        const mockExam = { id: 1, start_time: moment().subtract(1, 'hour') };
-        const mockQuestion = {
-          id: 1,
-          exam_id: 1,
-          type: 'single_choice',
-          Options: [{ id: 1 }]
-        };
-        const mockOption = { id: 1, is_correct: true, marks: 2 };
-        const mockAnswer = { option_id: 1, question_id: 1, user_exam_id: 1 };
+    it('should successfully create or update answers', async () => {
+      const mockUserExam = {
+        id: 1,
+        user_id: 1,
+        status: 'on-going',
+        exam_id: 1
+      };
+      const mockExam = { id: 1, start_time: moment().subtract(1, 'hour') };
+      const mockQuestion = {
+        id: 1,
+        exam_id: 1,
+        type: 'single_choice',
+        Options: [{ id: 1 }]
+      };
+      const mockOption = { id: 1, is_correct: true, marks: 2 };
+      const mockAnswer = { option_id: 1, question_id: 1, user_exam_id: 1 };
 
-        UserExam.findOne.mockResolvedValue(mockUserExam);
-        Exam.findByPk.mockResolvedValue(mockExam);
-        Question.findOne.mockResolvedValue(mockQuestion);
-        Option.findOne.mockResolvedValue(mockOption);
-        Answer.findAll.mockResolvedValue([]);
-        Answer.bulkCreate.mockResolvedValue([mockAnswer]);
-      });
+      UserExam.findOne.mockResolvedValue(mockUserExam);
+      Exam.findByPk.mockResolvedValue(mockExam);
+      Question.findOne.mockResolvedValue(mockQuestion);
+      Option.findOne.mockResolvedValue(mockOption);
+      Answer.findAll.mockResolvedValue([]);
+      Answer.bulkCreate.mockResolvedValue([mockAnswer]);
     });
 
     it('should throw "User not match" error when user ids do not match', async () => {
@@ -91,6 +89,47 @@ describe('Exam Service', () => {
 
       await expect(createAnswer({ id: 1 }, { id: 1 }, { questionId: 1, optionIds: [1] })).rejects.toThrow(
         'User not match'
+      );
+    });
+
+    it('should throw "Already submitted exam" error when the exam is already completed', async () => {
+      const mockUserExam = {
+        id: 1,
+        user_id: 1,
+        status: 'completed',
+        exam_id: 1
+      };
+      UserExam.findOne.mockResolvedValue(mockUserExam);
+
+      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
+        const error = new Error(message);
+        error.statusCode = statusCode;
+        throw error;
+      });
+
+      await expect(createAnswer({ id: 1 }, { id: 1 }, { questionId: 1, optionIds: [1] })).rejects.toThrow(
+        'Already submited exam'
+      );
+    });
+
+    it('should throw "Question not found" error if the question is not found', async () => {
+      const mockUserExam = {
+        id: 1,
+        user_id: 1,
+        status: 'on-going',
+        exam_id: 1
+      };
+      UserExam.findOne.mockResolvedValue(mockUserExam);
+      Question.findOne.mockResolvedValue(null);
+
+      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
+        const error = new Error(message);
+        error.statusCode = statusCode;
+        throw error;
+      });
+
+      await expect(createAnswer({ id: 1 }, { id: 1 }, { questionId: 1, optionIds: [1] })).rejects.toThrow(
+        'Question not found'
       );
     });
   });
@@ -117,8 +156,6 @@ describe('Exam Service', () => {
       commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
 
       await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(2);
-
-      expect(transactionContext.commit).toHaveBeenCalled();
     });
 
     it('should throw "User Exam not found" error if user exam is not found', async () => {
@@ -157,8 +194,43 @@ describe('Exam Service', () => {
       commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
 
       await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(-2);
+    });
 
-      expect(transactionContext.commit).toHaveBeenCalled();
+    it('should return the score if already calculated', async () => {
+      const mockUserExam = {
+        id: 1,
+        user_id: 1,
+        exam_id: 1,
+        status: 'completed',
+        score: 5
+      };
+
+      UserExam.findOne.mockResolvedValue(mockUserExam);
+
+      await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(5);
+    });
+
+    it('should handle missing or empty answers for a question', async () => {
+      const mockUserExam = {
+        id: 1,
+        user_id: 1,
+        exam_id: 1,
+        status: 'completed',
+        score: null
+      };
+      const mockQuestion = {
+        id: 1,
+        type: 'single_choice',
+        negative_marks: -1,
+        Options: [{ id: 1, is_correct: true, marks: 2 }],
+        Answers: [{ id: 10, option_id: 1 }]
+      };
+
+      UserExam.findOne.mockResolvedValue(mockUserExam);
+      Question.findAll.mockResolvedValue([mockQuestion]);
+      commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
+
+      await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(2);
     });
   });
 
@@ -176,8 +248,6 @@ describe('Exam Service', () => {
       Exam.findByPk.mockResolvedValue(mockExam);
 
       await expect(submitExam({ id: 1 }, { id: 1 })).resolves.toBe('Exam submited successfully');
-
-      expect(transactionContext.commit).toHaveBeenCalled();
     });
 
     it('should throw "Can not access other user" error if user ids do not match', async () => {
@@ -206,6 +276,17 @@ describe('Exam Service', () => {
       Exam.findByPk.mockResolvedValue(mockExam);
 
       await expect(submitExam({ id: 1 }, { id: 1 })).rejects.toThrow('Exam is not started yet');
+    });
+    it('should throw "User exam not found" error if the user exam does not exist', async () => {
+      UserExam.findByPk.mockResolvedValue(null);
+
+      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
+        const error = new Error(message);
+        error.statusCode = statusCode;
+        throw error;
+      });
+
+      await expect(submitExam({ id: 1 }, { id: 1 })).rejects.toThrow('user exam not found');
     });
   });
 });

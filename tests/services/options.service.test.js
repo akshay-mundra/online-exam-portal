@@ -38,16 +38,13 @@ describe('Option Service', () => {
 
       const result = await create(questionId, payload);
 
-      expect(Option.create).toHaveBeenCalledWith(
-        {
-          option: 'Option A',
-          is_correct: true,
-          marks: 5,
-          question_id: questionId
-        },
-        { transaction: transactionContext }
-      );
-      expect(transactionContext.commit).toHaveBeenCalled();
+      expect(Option.create).toHaveBeenCalledWith({
+        option: 'Option A',
+        is_correct: true,
+        marks: 5,
+        question_id: questionId
+      });
+
       expect(result).toEqual({ id: '1', ...payload, question_id: questionId });
     });
 
@@ -57,7 +54,6 @@ describe('Option Service', () => {
       Option.create.mockRejectedValue(new Error('Database Error'));
 
       await expect(create(questionId, payload)).rejects.toThrow('Database Error');
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });
 
@@ -78,10 +74,8 @@ describe('Option Service', () => {
         {
           where: { id },
           returning: true
-        },
-        { transaction: transactionContext }
+        }
       );
-      expect(transactionContext.commit).toHaveBeenCalled();
       expect(result).toEqual([{ id, ...payload }]);
     });
 
@@ -93,7 +87,6 @@ describe('Option Service', () => {
       await expect(update(id, payload)).rejects.toThrow('Option not found');
 
       expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('Option not found', 404);
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
 
     it('should rollback transaction on error during update', async () => {
@@ -102,7 +95,6 @@ describe('Option Service', () => {
       Option.update.mockRejectedValue(new Error('Database Error'));
 
       await expect(update(id, payload)).rejects.toThrow('Database Error');
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });
 
@@ -113,8 +105,8 @@ describe('Option Service', () => {
 
       const result = await remove(id);
 
-      expect(Option.destroy).toHaveBeenCalledWith({ where: { id } }, { transaction: transactionContext });
-      expect(transactionContext.commit).toHaveBeenCalled();
+      expect(Option.destroy).toHaveBeenCalledWith({ where: { id } });
+
       expect(result).toBe('Option deleted successfully');
     });
 
@@ -125,7 +117,6 @@ describe('Option Service', () => {
       await expect(remove(id)).rejects.toThrow('Option not found');
 
       expect(commonHelpers.throwCustomError).toHaveBeenCalledWith('Option not found', 404);
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
 
     it('should rollback transaction on error during removal', async () => {
@@ -133,7 +124,6 @@ describe('Option Service', () => {
       Option.destroy.mockRejectedValue(new Error('Database Error'));
 
       await expect(remove(id)).rejects.toThrow('Database Error');
-      expect(transactionContext.rollback).toHaveBeenCalled();
     });
   });
 });

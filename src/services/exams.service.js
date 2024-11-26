@@ -36,26 +36,15 @@ async function getAll(currentUser, query) {
 // create new exam
 async function create(currentUser, payload) {
   const { title, startTime, endTime } = payload;
-  const transactionContext = await sequelize.transaction();
 
-  try {
-    const exam = await Exam.create(
-      {
-        title,
-        start_time: startTime,
-        end_time: endTime,
-        admin_id: currentUser.id
-      },
-      { transaction: transactionContext }
-    );
+  const exam = await Exam.create({
+    title,
+    start_time: startTime,
+    end_time: endTime,
+    admin_id: currentUser.id
+  });
 
-    await transactionContext.commit();
-
-    return exam;
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
-  }
+  return exam;
 }
 
 // get single exam by id
@@ -91,72 +80,50 @@ async function get(currentUser, id) {
 // update exam details only the admin who created it can update the exam.
 async function update(currentUser, id, payload) {
   const { title, startTime, endTime } = payload;
-  const transactionContext = await sequelize.transaction();
 
-  try {
-    const [updateRowCount, updatedExam] = await Exam.update(
-      { title, start_time: startTime, end_time: endTime },
-      {
-        where: { id, admin_id: currentUser.id, is_published: false },
-        returning: true
-      },
-      {
-        transaction: transactionContext
-      }
-    );
-
-    if (updateRowCount === 0) {
-      commonHelpers.throwCustomError('Exam not found or already published', 404);
+  const [updateRowCount, updatedExam] = await Exam.update(
+    { title, start_time: startTime, end_time: endTime },
+    {
+      where: { id, admin_id: currentUser.id, is_published: false },
+      returning: true
     }
+  );
 
-    await transactionContext.commit();
-
-    return updatedExam;
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (updateRowCount === 0) {
+    commonHelpers.throwCustomError('Exam not found or already published', 404);
   }
+
+  return updatedExam;
 }
 
 // remove exam by id
 async function remove(currentUser, id) {
-  const transactionContext = await sequelize.transaction();
+  const currentTime = moment.utc();
 
-  try {
-    const currentTime = moment.utc();
-
-    const countChanged = await Exam.destroy(
-      {
-        where: {
-          id,
-          admin_id: currentUser.id,
-          [Op.or]: [
-            {
-              start_time: {
-                [Op.gt]: currentTime.toDate()
-              }
-            },
-            {
-              end_time: {
-                [Op.lt]: currentTime.toDate()
-              }
-            }
-          ]
+  const countChanged = await Exam.destroy({
+    where: {
+      id,
+      admin_id: currentUser.id,
+      [Op.or]: [
+        {
+          start_time: {
+            [Op.gt]: currentTime.toDate()
+          }
+        },
+        {
+          end_time: {
+            [Op.lt]: currentTime.toDate()
+          }
         }
-      },
-      { transaction: transactionContext }
-    );
-    if (countChanged === 0) {
-      commonHelpers.throwCustomError('exam not found or exam is currently on going', 404);
+      ]
     }
+  });
 
-    await transactionContext.commit();
-
-    return { message: 'Exam deleted successfully!', countChanged };
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (countChanged === 0) {
+    commonHelpers.throwCustomError('exam not found or exam is currently on going', 404);
   }
+
+  return { message: 'Exam deleted successfully!', countChanged };
 }
 
 // get result of all the users in that exam
@@ -192,6 +159,7 @@ async function getResult(currentUser, id) {
 
   for (const user of users) {
     const score = await calculateUserScore(user, user.Exams[0].users_exams);
+
     results.push({
       score: score,
       user: {
@@ -208,49 +176,40 @@ async function getResult(currentUser, id) {
 // add user to exam if user exist and is created by that admin.
 async function addUser(currentUser, id, payload) {
   const { userId } = payload;
-  const transactionContext = await sequelize.transaction();
 
-  try {
-    const exam = await Exam.findByPk(id);
+  const exam = await Exam.findByPk(id);
 
-    if (!exam) {
-      commonHelpers.throwCustomError('Exam not found', 404);
-    }
-
-    if (exam.is_published) {
-      commonHelpers.throwCustomError('Exam is already published', 400);
-    }
-
-    const user = await User.findByPk(userId);
-
-    if (!user) {
-      commonHelpers.throwCustomError('User not found', 404);
-    }
-
-    if (user.admin_id !== currentUser.id) {
-      commonHelpers.throwCustomError('Can not add user that is not created by you', 403);
-    }
-
-    const [userExam, isCreated] = await UserExam.findOrCreate({
-      where: { user_id: userId, exam_id: id },
-      defaults: {
-        user_id: userId,
-        exam_id: id
-      },
-      transaction: transactionContext
-    });
-
-    if (!isCreated) {
-      commonHelpers.throwCustomError('User is already assigned this exam', 400);
-    }
-
-    await transactionContext.commit();
-
-    return userExam;
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (!exam) {
+    commonHelpers.throwCustomError('Exam not found', 404);
   }
+
+  if (exam.is_published) {
+    commonHelpers.throwCustomError('Exam is already published', 400);
+  }
+
+  const user = await User.findByPk(userId);
+
+  if (!user) {
+    commonHelpers.throwCustomError('User not found', 404);
+  }
+
+  if (user.admin_id !== currentUser.id) {
+    commonHelpers.throwCustomError('Can not add user that is not created by you', 403);
+  }
+
+  const [userExam, isCreated] = await UserExam.findOrCreate({
+    where: { user_id: userId, exam_id: id },
+    defaults: {
+      user_id: userId,
+      exam_id: id
+    }
+  });
+
+  if (!isCreated) {
+    commonHelpers.throwCustomError('User is already assigned this exam', 400);
+  }
+
+  return userExam;
 }
 
 // get all users for that exam
@@ -321,46 +280,33 @@ async function getUser(currentUser, userId, id) {
 
 // remove user from exam
 async function removeUser(currentUser, userId, id) {
-  const transactionContext = await sequelize.transaction();
+  const user = await User.findOne({
+    where: { id: userId, admin_id: currentUser.id }
+  });
 
-  try {
-    const user = await User.findOne({
-      where: { id: userId, admin_id: currentUser.id }
-    });
-    if (!user) {
-      commonHelpers.throwCustomError('User not found', 404);
-    }
-
-    const exam = await Exam.findOne({
-      where: { id: id, admin_id: currentUser.id }
-    });
-
-    if (!exam) {
-      commonHelpers.throwCustomError('Exam not found', 404);
-    }
-
-    if (exam.is_published) {
-      commonHelpers.throwCustomError('Exam is already published', 400);
-    }
-
-    const modifyCount = await UserExam.destroy(
-      { where: { user_id: userId, exam_id: id } },
-      { transaction: transactionContext }
-    );
-
-    if (modifyCount === 0) {
-      commonHelpers.throwCustomError('User is not associated to this exam', 403);
-    }
-
-    console.log(modifyCount);
-
-    await transactionContext.commit();
-
-    return 'User removed from exam successfully';
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (!user) {
+    commonHelpers.throwCustomError('User not found', 404);
   }
+
+  const exam = await Exam.findOne({
+    where: { id: id, admin_id: currentUser.id }
+  });
+
+  if (!exam) {
+    commonHelpers.throwCustomError('Exam not found', 404);
+  }
+
+  if (exam.is_published) {
+    commonHelpers.throwCustomError('Exam is already published', 400);
+  }
+
+  const modifyCount = await UserExam.destroy({ where: { user_id: userId, exam_id: id } });
+
+  if (modifyCount === 0) {
+    commonHelpers.throwCustomError('User is not associated to this exam', 403);
+  }
+
+  return 'User removed from exam successfully';
 }
 
 // create question for exam
@@ -515,77 +461,52 @@ async function getQuestion(currentUser, id, questionId) {
 // update question details by exam id and questionId
 async function updateQuestion(currentUser, id, questionId, payload) {
   const { question, type, negativeMarks } = payload;
-  const transactionContext = await sequelize.transaction();
 
-  try {
-    const [updateRowCount, updatedQuestion] = await Question.update(
-      {
-        question,
-        type,
-        negative_marks: negativeMarks
-      },
-      {
-        where: { id: questionId, exam_id: id },
-        returning: true,
-        include: [
-          {
-            model: Exam,
-            where: { admin_id: currentUser.id },
-            attributes: [],
-            required: true
-          }
-        ]
-      },
-      {
-        transaction: transactionContext
-      }
-    );
-
-    if (updateRowCount === 0) {
-      commonHelpers.throwCustomError('Question not found', 404);
+  const [updateRowCount, updatedQuestion] = await Question.update(
+    {
+      question,
+      type,
+      negative_marks: negativeMarks
+    },
+    {
+      where: { id: questionId, exam_id: id },
+      returning: true,
+      include: [
+        {
+          model: Exam,
+          where: { admin_id: currentUser.id },
+          attributes: [],
+          required: true
+        }
+      ]
     }
+  );
 
-    await transactionContext.commit();
-
-    return updatedQuestion;
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (updateRowCount === 0) {
+    commonHelpers.throwCustomError('Question not found', 404);
   }
+
+  return updatedQuestion;
 }
 
 // remove question
 async function removeQuestion(currentUser, id, questionId) {
-  const transactionContext = await sequelize.transaction();
-
-  try {
-    const modifyCount = await Question.destroy(
+  const modifyCount = await Question.destroy({
+    where: { id: questionId, exam_id: id },
+    include: [
       {
-        where: { id: questionId, exam_id: id },
-        include: [
-          {
-            model: Exam,
-            where: { admin_id: currentUser.id },
-            required: true
-          }
-        ]
-      },
-      {
-        transaction: transactionContext
+        model: Exam,
+        where: { admin_id: currentUser.id },
+        required: true
       }
-    );
+    ]
+  });
 
-    if (modifyCount === 0) {
-      commonHelpers.throwCustomError('Question not found', 404);
-    }
-
-    await transactionContext.commit();
-
-    return 'question removed successfully';
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (modifyCount === 0) {
+    commonHelpers.throwCustomError('Question not found', 404);
   }
+
+  return 'question removed successfully';
 }
 
 module.exports = {

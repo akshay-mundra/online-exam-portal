@@ -140,47 +140,40 @@ async function forgotPassword(payload) {
 // reset passwword by verifying token and updating to new password
 async function resetPassword(payload) {
   const { password, confirmPassword, token, userId } = payload;
-  const transactionContext = await sequelize.transaction();
 
-  try {
-    if (confirmPassword !== password) {
-      return commonHelpers.throwCustomError('Both passwords should match', 422);
-    }
-
-    const user = await User.findOne({
-      where: { id: userId }
-    });
-
-    if (!user) {
-      return commonHelpers.throwCustomError('User does not exist', 404);
-    }
-
-    const key = `reset-token:${user.id}`;
-    const resetToken = await redisClient.get(key);
-
-    if (!resetToken) {
-      return commonHelpers.throwCustomError('Invalid or expired reset token', 401);
-    }
-
-    const isValid = await bcrypt.compare(token, resetToken);
-
-    if (!isValid) {
-      return commonHelpers.throwCustomError('Invalid token', 401);
-    }
-
-    redisClient.del(key);
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    user.password = hashedPassword;
-
-    await user.save({ transaction: transactionContext });
-    await transactionContext.commit();
-
-    return 'Password reset successful';
-  } catch (error) {
-    await transactionContext.rollback();
-    throw error;
+  if (confirmPassword !== password) {
+    return commonHelpers.throwCustomError('Both passwords should match', 422);
   }
+
+  const user = await User.findOne({
+    where: { id: userId }
+  });
+
+  if (!user) {
+    return commonHelpers.throwCustomError('User does not exist', 404);
+  }
+
+  const key = `reset-token:${user.id}`;
+  const resetToken = await redisClient.get(key);
+
+  if (!resetToken) {
+    return commonHelpers.throwCustomError('Invalid or expired reset token', 401);
+  }
+
+  const isValid = await bcrypt.compare(token, resetToken);
+
+  if (!isValid) {
+    return commonHelpers.throwCustomError('Invalid token', 401);
+  }
+
+  redisClient.del(key);
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  user.password = hashedPassword;
+
+  await user.save();
+
+  return 'Password reset successful';
 }
 
 // logout user
