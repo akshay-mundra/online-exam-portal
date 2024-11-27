@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       option: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
       },
       is_correct: {
