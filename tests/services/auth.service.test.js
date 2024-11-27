@@ -152,11 +152,9 @@ describe('Auth Service', () => {
       const result = await forgotPassword({ email });
 
       expect(User.findOne).toHaveBeenCalledWith({ where: { email } });
-      expect(redisClient.set).toHaveBeenCalledWith(`reset-token:${user.id}`, 'hashedResetToken', 'EX', 60);
+      expect(redisClient.set).toHaveBeenCalledWith(`reset-token:${user.id}`, 'hashedResetToken', 'EX', 600);
       expect(nodemailerHelpers.sendEmail).toHaveBeenCalled();
-      expect(result).toEqual({
-        message: 'Password reset link sent to email'
-      });
+      expect(result).toEqual('Password reset link sent to email');
     });
 
     it('should throw an error if user does not exist', async () => {
