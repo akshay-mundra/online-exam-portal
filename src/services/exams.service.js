@@ -269,7 +269,7 @@ async function getUser(currentUser, params) {
     ]
   };
 
-  if (isSuperAdmin || isAdmin || (isUser && currentUser.id !== userId)) {
+  if (isSuperAdmin || isAdmin || (isUser && currentUser.id === userId)) {
     user = await User.findOne(options);
   } else {
     commonHelpers.throwCustomError('Can not access other user', 403);
