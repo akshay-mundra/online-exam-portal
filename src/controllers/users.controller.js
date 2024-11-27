@@ -1,5 +1,6 @@
 const commonHelpers = require('../helpers/common.helper');
 const userServices = require('../services/users.service');
+const { logger } = require('../helpers/loggers.helper');
 
 async function getAll(req, res, next) {
   try {
@@ -9,7 +10,7 @@ async function getAll(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -22,7 +23,7 @@ async function getMe(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -35,7 +36,7 @@ async function get(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -48,7 +49,7 @@ async function update(req, res, next) {
     res.statusCode = 202;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -58,10 +59,10 @@ async function remove(req, res, next) {
     const { user, params } = req;
     const result = await userServices.remove(user, params);
     res.data = result;
-    res.statusCode = 202;
+    res.statusCode = 204;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -74,7 +75,7 @@ async function bulkCreate(req, res, next) {
     res.statusCode = 201;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -87,7 +88,7 @@ async function getAllExams(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -100,7 +101,7 @@ async function startExam(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }

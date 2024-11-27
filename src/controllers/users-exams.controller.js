@@ -1,5 +1,6 @@
 const commonHelpers = require('../helpers/common.helper');
 const userExamServices = require('../services/users-exams.service');
+const { logger } = require('../helpers/loggers.helper');
 
 async function createAnswer(req, res, next) {
   try {
@@ -9,7 +10,7 @@ async function createAnswer(req, res, next) {
     res.statusCode = 201;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -22,7 +23,7 @@ async function calculateUserScore(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -35,7 +36,7 @@ async function submitExam(req, res, next) {
     res.statusCode = 202;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }

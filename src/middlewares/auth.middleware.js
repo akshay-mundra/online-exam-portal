@@ -1,6 +1,7 @@
 const commonHelpers = require('../helpers/common.helper');
 const jwtHelpers = require('../helpers/jwt.helper');
 const { SUPER_ADMIN, ADMIN } = require('../constants/common.constant').roles;
+const { logger } = require('../helpers/loggers.helper');
 
 async function authenticate(req, res, next) {
   try {
@@ -18,7 +19,7 @@ async function authenticate(req, res, next) {
       error.message = 'Token expired';
       error.statusCode = 401;
     }
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -36,7 +37,7 @@ function authorize(allowedRoles) {
         commonHelpers.throwCustomError('Access Denied | Forbidden', 403);
       }
     } catch (error) {
-      console.log(error);
+      logger.error(error);
       commonHelpers.errorHandler(req, res, error.message, error.statusCode);
     }
   };
@@ -64,7 +65,7 @@ async function authorizeRegister(req, res, next) {
       next();
     }
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
