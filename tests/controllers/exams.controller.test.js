@@ -162,7 +162,7 @@ describe('Exams Controller', () => {
 
       expect(examServices.remove).toHaveBeenCalledWith(req.user, { id: examId });
       expect(res.data).toEqual(mockResponse);
-      expect(res.statusCode).toBe(202);
+      expect(res.statusCode).toBe(204);
       expect(next).toHaveBeenCalled();
     });
 
@@ -311,7 +311,7 @@ describe('Exams Controller', () => {
 
       expect(examServices.removeUser).toHaveBeenCalledWith(req.user, { userId, id: examId });
       expect(res.data).toEqual(mockResponse);
-      expect(res.statusCode).toBe(202);
+      expect(res.statusCode).toBe(204);
       expect(next).toHaveBeenCalled();
     });
 
@@ -463,7 +463,7 @@ describe('Exams Controller', () => {
 
       expect(examServices.removeQuestion).toHaveBeenCalledWith(req.user, { id: examId, questionId });
       expect(res.data).toEqual(mockResponse);
-      expect(res.statusCode).toBe(202);
+      expect(res.statusCode).toBe(204);
       expect(next).toHaveBeenCalled();
     });
 
