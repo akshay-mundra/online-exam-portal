@@ -57,7 +57,7 @@ async function remove(req, res, next) {
     const { params } = req;
     const result = await roleServices.remove(params);
     res.data = result;
-    res.statusCode = 202;
+    res.statusCode = 204;
     next();
   } catch (error) {
     console.log(error);

@@ -58,7 +58,7 @@ async function removeOption(req, res, next) {
     const { user, params } = req;
     const result = await questionServices.removeOption(user, params);
     res.data = result;
-    res.statusCode = 202;
+    res.statusCode = 204;
     next();
   } catch (error) {
     console.log(error);
