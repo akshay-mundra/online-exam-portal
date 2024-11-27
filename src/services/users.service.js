@@ -99,7 +99,7 @@ async function update(currentUser, params, payload) {
     return commonHelpers.throwCustomError('User not found', 404);
   }
 
-  return updatedUser[0];
+  return updatedUser.pop();
 }
 
 // remove user (only by admin and superadmin)
@@ -117,7 +117,7 @@ async function remove(currentUser, params) {
     return commonHelpers.throwCustomError('User not found', 404);
   }
 
-  return { count: countChanged, message: 'User removed successfully' };
+  return 'User removed successfully';
 }
 
 // bulk create users from csv or excel file
@@ -265,7 +265,7 @@ async function startExam(currentUser, params) {
     commonHelpers.throwCustomError('User is not assigned to this exam', 403);
   }
 
-  return updatedUserExam[0];
+  return updatedUserExam.pop();
 }
 
 module.exports = {

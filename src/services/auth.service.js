@@ -126,9 +126,7 @@ async function forgotPassword(payload) {
 
   console.log('reset token', resetToken); // temp
   console.log('userId', user.id); // temp
-  return {
-    message: 'Password reset link sent to email'
-  };
+  return 'Password reset link sent to email';
 }
 
 // reset passwword by verifying token and updating to new password

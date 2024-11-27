@@ -90,7 +90,7 @@ async function getOption(currentUser, params) {
     commonHelpers.throwCustomError('question not found or you do not have access to it', 403);
   }
 
-  return question.Options[0];
+  return question.Options.pop();
 }
 
 // update the option
