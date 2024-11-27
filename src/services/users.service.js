@@ -265,7 +265,7 @@ async function startExam(currentUser, params) {
     commonHelpers.throwCustomError('User is not assigned to this exam', 403);
   }
 
-  return updatedUserExam[0];
+  return updatedUserExam.pop();
 }
 
 module.exports = {
