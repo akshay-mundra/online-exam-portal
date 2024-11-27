@@ -1,5 +1,6 @@
 const commonHelpers = require('../helpers/common.helper');
 const examServices = require('../services/exams.service');
+const { logger } = require('../helpers/loggers.helper');
 
 async function getAll(req, res, next) {
   try {
@@ -9,7 +10,7 @@ async function getAll(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -22,7 +23,7 @@ async function create(req, res, next) {
     res.statusCode = 201;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -35,7 +36,7 @@ async function get(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -48,7 +49,7 @@ async function update(req, res, next) {
     res.statusCode = 202;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -61,7 +62,7 @@ async function remove(req, res, next) {
     res.statusCode = 204;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -74,7 +75,7 @@ async function getResult(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -87,7 +88,7 @@ async function addUser(req, res, next) {
     res.statusCode = 201;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -100,7 +101,7 @@ async function getAllUsers(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -113,7 +114,7 @@ async function getUser(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -126,7 +127,7 @@ async function removeUser(req, res, next) {
     res.statusCode = 204;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -139,7 +140,7 @@ async function createQuestion(req, res, next) {
     res.statusCode = 201;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -152,7 +153,7 @@ async function getAllQuestions(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -165,7 +166,7 @@ async function getQuestion(req, res, next) {
     res.statusCode = 200;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -178,7 +179,7 @@ async function updateQuestion(req, res, next) {
     res.statusCode = 202;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
@@ -191,7 +192,7 @@ async function removeQuestion(req, res, next) {
     res.statusCode = 204;
     next();
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     commonHelpers.errorHandler(req, res, error.message, error.statusCode);
   }
 }
