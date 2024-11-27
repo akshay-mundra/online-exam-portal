@@ -1,4 +1,13 @@
-const { getAll, get, update, remove, bulkCreate, getAllExams } = require('../../src/controllers/users.controller');
+const {
+  getAll,
+  get,
+  update,
+  remove,
+  bulkCreate,
+  getAllExams,
+  startExam,
+  getMe
+} = require('../../src/controllers/users.controller');
 const userServices = require('../../src/services/users.service');
 const commonHelpers = require('../../src/helpers/common.helper');
 const { faker } = require('@faker-js/faker');
@@ -71,6 +80,33 @@ describe('User Controller', () => {
       await get(req, res, next);
 
       expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 404);
+      expect(next).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getMe', () => {
+    it('should fetch user details successfully', async () => {
+      const mockUserDetails = { id: 'user-id', name: 'John Doe', email: 'user@example.com' };
+      userServices.getMe.mockResolvedValue(mockUserDetails);
+
+      await getMe(req, res, next);
+
+      expect(userServices.getMe).toHaveBeenCalledWith(req.user);
+      expect(res.data).toEqual(mockUserDetails);
+      expect(res.statusCode).toBe(200);
+      expect(next).toHaveBeenCalled();
+    });
+
+    it('should handle errors if getMe fails', async () => {
+      const errorMessage = 'Error fetching user details';
+      const error = new Error(errorMessage);
+      error.statusCode = 400;
+      userServices.getMe.mockRejectedValue(error);
+
+      await getMe(req, res, next);
+
+      expect(userServices.getMe).toHaveBeenCalledWith(req.user);
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
       expect(next).not.toHaveBeenCalled();
     });
   });
@@ -189,6 +225,33 @@ describe('User Controller', () => {
 
       await getAllExams(req, res, next);
 
+      expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
+      expect(next).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('start exam', () => {
+    it('should start an exam successfully', async () => {
+      const mockResult = { examId: req.params.examId, startedAt: new Date() };
+      userServices.startExam.mockResolvedValue(mockResult);
+
+      await startExam(req, res, next);
+
+      expect(userServices.startExam).toHaveBeenCalledWith(req.user, req.params);
+      expect(res.data).toEqual(mockResult);
+      expect(res.statusCode).toBe(200);
+      expect(next).toHaveBeenCalled();
+    });
+
+    it('should handle errors if startExam fails', async () => {
+      const errorMessage = 'Error starting exam';
+      const error = new Error(errorMessage);
+      error.statusCode = 400;
+      userServices.startExam.mockRejectedValue(error);
+
+      await startExam(req, res, next);
+
+      expect(userServices.startExam).toHaveBeenCalledWith(req.user, req.params);
       expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 400);
       expect(next).not.toHaveBeenCalled();
     });
