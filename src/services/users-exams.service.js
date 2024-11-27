@@ -150,7 +150,7 @@ async function calculateUserScore(currentUser, params) {
     commonHelpers.throwCustomError('Can not see result of other user', 403);
   }
 
-  if (userExam.status === 'on-going' || userExam.status === 'pending') {
+  if (['on-going', 'pending'].includes(userExam.status)) {
     commonHelpers.throwCustomError('User has not completed the exam', 400);
   }
 

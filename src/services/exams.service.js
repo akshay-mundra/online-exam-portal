@@ -126,7 +126,7 @@ async function remove(currentUser, params) {
     commonHelpers.throwCustomError('exam not found or exam is currently on going', 404);
   }
 
-  return { message: 'Exam deleted successfully!', countChanged };
+  return 'Exam deleted successfully!';
 }
 
 // get result of all the users in that exam
@@ -183,16 +183,6 @@ async function addUser(currentUser, params, payload) {
   const { id } = params;
   const { userId } = payload;
 
-  const exam = await Exam.findByPk(id);
-
-  if (!exam) {
-    commonHelpers.throwCustomError('Exam not found', 404);
-  }
-
-  if (exam.is_published) {
-    commonHelpers.throwCustomError('Exam is already published', 400);
-  }
-
   const user = await User.findByPk(userId);
 
   if (!user) {
@@ -201,6 +191,16 @@ async function addUser(currentUser, params, payload) {
 
   if (user.admin_id !== currentUser.id) {
     commonHelpers.throwCustomError('Can not add user that is not created by you', 403);
+  }
+
+  const exam = await Exam.findByPk(id);
+
+  if (!exam) {
+    commonHelpers.throwCustomError('Exam not found', 404);
+  }
+
+  if (exam.is_published) {
+    commonHelpers.throwCustomError('Exam is already published', 400);
   }
 
   const [userExam, isCreated] = await UserExam.findOrCreate({
@@ -212,7 +212,7 @@ async function addUser(currentUser, params, payload) {
   });
 
   if (!isCreated) {
-    commonHelpers.throwCustomError('User is already assigned this exam', 400);
+    commonHelpers.throwCustomError('User is already assigned to this exam', 400);
   }
 
   return userExam;
@@ -269,14 +269,10 @@ async function getUser(currentUser, params) {
     ]
   };
 
-  if (isSuperAdmin || isAdmin) {
+  if (isSuperAdmin || isAdmin || (isUser && currentUser.id !== userId)) {
     user = await User.findOne(options);
-  } else if (isUser) {
-    if (currentUser.id !== userId) {
-      commonHelpers.throwCustomError('Can not access other user', 403);
-    }
-
-    user = await User.findOne(options);
+  } else {
+    commonHelpers.throwCustomError('Can not access other user', 403);
   }
 
   if (!user) {
