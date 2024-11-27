@@ -1,4 +1,4 @@
-const { createAnswer, calculateUserScore, submitExam } = require('../../src/controllers/users-exams.controller');
+const { createAnswer, getUserScore, submitExam } = require('../../src/controllers/users-exams.controller');
 const commonHelpers = require('../../src/helpers/common.helper');
 const userExamServices = require('../../src/services/users-exams.service');
 const { getMockReq, getMockRes } = require('@jest-mock/express');
@@ -51,30 +51,30 @@ describe('User Exam Controllers', () => {
     });
   });
 
-  describe('calculateUserScore', () => {
+  describe('getUserScore', () => {
     it('should calculate the user score successfully', async () => {
       const params = { examId: faker.string.uuid() };
       req.params = params;
       req.user = { id: faker.string.uuid() };
 
       const mockResponse = { score: faker.number.int() };
-      userExamServices.calculateUserScore.mockResolvedValue(mockResponse);
+      userExamServices.getUserScore.mockResolvedValue(mockResponse);
 
-      await calculateUserScore(req, res, next);
+      await getUserScore(req, res, next);
 
-      expect(userExamServices.calculateUserScore).toHaveBeenCalledWith(req.user, params);
+      expect(userExamServices.getUserScore).toHaveBeenCalledWith(req.user, params);
       expect(res.data).toEqual(mockResponse);
       expect(res.statusCode).toBe(200);
       expect(next).toHaveBeenCalled();
     });
 
-    it('should handle errors if calculateUserScore fails', async () => {
+    it('should handle errors if getUserScore fails', async () => {
       const errorMessage = 'Error calculating score';
       const error = new Error(errorMessage);
       error.statusCode = 500;
-      userExamServices.calculateUserScore.mockRejectedValue(error);
+      userExamServices.getUserScore.mockRejectedValue(error);
 
-      await calculateUserScore(req, res, next);
+      await getUserScore(req, res, next);
 
       expect(commonHelpers.errorHandler).toHaveBeenCalledWith(req, res, errorMessage, 500);
     });

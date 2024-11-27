@@ -172,7 +172,7 @@ describe('Questions Controller', () => {
 
       expect(questionServices.removeOption).toHaveBeenCalledWith(req.user, params);
       expect(res.data).toEqual(mockResponse);
-      expect(res.statusCode).toBe(202);
+      expect(res.statusCode).toBe(204);
       expect(next).toHaveBeenCalled();
     });
 

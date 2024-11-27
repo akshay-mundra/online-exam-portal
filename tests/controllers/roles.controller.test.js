@@ -144,7 +144,7 @@ describe('Roles Controller', () => {
 
       expect(roleServices.remove).toHaveBeenCalledWith({ id: roleId });
       expect(res.data).toEqual(mockResponse);
-      expect(res.statusCode).toBe(202);
+      expect(res.statusCode).toBe(204);
       expect(next).toHaveBeenCalled();
     });
 

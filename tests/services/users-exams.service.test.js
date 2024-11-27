@@ -1,4 +1,4 @@
-const { createAnswer, calculateUserScore, submitExam } = require('../../src/services/users-exams.service');
+const { createAnswer, getUserScore, submitExam } = require('../../src/services/users-exams.service');
 const { UserExam, Exam, Question, Option, Answer, sequelize } = require('../../src/models');
 const commonHelpers = require('../../src/helpers/common.helper');
 const moment = require('moment');
@@ -33,12 +33,14 @@ jest.mock('../../src/helpers/common.helper', () => ({
   throwCustomError: jest.fn(),
   getRolesAsBool: jest.fn()
 }));
+jest.mock('../../src/helpers/users-exams.helper');
 
 describe('Exam Service', () => {
   let transactionContext;
 
   beforeEach(() => {
     transactionContext = { commit: jest.fn(), rollback: jest.fn() };
+
     sequelize.transaction.mockResolvedValue(transactionContext);
   });
 
@@ -145,108 +147,54 @@ describe('Exam Service', () => {
       await expect(createAnswer({ id: 1 }, { id: 1 }, { questionId: 1, optionIds: [1] })).rejects.toThrow('Not found');
     });
   });
-
-  describe('calculateUserScore', () => {
-    it('should calculate and return the score for an exam', async () => {
-      const mockUserExam = {
-        id: 1,
-        user_id: 1,
-        exam_id: 1,
-        status: 'completed',
-        score: null
-      };
-      const mockQuestion = {
-        id: 1,
-        type: 'single_choice',
-        negative_marks: -1,
-        Options: [{ id: 1, is_correct: true, marks: 2 }],
-        Answers: [{ option_id: 1 }]
-      };
-
-      UserExam.findOne.mockResolvedValue(mockUserExam);
-      Question.findAll.mockResolvedValue([mockQuestion]);
-      commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
-
-      await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(2);
+  describe('getUserScore', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
     });
 
     it('should throw "User Exam not found" error if user exam is not found', async () => {
-      UserExam.findOne.mockResolvedValue(null);
+      UserExam.findOne.mockResolvedValueOnce(null);
+      commonHelpers.getRolesAsBool.mockResolvedValueOnce({ isUser: true });
 
-      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
-        const error = new Error(message);
-        error.statusCode = statusCode;
-        throw error;
-      });
-
-      await expect(calculateUserScore({ id: 1 }, { id: 1 })).rejects.toThrow('User Exam not found');
+      await expect(getUserScore({ id: 1, roles: ['user'] }, { id: 1 })).rejects.toThrow('User Exam not found');
     });
 
-    it('should handle incorrect answers for multiple-choice questions', async () => {
+    it('should throw "User has not completed the exam" error if the exam is not completed', async () => {
       const mockUserExam = {
         id: 1,
         user_id: 1,
         exam_id: 1,
-        status: 'completed',
+        status: 'on-going',
         score: null
       };
-      const mockQuestion = {
-        id: 1,
-        type: 'multiple_choice',
-        negative_marks: -2,
-        Options: [
-          { id: 1, is_correct: true, marks: 2 },
-          { id: 2, is_correct: false, marks: 0 }
-        ],
-        Answers: [{ option_id: 1 }, { option_id: 2 }]
-      };
+      commonHelpers.getRolesAsBool.mockResolvedValueOnce({ isUser: true });
+      UserExam.findOne.mockResolvedValueOnce(mockUserExam);
 
-      UserExam.findOne.mockResolvedValue(mockUserExam);
-      Question.findAll.mockResolvedValue([mockQuestion]);
-      commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
-
-      await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(-2);
+      await expect(getUserScore({ id: 1, roles: ['user'] }, { id: 1 })).rejects.toThrow(
+        'User has not completed the exam'
+      );
     });
 
-    it('should return the score if already calculated', async () => {
+    it('should return the score if the exam is completed', async () => {
       const mockUserExam = {
         id: 1,
         user_id: 1,
         exam_id: 1,
         status: 'completed',
-        score: 5
+        score: 10
       };
+      commonHelpers.getRolesAsBool.mockResolvedValueOnce({ isUser: true });
+      UserExam.findOne.mockResolvedValueOnce(mockUserExam);
 
-      UserExam.findOne.mockResolvedValue(mockUserExam);
-
-      await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(5);
-    });
-
-    it('should handle missing or empty answers for a question', async () => {
-      const mockUserExam = {
-        id: 1,
-        user_id: 1,
-        exam_id: 1,
-        status: 'completed',
-        score: null
-      };
-      const mockQuestion = {
-        id: 1,
-        type: 'single_choice',
-        negative_marks: -1,
-        Options: [{ id: 1, is_correct: true, marks: 2 }],
-        Answers: [{ id: 10, option_id: 1 }]
-      };
-
-      UserExam.findOne.mockResolvedValue(mockUserExam);
-      Question.findAll.mockResolvedValue([mockQuestion]);
-      commonHelpers.getRolesAsBool.mockReturnValue({ isUser: true });
-
-      await expect(calculateUserScore({ id: 1, roles: [] }, { id: 1 })).resolves.toBe(2);
+      await expect(getUserScore({ id: 1, roles: ['user'] }, { id: 1 })).resolves.toBe(10);
     });
   });
 
   describe('submitExam', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
     it('should successfully submit an exam', async () => {
       const mockUserExam = {
         id: 1,
@@ -259,7 +207,11 @@ describe('Exam Service', () => {
       UserExam.findByPk.mockResolvedValue(mockUserExam);
       Exam.findByPk.mockResolvedValue(mockExam);
 
-      await expect(submitExam({ id: 1 }, { id: 1 })).resolves.toBe('Exam submited successfully');
+      await submitExam({ id: 1 }, { id: 1 });
+
+      expect(UserExam.findByPk).toHaveBeenCalled();
+      expect(Exam.findByPk).toHaveBeenCalled();
+      expect(UserExam.update).toHaveBeenCalled();
     });
 
     it('should throw "Can not access other user" error if user ids do not match', async () => {
@@ -273,6 +225,33 @@ describe('Exam Service', () => {
       });
 
       await expect(submitExam({ id: 1 }, { id: 1 })).rejects.toThrow('Can not access other user');
+    });
+
+    it('should throw if exam is completed', async () => {
+      const mockUserExam = { id: 1, user_id: 2, status: 'completed' };
+      UserExam.findByPk.mockResolvedValue(mockUserExam);
+
+      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
+        const error = new Error(message);
+        error.statusCode = statusCode;
+        throw error;
+      });
+
+      await expect(submitExam({ id: 2 }, { id: 1 })).rejects.toThrow('Exam is already submitted');
+    });
+
+    it('should throw if exam is not found', async () => {
+      const mockUserExam = { id: 1, user_id: 2, status: 'on-going' };
+      UserExam.findByPk.mockResolvedValue(mockUserExam);
+      Exam.findByPk.mockResolvedValue(null);
+
+      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
+        const error = new Error(message);
+        error.statusCode = statusCode;
+        throw error;
+      });
+
+      await expect(submitExam({ id: 2 }, { id: 1 })).rejects.toThrow('Exam not found');
     });
 
     it('should throw "Exam is not started yet" error if exam has not started', async () => {

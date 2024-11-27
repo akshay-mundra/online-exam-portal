@@ -176,7 +176,7 @@ describe('Service Layer Unit Tests', () => {
 
       const result = await service.remove(currentUser, { id: userId });
 
-      expect(result).toEqual({ count: 1, message: 'User removed successfully' });
+      expect(result).toEqual('User removed successfully');
       expect(User.destroy).toHaveBeenCalledWith({ where: { id: userId } });
     });
 
@@ -189,7 +189,7 @@ describe('Service Layer Unit Tests', () => {
 
       const result = await service.remove(currentUser, { id: userId });
 
-      expect(result).toEqual({ count: 1, message: 'User removed successfully' });
+      expect(result).toEqual('User removed successfully');
       expect(User.destroy).toHaveBeenCalledWith({ where: { id: userId, admin_id: currentUser.id } });
     });
 

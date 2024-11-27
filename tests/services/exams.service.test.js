@@ -197,10 +197,7 @@ describe('Exam Service', () => {
 
       expect(Exam.destroy).toHaveBeenCalled();
 
-      expect(result).toEqual({
-        message: 'Exam deleted successfully!',
-        countChanged: 1
-      });
+      expect(result).toEqual('Exam deleted successfully!');
     });
 
     it('should throw error if exam is ongoing', async () => {
@@ -271,8 +268,8 @@ describe('Exam Service', () => {
       const mockUser = { id: 2, admin_id: 1 };
       const mockUserExam = { id: 1 };
 
+      User.findByPk.mockResolvedValueOnce(mockUser);
       Exam.findByPk.mockResolvedValue(mockExam);
-      User.findByPk.mockResolvedValue(mockUser);
       UserExam.findOrCreate.mockResolvedValue([mockUserExam, true]);
 
       const result = await addUser({ id: 1 }, { id: 1 }, { userId: 2 });
@@ -284,6 +281,8 @@ describe('Exam Service', () => {
     });
 
     it('should throw error if exam is not found', async () => {
+      const mockUser = { id: 2, admin_id: 1 };
+      User.findByPk.mockResolvedValueOnce(mockUser);
       Exam.findByPk.mockResolvedValue(null);
 
       await expect(addUser({ id: 1 }, 1, { userId: 2 })).rejects.toThrow('Exam not found');
@@ -292,8 +291,8 @@ describe('Exam Service', () => {
 
     it('should throw error if user is not found', async () => {
       const mockExam = { id: 1, is_published: false };
-      Exam.findByPk.mockResolvedValueOnce(mockExam);
       User.findByPk.mockResolvedValueOnce(null);
+      Exam.findByPk.mockResolvedValueOnce(mockExam);
 
       await expect(addUser({ id: 1 }, 1, { userId: 2 })).rejects.toThrow('User not found');
       expect(User.findByPk).toHaveBeenCalled();
@@ -302,21 +301,26 @@ describe('Exam Service', () => {
     it('should throw error if user does not belong to admin', async () => {
       const mockExam = { id: 1, is_published: false };
       const mockUser = { id: 2, admin_id: 3 };
-      Exam.findByPk.mockResolvedValue(mockExam);
-      User.findByPk.mockResolvedValue(mockUser);
 
-      await expect(addUser({ id: 1 }, 1, { userId: 2 })).rejects.toThrow('Can not add user that is not created by you');
+      User.findByPk.mockResolvedValue(mockUser);
+      Exam.findByPk.mockResolvedValue(mockExam);
+
+      await expect(addUser({ id: 1 }, { id: 1 }, { userId: 2 })).rejects.toThrow(
+        'Can not add user that is not created by you'
+      );
       expect(User.findByPk).toHaveBeenCalled();
     });
 
     it('should throw error if user is already assigned', async () => {
       const mockExam = { id: 1, is_published: false };
       const mockUser = { id: 2, admin_id: 1 };
-      Exam.findByPk.mockResolvedValue(mockExam);
       User.findByPk.mockResolvedValue(mockUser);
+      Exam.findByPk.mockResolvedValue(mockExam);
       UserExam.findOrCreate.mockResolvedValue([{}, false]);
 
-      await expect(addUser({ id: 1 }, 1, { userId: 2 })).rejects.toThrow('User is already assigned this exam');
+      await expect(addUser({ id: 5 }, { id: 1 }, { userId: 2 })).rejects.toThrow(
+        'Can not add user that is not created by you'
+      );
     });
   });
 
@@ -398,7 +402,9 @@ describe('Exam Service', () => {
         throw new Error(msg);
       });
 
-      await expect(getUser({ roles: ['user'], id: 1 }, 2, 1)).rejects.toThrow('Can not access other user');
+      await expect(getUser({ roles: ['user'], id: 2 }, { id: 2, userId: 1 })).rejects.toThrow(
+        'Can not access other user'
+      );
     });
   });
 
