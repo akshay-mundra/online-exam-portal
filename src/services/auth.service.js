@@ -116,7 +116,7 @@ async function forgotPassword(payload) {
   const resetToken = crypto.randomBytes(32).toString('hex');
   const hashedToken = await bcrypt.hash(resetToken, 10);
 
-  await redisClient.set(key, hashedToken, 'EX', 60);
+  await redisClient.set(key, hashedToken, 'EX', 600);
 
   nodemailerHelpers.sendEmail({
     to: user.email,
