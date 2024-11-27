@@ -3,7 +3,7 @@ const moment = require('moment');
 const { Exam, User } = require('../models');
 const nodemailerHelpers = require('../helpers/nodemailer.helper');
 const { Op } = require('sequelize');
-const { calculateUserScore } = require('../services/users-exams.service');
+const { calculateUserScore } = require('../helpers/users-exams.helper');
 
 // Helper function to send email
 const sendExamResultEmail = async (userEmail, examDetails, score) => {
@@ -42,7 +42,7 @@ cron.schedule('*/5 * * * *', async () => {
             model: Exam,
             where: { id: exam.id },
             through: {
-              where: { status: 'completed' },
+              where: { status: 'completed', deleted_at: null },
               attributes: ['id']
             },
             required: true,
@@ -54,7 +54,7 @@ cron.schedule('*/5 * * * *', async () => {
       for (const user of users) {
         const userEmail = user.email;
 
-        const score = await calculateUserScore(user, user.Exams[0].users_exams);
+        const score = await calculateUserScore(user.Exams[0].users_exams);
 
         await sendExamResultEmail(userEmail, exam, score);
       }

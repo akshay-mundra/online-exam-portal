@@ -1,5 +1,6 @@
 const { UserExam, Exam, Option, Question, Answer, sequelize } = require('../models');
 const commonHelpers = require('../helpers/common.helper');
+const userExamHelpers = require('../helpers/users-exams.helper');
 const moment = require('moment');
 const { Op } = require('sequelize');
 
@@ -112,8 +113,7 @@ async function createAnswer(currentUser, params, payload) {
 
     if (ansToCreate && ansToCreate.length > 0) {
       await Answer.bulkCreate(ansToCreate, {
-        transaction: transactionContext,
-        returning: true
+        transaction: transactionContext
       });
     }
 
@@ -126,14 +126,8 @@ async function createAnswer(currentUser, params, payload) {
   }
 }
 
-/*
-  calculate user score for the exam
-  if in single choice multiple optins are selected then its wrong
-  if in multiple choice if a correct option is selected then partial marks will be given but
-  any wrong option selection should make the whole quesiton incorrect.
-  minus marking should be given.
-*/
-async function calculateUserScore(currentUser, params) {
+// get user score for the user exam.
+async function getUserScore(currentUser, params) {
   const { id } = params;
   const roles = currentUser.roles;
   const { isUser } = commonHelpers.getRolesAsBool(roles);
@@ -154,81 +148,7 @@ async function calculateUserScore(currentUser, params) {
     commonHelpers.throwCustomError('User has not completed the exam', 400);
   }
 
-  if (userExam.score !== null) {
-    return userExam.score;
-  }
-
-  const questionAnswers = await Question.findAll({
-    where: {
-      exam_id: userExam.exam_id
-    },
-    attributes: ['id', 'type', 'negative_marks'],
-    include: [
-      {
-        model: Option,
-        attributes: ['id', 'marks', 'is_correct'],
-        required: true
-      },
-      {
-        model: Answer,
-        attributes: ['id', 'option_id']
-      }
-    ]
-  });
-
-  let totalScore = 0;
-
-  questionAnswers.forEach(question => {
-    const answers = question.Answers;
-    const options = question.Options;
-
-    if (question.type === 'single_choice') {
-      if (answers?.length === 0) {
-        return;
-      } else if (answers?.length > 1) {
-        totalScore += question.negative_marks;
-      } else {
-        const selectedOption = options.find(option => option.id === answers[0].option_id);
-
-        if (selectedOption && selectedOption.is_correct) {
-          totalScore += selectedOption.marks;
-        } else {
-          totalScore += question.negative_marks;
-        }
-      }
-    } else {
-      let isIncorrect = false;
-      let questionMarks = 0;
-
-      for (const answer of answers) {
-        const selectedOption = options.find(option => option.id === answer.option_id);
-
-        if (selectedOption) {
-          if (selectedOption.is_correct) {
-            questionMarks += selectedOption.marks;
-          } else {
-            isIncorrect = true;
-            break;
-          }
-        }
-      }
-
-      if (isIncorrect) {
-        totalScore += question.negative_marks;
-      } else {
-        totalScore += questionMarks;
-      }
-    }
-  });
-
-  await UserExam.update(
-    { score: totalScore },
-    {
-      where: { id: id }
-    }
-  );
-
-  return totalScore;
+  return userExam.score;
 }
 
 // submit exam - change the exam status for the user
@@ -245,6 +165,10 @@ async function submitExam(currentUser, params) {
     commonHelpers.throwCustomError('Can not access other user', 403);
   }
 
+  if (userExam.status === 'completed') {
+    commonHelpers.throwCustomError('Exam is already submitted', 400);
+  }
+
   const exam = await Exam.findByPk(userExam.exam_id);
 
   if (!exam) {
@@ -257,9 +181,12 @@ async function submitExam(currentUser, params) {
     commonHelpers.throwCustomError('Exam is not started yet', 400);
   }
 
+  const totalScore = await userExamHelpers.calculateUserScore(userExam.id);
+
   await UserExam.update(
     {
-      status: 'completed'
+      status: 'completed',
+      score: totalScore
     },
     {
       where: {
@@ -268,7 +195,7 @@ async function submitExam(currentUser, params) {
     }
   );
 
-  return 'Exam submited successfully';
+  return { message: 'Exam submited successfully', score: totalScore };
 }
 
-module.exports = { createAnswer, calculateUserScore, submitExam };
+module.exports = { createAnswer, getUserScore, submitExam };

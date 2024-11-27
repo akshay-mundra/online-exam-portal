@@ -15,10 +15,10 @@ async function createAnswer(req, res, next) {
   }
 }
 
-async function calculateUserScore(req, res, next) {
+async function getUserScore(req, res, next) {
   try {
     const { params, user } = req;
-    const result = await userExamServices.calculateUserScore(user, params);
+    const result = await userExamServices.getUserScore(user, params);
     res.data = result;
     res.statusCode = 200;
     next();
@@ -41,4 +41,4 @@ async function submitExam(req, res, next) {
   }
 }
 
-module.exports = { createAnswer, calculateUserScore, submitExam };
+module.exports = { createAnswer, getUserScore, submitExam };
