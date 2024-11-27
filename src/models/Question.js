@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       question: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
       },
       type: {
