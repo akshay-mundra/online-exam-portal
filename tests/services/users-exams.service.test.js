@@ -132,6 +132,18 @@ describe('Exam Service', () => {
         'Question not found'
       );
     });
+
+    it('should thow error if user exam is not found', async () => {
+      UserExam.findOne.mockResolvedValue(null);
+
+      commonHelpers.throwCustomError.mockImplementation((message, statusCode) => {
+        const error = new Error(message);
+        error.statusCode = statusCode;
+        throw error;
+      });
+
+      await expect(createAnswer({ id: 1 }, { id: 1 }, { questionId: 1, optionIds: [1] })).rejects.toThrow('Not found');
+    });
   });
 
   describe('calculateUserScore', () => {
