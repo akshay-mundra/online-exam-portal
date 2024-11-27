@@ -9,7 +9,7 @@ const roleValidators = require('../validators/roles.validator');
 router.get(
   '/',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize([]),
+  authMiddlewares.authorize(), // allow only super admin
   roleController.getAll,
   commonHelpers.responseHandler
 );
@@ -18,7 +18,7 @@ router.post(
   '/',
   roleValidators.roleSchema,
   authMiddlewares.authenticate,
-  authMiddlewares.authorize([]),
+  authMiddlewares.authorize(),
   roleController.create,
   commonHelpers.responseHandler
 );
@@ -26,7 +26,7 @@ router.post(
 router.get(
   '/:id',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize([]),
+  authMiddlewares.authorize(),
   roleController.get,
   commonHelpers.responseHandler
 );
@@ -35,7 +35,7 @@ router.patch(
   '/:id',
   roleValidators.roleSchema,
   authMiddlewares.authenticate,
-  authMiddlewares.authorize([]),
+  authMiddlewares.authorize(),
   roleController.update,
   commonHelpers.responseHandler
 );
@@ -43,7 +43,7 @@ router.patch(
 router.delete(
   '/:id',
   authMiddlewares.authenticate,
-  authMiddlewares.authorize([]),
+  authMiddlewares.authorize(),
   roleController.remove,
   commonHelpers.responseHandler
 );

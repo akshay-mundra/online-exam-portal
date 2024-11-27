@@ -31,7 +31,7 @@ function authorize(allowedRoles) {
 
       if (userRoles.includes(SUPER_ADMIN)) return next();
 
-      if (userRoles && allowedRoles.some(role => userRoles.includes(role))) {
+      if (userRoles && allowedRoles?.some(role => userRoles.includes(role))) {
         return next();
       } else {
         commonHelpers.throwCustomError('Access Denied | Forbidden', 403);

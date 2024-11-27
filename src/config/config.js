@@ -32,5 +32,20 @@ module.exports = {
       updatedAt: 'updated_at',
       deletedAt: 'deleted_at'
     }
+  },
+  production: {
+    host: process.env.DB_HOST,
+    dialect: process.env.DB_DIALECT,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+    define: {
+      paranoid: true,
+      underscored: true,
+      timestamps: true,
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      deletedAt: 'deleted_at'
+    }
   }
 };
