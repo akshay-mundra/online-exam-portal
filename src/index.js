@@ -4,11 +4,13 @@ const { registerRoutes } = require('./routes');
 require('./schedulers');
 const swaggerUi = require('swagger-ui-express');
 const { swaggerDocument } = require('./swagger/swagger');
+const requestIp = require('request-ip');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(requestIp.mw()); // get client ip
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

@@ -19,7 +19,7 @@ router.post(
 
 router.post(
   '/forgot-password',
-  rateLimiter({ endPoint: 'auth/register', rateLimit: { limit: 5, time: 300 } }),
+  rateLimiter({ limit: 5, time: 300 }),
   authValidators.forgotPassword,
   authControllers.forgotPassword,
   commonHelpers.responseHandler
