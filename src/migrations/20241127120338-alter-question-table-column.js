@@ -23,7 +23,7 @@ module.exports = {
      * await queryInterface.dropTable('users');
      */
     queryInterface.changeColumn('questions', 'question', {
-      type: Sequelize.STRING,
+      type: Sequelize.TEXT,
       allowNull: false
     });
   }
