@@ -1,33 +1,26 @@
-const { redisClient } = require('../config/redis');
-const commonHelpers = require('../helpers/common.helper');
+// const { redisClient } = require('../config/redis');
+// const commonHelpers = require('../helpers/common.helper');
+const { rateLimit } = require('express-rate-limit');
 
 /**
  * Apply rate limit for api calls based on user ip.
  *
  * @param {rule} rule - contains the details to apply rate limit e.g.- {endPoint, rateLimit: {limit, time}}.
+ * @param {ip} ip - contains a flag to apply rate limiting on either ip or based on user.
  */
-function rateLimiter(rule) {
-  const { endPoint, rateLimit } = rule;
-  return async (req, res, next) => {
-    try {
-      const ip = req.ip;
-      const key = `${endPoint}:${ip}`;
+function rateLimiter(rule, ip = true) {
+  const { time, limit } = rule;
 
-      const requests = await redisClient.incr(key);
-
-      if (requests === 1) {
-        await redisClient.expire(key, rateLimit.time);
-      }
-
-      if (requests > rateLimit.limit) {
-        return commonHelpers.throwCustomError('Too many requests', 429);
-      }
-
-      next();
-    } catch (error) {
-      commonHelpers.errorHandler(req, res, error.message, error.statusCode);
+  return rateLimit({
+    windowMs: time * 1000,
+    limit,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: 'Too many requests, please try again later.',
+    keyGenerator: req => {
+      return ip ? req.clientIp : req?.user?.id;
     }
-  };
+  });
 }
 
 module.exports = { rateLimiter };
